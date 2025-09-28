@@ -1,0 +1,169 @@
+"use client";
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import React from "react";
+import { useRouter } from 'next/navigation';
+import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
+import { categorizeListing } from "@/ai/flows/categorize-listing";
+import { listingCategories, ListingCategory } from "@/lib/types";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2, Sparkles, Upload } from "lucide-react";
+import Image from "next/image";
+
+const formSchema = z.object({
+  title: z.string().min(5, "Title must be at least 5 characters."),
+  description: z.string().min(20, "Description must be at least 20 characters."),
+  category: z.enum(listingCategories, { required_error: "Please select a category." }),
+  price: z.coerce.number().min(0, "Price must be a positive number."),
+  media: z.any().optional(),
+});
+
+export function NewListingForm() {
+  const { user } = useAuth();
+  const router = useRouter();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isCategorizing, setIsCategorizing] = React.useState(false);
+  const [previewImage, setPreviewImage] = React.useState<string | null>(null);
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+      price: 0,
+    },
+  });
+  
+  React.useEffect(() => {
+    if (!user) {
+        toast({
+            title: "Please log in",
+            description: "You must be logged in to create a listing.",
+            variant: "destructive"
+        });
+        router.push('/login');
+    }
+  }, [user, router, toast]);
+
+  const handleCategorize = async () => {
+    const title = form.getValues("title");
+    const description = form.getValues("description");
+    if (!title || !description) {
+      toast({ title: "Please fill in title and description first.", variant: "destructive" });
+      return;
+    }
+    setIsCategorizing(true);
+    try {
+      const result = await categorizeListing({ title, description });
+      if (result.category) {
+        form.setValue("category", result.category);
+        toast({ title: "Category suggested!", description: `We think this is a '${result.category}'.` });
+      }
+    } catch (error) {
+      toast({ variant: "destructive", title: "Categorization Failed", description: "Could not suggest a category." });
+    } finally {
+      setIsCategorizing(false);
+    }
+  };
+  
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setPreviewImage(reader.result as string);
+      reader.readAsDataURL(file);
+      form.setValue('media', file);
+    }
+  };
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsSubmitting(true);
+    // Mock submission
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    console.log("Form Submitted:", values);
+    toast({
+      title: "Listing Created!",
+      description: "Your listing is now live on the marketplace.",
+    });
+    router.push("/marketplace");
+    setIsSubmitting(false);
+  }
+
+  return (
+    <Card>
+      <CardContent className="p-6">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField control={form.control} name="title" render={({ field }) => (
+              <FormItem><FormLabel>Listing Title</FormLabel><FormControl><Input placeholder="e.g., Hand-Painted Custom Sneakers" {...field} /></FormControl><FormMessage /></FormItem>
+            )} />
+            
+            <FormField control={form.control} name="description" render={({ field }) => (
+              <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea placeholder="Describe your product or service in detail..." rows={5} {...field} /></FormControl><FormMessage /></FormItem>
+            )} />
+
+            <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                    <FormLabel>Category</FormLabel>
+                    <Button type="button" size="sm" variant="ghost" onClick={handleCategorize} disabled={isCategorizing}>
+                        {isCategorizing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4" />}
+                        Suggest with AI
+                    </Button>
+                </div>
+                <FormField control={form.control} name="category" render={({ field }) => (
+                  <FormItem>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                            <SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            {listingCategories.map(cat => (
+                                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                   </FormItem>
+                )} />
+            </div>
+
+            <FormField control={form.control} name="price" render={({ field }) => (
+              <FormItem><FormLabel>Price</FormLabel><FormControl><div className="relative"><span className="absolute inset-y-0 left-3 flex items-center text-muted-foreground">$</span><Input type="number" step="0.01" placeholder="25.00" className="pl-6" {...field} /></div></FormControl><FormMessage /></FormItem>
+            )} />
+
+            <FormField control={form.control} name="media" render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Image</FormLabel>
+                    <FormControl>
+                        <div className="flex items-center gap-4">
+                            <Button type="button" variant="outline" onClick={() => document.getElementById('media-upload')?.click()}>
+                                <Upload className="mr-2 h-4 w-4"/> Upload Image
+                            </Button>
+                            <input type="file" id="media-upload" className="hidden" accept="image/*" onChange={handleFileChange} />
+                            {previewImage && <div className="relative w-20 h-20 rounded-md overflow-hidden"><Image src={previewImage} alt="Preview" fill className="object-cover" /></div>}
+                        </div>
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+            )} />
+
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Create Listing
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
+  );
+}

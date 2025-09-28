@@ -1,3 +1,76 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "user-1",
+      "description": "Profile of Alex Johnson",
+      "imageUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NTkwMTExOTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "user-2",
+      "description": "Profile of Maria Garcia",
+      "imageUrl": "https://images.unsplash.com/photo-1544717305-2782549b5136?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxzdHVkZW50JTIwc21pbGluZ3xlbnwwfHx8fDE3NTg5NTMwMzN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "student smiling"
+    },
+    {
+      "id": "user-3",
+      "description": "Profile of Chen Wei",
+      "imageUrl": "https://images.unsplash.com/photo-1493612276216-ee3925520721?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxwZXJzb24lMjB0aGlua2luZ3xlbnwwfHx8fDE3NTg5NjgyMDh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person thinking"
+    },
+    {
+      "id": "listing-1",
+      "description": "Hand-painted custom sneakers",
+      "imageUrl": "https://images.unsplash.com/photo-1717664793398-4602068016f3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxjdXN0b20lMjBzbmVha2Vyc3xlbnwwfHx8fDE3NTkwNDQ1NDl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "custom sneakers"
+    },
+    {
+      "id": "listing-2",
+      "description": "A set of digital study notes for biology",
+      "imageUrl": "https://images.unsplash.com/photo-1672847900914-3fbd4fa39037?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxkaWdpdGFsJTIwbm90ZXN8ZW58MHx8fHwxNzU5MDQ0NTQ5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "digital notes"
+    },
+    {
+      "id": "listing-3",
+      "description": "Tutoring session for calculus",
+      "imageUrl": "https://images.unsplash.com/photo-1758685733940-b1c11d04f553?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxtYXRoJTIwdHV0b3Jpbmd8ZW58MHx8fHwxNzU5MDQ0NTQ5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "math tutoring"
+    },
+    {
+      "id": "listing-4",
+      "description": "Seeking a collaborator for a hackathon project",
+      "imageUrl": "https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx0ZWFtJTIwY29sbGFib3JhdGlvbnxlbnwwfHx8fDE3NTkwMzMzOTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "team collaboration"
+    },
+    {
+      "id": "listing-5",
+      "description": "Handmade ceramic mugs",
+      "imageUrl": "https://images.unsplash.com/photo-1669329597053-993120e439ed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxjZXJhbWljJTIwbXVnc3xlbnwwfHx8fDE3NTg5NjY4ODB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ceramic mugs"
+    },
+    {
+      "id": "listing-6",
+      "description": "Dorm room poster design",
+      "imageUrl": "https://images.unsplash.com/photo-1543487945-139a97f387d5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwb3N0ZXIlMjBkZXNpZ258ZW58MHx8fHwxNzU5MDE3NDUwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "poster design"
+    },
+    {
+      "id": "listing-7",
+      "description": "Resume and cover letter review service",
+      "imageUrl": "https://images.unsplash.com/photo-1629839958207-5400ab5e1e7f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxyZXN1bWUlMjByZXZpZXd8ZW58MHx8fHwxNzU5MDQ0NTUwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "resume review"
+    },
+    {
+      "id": "listing-8",
+      "description": "Join our startup focused on sustainability",
+      "imageUrl": "https://images.unsplash.com/photo-1711017067637-ade88765c8fd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxzdXN0YWluYWJpbGl0eSUyMHN0YXJ0dXB8ZW58MHx8fHwxNzU5MDQ0NTUwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "sustainability startup"
+    },
+    {
+      "id": "hero-image",
+      "description": "Students collaborating on a project",
+      "imageUrl": "https://images.unsplash.com/photo-1758270705317-3ef6142d306f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxzdHVkZW50cyUyMGNvbGxhYm9yYXRpbmd8ZW58MHx8fHwxNzU5MDAxNDUxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "students collaborating"
+    }
+  ]
 }
