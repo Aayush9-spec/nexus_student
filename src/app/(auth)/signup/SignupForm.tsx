@@ -19,10 +19,7 @@ import { Logo } from "@/components/Logo";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  email: z.string().email({ message: "Please enter a valid email." }).refine(
-    (email) => email.endsWith(".edu"),
-    { message: "Please use your student email address (.edu)." }
-  ),
+  email: z.string().email({ message: "Please enter a valid email." }),
   college: z.string().min(3, { message: "College name is required." }),
   password: z.string().min(8, { message: "Password must be at least 8 characters." }),
   profilePictureUrl: z.string().optional(),
@@ -144,7 +141,7 @@ export function SignupForm() {
                 <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Alex Johnson" {...field} /></FormControl><FormMessage /></FormItem>
             )}/>
             <FormField control={form.control} name="email" render={({ field }) => (
-                <FormItem><FormLabel>Student Email</FormLabel><FormControl><Input placeholder="alex@university.edu" {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Email</FormLabel><FormControl><Input placeholder="alex.johnson@example.com" {...field} /></FormControl><FormMessage /></FormItem>
             )}/>
             <FormField control={form.control} name="college" render={({ field }) => (
                 <FormItem><FormLabel>College/University</FormLabel><FormControl><Input placeholder="Stanford University" {...field} /></FormControl><FormMessage /></FormItem>
