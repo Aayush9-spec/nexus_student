@@ -1,4 +1,4 @@
-import { dummyListings } from '@/lib/dummy-data';
+import { dummyListings, dummyUsers } from '@/lib/dummy-data';
 import { ListingGrid } from './components/ListingGrid';
 import { FilterSidebar } from './components/FilterSidebar';
 import { Suspense } from 'react';
@@ -8,6 +8,7 @@ type MarketplacePageProps = {
     q?: string;
     category?: string;
     maxPrice?: string;
+    colleges?: string;
   };
 };
 
@@ -17,7 +18,11 @@ export default function MarketplacePage({ searchParams }: MarketplacePageProps) 
     const queryMatch = searchParams.q ? listing.title.toLowerCase().includes(searchParams.q.toLowerCase()) || listing.description.toLowerCase().includes(searchParams.q.toLowerCase()) : true;
     const categoryMatch = searchParams.category ? listing.category === searchParams.category : true;
     const priceMatch = searchParams.maxPrice ? listing.price <= Number(searchParams.maxPrice) : true;
-    return queryMatch && categoryMatch && priceMatch;
+    
+    const selectedColleges = searchParams.colleges?.split(',');
+    const collegeMatch = selectedColleges && selectedColleges.length > 0 ? listing.seller && selectedColleges.includes(listing.seller.college) : true;
+
+    return queryMatch && categoryMatch && priceMatch && collegeMatch;
   });
 
   return (

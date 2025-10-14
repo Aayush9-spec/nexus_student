@@ -9,7 +9,11 @@ import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { listingCategories, ListingCategory } from '@/lib/types';
-import { X } from 'lucide-react';
+import { X, MapPin } from 'lucide-react';
+import { dummyUsers } from '@/lib/dummy-data';
+import { Checkbox } from '@/components/ui/checkbox';
+
+const colleges = [...new Set(dummyUsers.map(u => u.college))];
 
 export function FilterSidebar() {
   const router = useRouter();
@@ -36,6 +40,18 @@ export function FilterSidebar() {
   const handlePriceChange = (values: number[]) => {
       router.push(pathname + '?' + createQueryString('maxPrice', String(values[0])));
   };
+
+  const handleCollegeChange = (college: string) => {
+    const currentColleges = searchParams.get('colleges')?.split(',') || [];
+    let newColleges: string[];
+    if (currentColleges.includes(college)) {
+        newColleges = currentColleges.filter(c => c !== college);
+    } else {
+        newColleges = [...currentColleges, college];
+    }
+    const collegeQuery = newColleges.length > 0 ? newColleges.join(',') : '';
+    router.push(pathname + '?' + createQueryString('colleges', collegeQuery));
+  }
   
   const clearFilters = () => {
     router.push(pathname);
@@ -43,6 +59,7 @@ export function FilterSidebar() {
 
   const selectedCategory = searchParams.get('category') || 'All';
   const maxPrice = Number(searchParams.get('maxPrice')) || 500;
+  const selectedColleges = searchParams.get('colleges')?.split(',') || [];
 
   return (
     <Card>
@@ -53,6 +70,13 @@ export function FilterSidebar() {
         </Button>
       </CardHeader>
       <CardContent className="space-y-6">
+        <div>
+            <Label className="font-semibold">Location</Label>
+            <div className="relative mt-2">
+                <MapPin className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input placeholder="Search by city or zip..." className="pl-8" disabled />
+            </div>
+        </div>
         <div>
           <Label className="font-semibold">Category</Label>
           <RadioGroup 
@@ -72,6 +96,23 @@ export function FilterSidebar() {
             ))}
           </RadioGroup>
         </div>
+
+        <div>
+          <Label className="font-semibold">College</Label>
+          <div className="mt-2 space-y-1">
+            {colleges.map(college => (
+                <div key={college} className="flex items-center space-x-2">
+                    <Checkbox 
+                        id={`college-${college.replace(/\s/g, '')}`}
+                        checked={selectedColleges.includes(college)}
+                        onCheckedChange={() => handleCollegeChange(college)}
+                    />
+                    <Label htmlFor={`college-${college.replace(/\s/g, '')}`} className="font-normal">{college}</Label>
+                </div>
+            ))}
+          </div>
+        </div>
+
         <div>
           <Label htmlFor="price-range" className="font-semibold">Max Price</Label>
           <div className='flex items-center gap-4 mt-2'>

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Star } from 'lucide-react';
+import { Star, MapPin } from 'lucide-react';
 
 export default function ListingDetailPage({ params }: { params: { listingId: string } }) {
   const listing = dummyListings.find(l => l.id === params.listingId);
@@ -45,7 +45,14 @@ export default function ListingDetailPage({ params }: { params: { listingId: str
             />
           </div>
           <h1 className="text-3xl md:text-4xl font-bold font-headline mb-2">{listing.title}</h1>
-          <Badge variant="secondary">{listing.category}</Badge>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Badge variant="secondary">{listing.category}</Badge>
+            {seller && (
+                <Badge variant="outline" className="flex items-center gap-1">
+                    <MapPin className="h-3 w-3" /> {seller.college}
+                </Badge>
+            )}
+          </div>
           <p className="text-lg mt-4 text-foreground/80">{listing.description}</p>
         </div>
         <div className="md:col-span-1">
