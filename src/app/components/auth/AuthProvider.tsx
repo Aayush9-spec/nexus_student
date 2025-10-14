@@ -1,14 +1,11 @@
 "use client";
 
+import React, { createContext, useState, ReactNode, useEffect } from 'react';
+import { Auth, User as FirebaseAuthUser, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { useAuth as useFirebaseAuth, useFirestore } from '@/firebase';
 import type { User } from '@/lib/types';
-import { dummyUsers } from '@/lib/dummy-data';
-import React, { createContext, useState, ReactNode } from 'react';
-
-// In a real app, this would be imported from a Firebase auth library
-type AuthUser = {
-  uid: string;
-  email: string | null;
-} | null;
+import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   user: User | null;
@@ -21,62 +18,58 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const auth = useFirebaseAuth();
+  const firestore = useFirestore();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  // Mock login
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (firebaseUser: FirebaseAuthUser | null) => {
+      if (firebaseUser) {
+        const userDocRef = doc(firestore, "users", firebaseUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          setUser({ id: userDoc.id, ...userDoc.data() } as User);
+        } else {
+          // Handle case where user exists in Auth but not Firestore
+          setUser(null); 
+        }
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [auth, firestore]);
+
   const login = async (email: string, pass: string) => {
-    setLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-    const foundUser = dummyUsers.find(u => u.email === email);
-    if (foundUser) {
-      setUser(foundUser);
-    } else {
-      throw new Error("User not found");
-    }
-    setLoading(false);
+    await signInWithEmailAndPassword(auth, email, pass);
   };
 
-  // Mock logout
   const logout = async () => {
-    setLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 300));
-    setUser(null);
-    setLoading(false);
+    await signOut(auth);
   };
 
-  // Mock signup
   const signup = async (name: string, email: string, pass: string, college: string, profilePictureUrl: string) => {
-    setLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    const newUser: User = {
-      id: `user_${Date.now()}`,
+    const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+    const firebaseUser = userCredential.user;
+
+    const newUser: Omit<User, 'id'> = {
       name,
       email,
       college,
       profilePictureUrl,
-      role: 'student',
       bio: 'A new member of the Nexus community!',
       skills: [],
       following: [],
       followers: [],
+      role: 'student',
     };
-    dummyUsers.push(newUser);
-    setUser(newUser);
-    setLoading(false);
+    
+    await setDoc(doc(firestore, "users", firebaseUser.uid), newUser);
   };
-  
-  // Mock initial auth state check
-  React.useEffect(() => {
-    const checkUser = async () => {
-      setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 500));
-      // To test a logged-in state by default, uncomment the line below
-      // setUser(dummyUsers[0]);
-      setLoading(false);
-    };
-    checkUser();
-  }, []);
 
   const value = {
     user,
