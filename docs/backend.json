@@ -1,0 +1,357 @@
+{
+  "entities": {
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Represents a user profile in the Nexus Student Marketplace.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserProfile entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The user's full name."
+        },
+        "college": {
+          "type": "string",
+          "description": "The college or university the user attends."
+        },
+        "bio": {
+          "type": "string",
+          "description": "A short biography or description of the user."
+        },
+        "skills": {
+          "type": "array",
+          "description": "An array of strings representing the user's skills.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "profilePicture": {
+          "type": "string",
+          "description": "URL of the user's profile picture.",
+          "format": "uri"
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address.",
+          "format": "email"
+        },
+        "verified": {
+          "type": "boolean",
+          "description": "Indicates whether the user's student status has been verified."
+        },
+        "followingIds": {
+          "type": "array",
+          "description": "References to other UserProfiles that this user is following. (Relationship: UserProfile N:N UserProfile)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "college",
+        "bio",
+        "skills",
+        "profilePicture",
+        "email",
+        "verified"
+      ]
+    },
+    "Listing": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Listing",
+      "type": "object",
+      "description": "Represents a listing for a product, service, or collaboration opportunity.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Listing entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the listing."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the listing."
+        },
+        "category": {
+          "type": "string",
+          "description": "The category the listing belongs to (e.g., Physical Products, Digital Products, Services, Community/Collaboration)."
+        },
+        "price": {
+          "type": "number",
+          "description": "The price of the item or service being offered."
+        },
+        "mediaUrl": {
+          "type": "array",
+          "description": "URLs of media files associated with the listing.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sellerId": {
+          "type": "string",
+          "description": "Reference to UserProfile of the seller. (Relationship: UserProfile 1:N Listing)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "The date and time the listing was created.",
+          "format": "date-time"
+        },
+        "tags": {
+          "type": "array",
+          "description": "An array of tags associated with the listing.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "college": {
+          "type": "string",
+          "description": "The college this listing is associated with."
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "description",
+        "category",
+        "price",
+        "mediaUrl",
+        "sellerId",
+        "createdAt",
+        "tags",
+        "college"
+      ]
+    },
+    "Transaction": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Transaction",
+      "type": "object",
+      "description": "Represents a transaction between a buyer and a seller.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Transaction entity."
+        },
+        "listingId": {
+          "type": "string",
+          "description": "Reference to the Listing involved in the transaction. (Relationship: Listing 1:N Transaction)"
+        },
+        "buyerId": {
+          "type": "string",
+          "description": "Reference to the UserProfile of the buyer. (Relationship: UserProfile 1:N Transaction)"
+        },
+        "sellerId": {
+          "type": "string",
+          "description": "Reference to the UserProfile of the seller. (Relationship: UserProfile 1:N Transaction)"
+        },
+        "amount": {
+          "type": "number",
+          "description": "The amount of the transaction."
+        },
+        "transactionDate": {
+          "type": "string",
+          "description": "The date and time the transaction occurred.",
+          "format": "date-time"
+        },
+        "paymentMethod": {
+          "type": "string",
+          "description": "The payment method used for the transaction."
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the transaction (e.g., completed, pending, failed)."
+        }
+      },
+      "required": [
+        "id",
+        "listingId",
+        "buyerId",
+        "sellerId",
+        "amount",
+        "transactionDate",
+        "paymentMethod",
+        "status"
+      ]
+    },
+    "Review": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Review",
+      "type": "object",
+      "description": "Represents a review or rating of a listing or user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Review entity."
+        },
+        "listingId": {
+          "type": "string",
+          "description": "Reference to the Listing being reviewed. (Relationship: Listing 1:N Review)"
+        },
+        "reviewerId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who wrote the review. (Relationship: UserProfile 1:N Review)"
+        },
+        "rating": {
+          "type": "number",
+          "description": "The rating given in the review (e.g., 1-5 stars)."
+        },
+        "comment": {
+          "type": "string",
+          "description": "The text comment associated with the review."
+        },
+        "reviewDate": {
+          "type": "string",
+          "description": "The date and time the review was submitted.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "listingId",
+        "reviewerId",
+        "rating",
+        "comment",
+        "reviewDate"
+      ]
+    },
+    "ChatMessage": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ChatMessage",
+      "type": "object",
+      "description": "Represents a chat message between two users.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ChatMessage entity."
+        },
+        "senderId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who sent the message. (Relationship: UserProfile 1:N ChatMessage)"
+        },
+        "receiverId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who received the message. (Relationship: UserProfile 1:N ChatMessage)"
+        },
+        "message": {
+          "type": "string",
+          "description": "The content of the chat message."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "The date and time the message was sent.",
+          "format": "date-time"
+        },
+        "read": {
+          "type": "boolean",
+          "description": "Indicates whether the message has been read by the receiver."
+        }
+      },
+      "required": [
+        "id",
+        "senderId",
+        "receiverId",
+        "message",
+        "timestamp",
+        "read"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Stores user profiles, with userId as the document ID. This structure enables easy access to individual user profiles and supports profile-specific queries.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/listings/{listingId}",
+        "definition": {
+          "entityName": "Listing",
+          "schema": {
+            "$ref": "#/backend/entities/Listing"
+          },
+          "description": "Stores listings with listingId as document ID. Includes denormalized 'sellerId' to avoid having to look up UserProfile when querying Listings.",
+          "params": [
+            {
+              "name": "listingId",
+              "description": "The unique identifier for the listing."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/transactions/{transactionId}",
+        "definition": {
+          "entityName": "Transaction",
+          "schema": {
+            "$ref": "#/backend/entities/Transaction"
+          },
+          "description": "Stores transaction data, with transactionId as the document ID. Contains references to listings, buyers, and sellers.",
+          "params": [
+            {
+              "name": "transactionId",
+              "description": "The unique identifier for the transaction."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/reviews/{reviewId}",
+        "definition": {
+          "entityName": "Review",
+          "schema": {
+            "$ref": "#/backend/entities/Review"
+          },
+          "description": "Stores reviews with reviewId as the document ID.  Each review is associated with a specific listing and reviewer.",
+          "params": [
+            {
+              "name": "reviewId",
+              "description": "The unique identifier for the review."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/messages/{messageId}",
+        "definition": {
+          "entityName": "ChatMessage",
+          "schema": {
+            "$ref": "#/backend/entities/ChatMessage"
+          },
+          "description": "Stores individual chat messages.  Each message is between a sender and receiver.",
+          "params": [
+            {
+              "name": "messageId",
+              "description": "The unique identifier for the chat message."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to ensure authorization independence and support the required query access patterns (QAPs) through denormalization and structural segregation. User profiles, listings, transactions, reviews, and chat messages are organized into separate collections to maintain a homogeneous security posture. User-owned data, like listings, are placed under the /users/{userId} path to simplify ownership-based security rules. Authorization independence is achieved by storing the sellerId inside the Listing document. This denormalization avoids the need for complex `get()` calls in security rules, enabling atomic operations and easier debugging. Collaborative data is managed using hierarchical paths, such as /users/{userId}/threads/{threadId}/messages/{messageId}. This structure facilitates straightforward security rules based on path ownership."
+  }
+}
