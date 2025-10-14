@@ -9,6 +9,7 @@ type MarketplacePageProps = {
     category?: string;
     maxPrice?: string;
     colleges?: string;
+    location?: string;
   };
 };
 
@@ -22,7 +23,9 @@ export default function MarketplacePage({ searchParams }: MarketplacePageProps) 
     const selectedColleges = searchParams.colleges?.split(',');
     const collegeMatch = selectedColleges && selectedColleges.length > 0 ? listing.seller && selectedColleges.includes(listing.seller.college) : true;
 
-    return queryMatch && categoryMatch && priceMatch && collegeMatch;
+    const locationMatch = searchParams.location ? listing.seller && listing.seller.college.toLowerCase().includes(searchParams.location.toLowerCase()) : true;
+
+    return queryMatch && categoryMatch && priceMatch && collegeMatch && locationMatch;
   });
 
   return (

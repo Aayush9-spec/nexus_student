@@ -53,6 +53,10 @@ export function FilterSidebar() {
     router.push(pathname + '?' + createQueryString('colleges', collegeQuery));
   }
   
+  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    router.push(pathname + '?' + createQueryString('location', e.target.value));
+  };
+  
   const clearFilters = () => {
     router.push(pathname);
   };
@@ -60,6 +64,7 @@ export function FilterSidebar() {
   const selectedCategory = searchParams.get('category') || 'All';
   const maxPrice = Number(searchParams.get('maxPrice')) || 500;
   const selectedColleges = searchParams.get('colleges')?.split(',') || [];
+  const location = searchParams.get('location') || '';
 
   return (
     <Card>
@@ -74,7 +79,12 @@ export function FilterSidebar() {
             <Label className="font-semibold">Location</Label>
             <div className="relative mt-2">
                 <MapPin className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search by city or zip..." className="pl-8" disabled />
+                <Input 
+                    placeholder="Search by college..." 
+                    className="pl-8" 
+                    value={location}
+                    onChange={handleLocationChange}
+                />
             </div>
         </div>
         <div>
