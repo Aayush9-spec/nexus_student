@@ -13,7 +13,7 @@ import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import type { Listing, User, Review as ReviewType } from '@/lib/types';
 import { useMemo } from 'react';
-import { dummyUsers } from '@/lib/dummy-data';
+import { dummyUsers } from '@/lib/dummy-data'; // This will be removed
 
 export default function ListingDetailPage({ params }: { params: { listingId: string } }) {
   const firestore = useFirestore();
@@ -42,10 +42,7 @@ export default function ListingDetailPage({ params }: { params: { listingId: str
   };
   
   // TODO: Replace with real reviews from Firestore
-  const reviews = useMemo(() => [
-      {id: '1', rating: 5, comment: 'Amazing quality and fast shipping!', reviewer: dummyUsers[0]},
-      {id: '2', rating: 4, comment: 'Exactly as described. Would buy again.', reviewer: dummyUsers[2]},
-  ], []);
+  const reviews: ReviewType[] = useMemo(() => [], []);
 
   if (isLoadingListing || isLoadingSeller) {
     return (
@@ -89,9 +86,9 @@ export default function ListingDetailPage({ params }: { params: { listingId: str
           <h1 className="text-3xl md:text-4xl font-bold font-headline mb-2">{listing.title}</h1>
           <div className="flex items-center gap-2 flex-wrap">
             <Badge variant="secondary">{listing.category}</Badge>
-            {seller && (
+            {listing.college && (
                 <Badge variant="outline" className="flex items-center gap-1">
-                    <MapPin className="h-3 w-3" /> {seller.college}
+                    <MapPin className="h-3 w-3" /> {listing.college}
                 </Badge>
             )}
           </div>
@@ -134,29 +131,35 @@ export default function ListingDetailPage({ params }: { params: { listingId: str
 
       <div>
         <h2 className="text-2xl font-bold font-headline mb-6">Reviews ({reviews.length})</h2>
-        <div className="space-y-6">
-            {reviews.map(review => (
-                <Card key={review.id}>
-                    <CardContent className="p-4 flex gap-4">
-                        <Avatar>
-                            <AvatarImage src={review.reviewer?.profilePictureUrl} />
-                            <AvatarFallback>{getInitials(review.reviewer?.name)}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                            <div className="flex items-center gap-2 mb-1">
-                                <p className="font-semibold">{review.reviewer?.name}</p>
-                                <div className="flex items-center">
-                                    {[...Array(5)].map((_, i) => (
-                                        <Star key={i} className={`h-4 w-4 ${i < review.rating ? 'fill-primary text-primary' : 'fill-muted stroke-muted-foreground'}`} />
-                                    ))}
+        {reviews.length > 0 ? (
+            <div className="space-y-6">
+                {reviews.map(review => (
+                    <Card key={review.id}>
+                        <CardContent className="p-4 flex gap-4">
+                            <Avatar>
+                                <AvatarImage src={review.reviewer?.profilePictureUrl} />
+                                <AvatarFallback>{getInitials(review.reviewer?.name)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                    <p className="font-semibold">{review.reviewer?.name}</p>
+                                    <div className="flex items-center">
+                                        {[...Array(5)].map((_, i) => (
+                                            <Star key={i} className={`h-4 w-4 ${i < review.rating ? 'fill-primary text-primary' : 'fill-muted stroke-muted-foreground'}`} />
+                                        ))}
+                                    </div>
                                 </div>
+                                <p className="text-muted-foreground">{review.comment}</p>
                             </div>
-                             <p className="text-muted-foreground">{review.comment}</p>
-                        </div>
-                    </CardContent>
-                </Card>
-            ))}
-        </div>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+        ) : (
+            <div className="text-center text-muted-foreground py-8">
+                <p>No reviews yet for this listing.</p>
+            </div>
+        )}
       </div>
     </div>
   );

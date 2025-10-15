@@ -84,11 +84,9 @@
           "description": "The price of the item or service being offered."
         },
         "mediaUrl": {
-          "type": "array",
-          "description": "URLs of media files associated with the listing.",
-          "items": {
-            "type": "string"
-          }
+          "type": "string",
+          "description": "URL of media file associated with the listing.",
+          "format": "uri"
         },
         "sellerId": {
           "type": "string",
@@ -120,7 +118,6 @@
         "mediaUrl",
         "sellerId",
         "createdAt",
-        "tags",
         "college"
       ]
     },

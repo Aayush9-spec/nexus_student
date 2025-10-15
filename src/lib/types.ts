@@ -21,10 +21,11 @@ export type Listing = {
   description:string;
   category: ListingCategory;
   price: number;
-  mediaUrl?: string;
+  mediaUrl: string; // Changed from mediaUrl?: string to be required and single
   sellerId: string;
   seller?: User;
   createdAt: string;
+  college: string; // Added college field
 };
 
 export type Review = {

@@ -8,7 +8,11 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { categorizeListing } from "@/ai/flows/categorize-listing";
-import { listingCategories, ListingCategory } from "@/lib/types";
+import { listingCategories } from "@/lib/types";
+import { useFirestore } from "@/firebase";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -24,13 +28,14 @@ const formSchema = z.object({
   description: z.string().min(20, "Description must be at least 20 characters."),
   category: z.enum(listingCategories, { required_error: "Please select a category." }),
   price: z.coerce.number().min(0, "Price must be a positive number."),
-  media: z.any().optional(),
+  media: z.instanceof(File).refine(file => file.size > 0, "Image is required."),
 });
 
 export function NewListingForm() {
   const { user } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  const firestore = useFirestore();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isCategorizing, setIsCategorizing] = React.useState(false);
   const [previewImage, setPreviewImage] = React.useState<string | null>(null);
@@ -87,16 +92,47 @@ export function NewListingForm() {
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!user || !firestore) {
+      toast({ title: "Error", description: "You must be logged in to create a listing.", variant: "destructive" });
+      return;
+    }
     setIsSubmitting(true);
-    // Mock submission
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    console.log("Form Submitted:", values);
-    toast({
-      title: "Listing Created!",
-      description: "Your listing is now live on the marketplace.",
-    });
-    router.push("/marketplace");
-    setIsSubmitting(false);
+    try {
+      // 1. Upload image to Firebase Storage
+      const storage = getStorage();
+      const mediaFile = values.media;
+      const storageRef = ref(storage, `listings/${user.id}/${Date.now()}_${mediaFile.name}`);
+      const uploadResult = await uploadBytes(storageRef, mediaFile);
+      const mediaUrl = await getDownloadURL(uploadResult.ref);
+
+      // 2. Create new listing document in Firestore
+      await addDoc(collection(firestore, "listings"), {
+        title: values.title,
+        description: values.description,
+        category: values.category,
+        price: values.price,
+        mediaUrl: mediaUrl,
+        sellerId: user.id,
+        college: user.college, // Assuming user object has college info
+        createdAt: serverTimestamp(),
+      });
+
+      toast({
+        title: "Listing Created!",
+        description: "Your listing is now live on the marketplace.",
+      });
+      router.push("/marketplace");
+
+    } catch (error) {
+      console.error("Error creating listing:", error);
+      toast({
+        variant: "destructive",
+        title: "Submission Failed",
+        description: error instanceof Error ? error.message : "Could not create listing. Please try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -144,15 +180,18 @@ export function NewListingForm() {
             <FormField control={form.control} name="media" render={({ field }) => (
                 <FormItem>
                     <FormLabel>Image</FormLabel>
-                    <FormControl>
-                        <div className="flex items-center gap-4">
+                     <FormControl>
+                        <div>
                             <Button type="button" variant="outline" onClick={() => document.getElementById('media-upload')?.click()}>
                                 <Upload className="mr-2 h-4 w-4"/> Upload Image
                             </Button>
-                            <input type="file" id="media-upload" className="hidden" accept="image/*" onChange={handleFileChange} />
-                            {previewImage && <div className="relative w-20 h-20 rounded-md overflow-hidden"><Image src={previewImage} alt="Preview" fill className="object-cover" /></div>}
+                            <input type="file" id="media-upload" className="hidden" accept="image/*" onChange={(e) => {
+                                handleFileChange(e);
+                                field.onChange(e.target.files?.[0]);
+                            }} />
                         </div>
                     </FormControl>
+                    {previewImage && <div className="relative w-20 h-20 rounded-md overflow-hidden mt-2"><Image src={previewImage} alt="Preview" fill className="object-cover" /></div>}
                     <FormMessage />
                 </FormItem>
             )} />

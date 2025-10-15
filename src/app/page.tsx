@@ -36,6 +36,7 @@ function TrendingListingCard({ listing }: { listing: Listing }) {
     return <ListingCard listing={listingWithSeller} />;
 }
 
+
 function FeaturedStudentCard({ user }: { user: User }) {
     const getInitials = (name: string) => {
         if (!name) return '';
@@ -66,21 +67,22 @@ function FeaturedStudentCard({ user }: { user: User }) {
 function FeaturedStudentsSection() {
     const firestore = useFirestore();
     
-    const listingsForStudentsQuery = useMemoFirebase(() => {
+    // Instead of querying users, we query recent listings to find active sellers
+    const recentListingsQuery = useMemoFirebase(() => {
         if (!firestore) return null;
-        return query(collection(firestore, 'listings'), limit(3)) as Query<Listing>;
+        // Let's get more listings to increase the chance of getting unique sellers
+        return query(collection(firestore, 'listings'), limit(10)) as Query<Listing>;
     }, [firestore]);
 
-    const { data: listings, isLoading: isLoadingListings } = useCollection<Listing>(listingsForStudentsQuery);
+    const { data: listings, isLoading: isLoadingListings } = useCollection<Listing>(recentListingsQuery);
 
-    const sellerIds = useMemo(() => {
+    const uniqueSellerIds = useMemo(() => {
         if (!listings) return [];
+        // Get unique seller IDs, up to 3
         const ids = listings.map(l => l.sellerId);
-        return [...new Set(ids)];
+        return [...new Set(ids)].slice(0, 3);
     }, [listings]);
 
-    // This is not ideal as it makes a request per user, but it respects security rules.
-    // For a production app, we would denormalize this or use a function.
     if (isLoadingListings) {
         return (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -89,9 +91,17 @@ function FeaturedStudentsSection() {
         );
     }
     
+    if (uniqueSellerIds.length === 0 && !isLoadingListings) {
+        return (
+            <div className="text-center text-muted-foreground">
+                <p>No student sellers featured yet. Be the first!</p>
+            </div>
+        )
+    }
+
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sellerIds.map(id => <FeaturedStudentLoader key={id} userId={id} />)}
+            {uniqueSellerIds.map(id => <FeaturedStudentLoader key={id} userId={id} />)}
         </div>
     );
 }
