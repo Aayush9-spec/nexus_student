@@ -66,12 +66,11 @@ function ProfileView({ userId }: { userId: string }) {
 
 
 export default function ProfilePage({ params }: { params: { userId: string } }) {
-  // The 'params' object is a "thenable" and must be unwrapped.
-  // We can create a simple component that awaits the params and then renders the actual page content.
-  // Or, more simply, we can extract the userId here and pass it down.
-  // The error log suggests `React.use()` but that can only be used in a Client Component that is not async.
-  // A simple way to solve this is to pass the param to a client component that handles the logic.
   const userId = params.userId;
+
+  if (!userId) {
+    notFound();
+  }
 
   return <ProfileView userId={userId} />;
 }
