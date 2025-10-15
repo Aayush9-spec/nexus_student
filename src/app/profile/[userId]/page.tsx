@@ -7,7 +7,6 @@ import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import type { User } from '@/lib/types';
 import { useAuth } from '@/hooks/use-auth';
-import { Button } from '@/components/ui/button';
 import { EditProfileDialog } from '../components/EditProfileDialog';
 
 export default function ProfilePage({ params }: { params: { userId: string } }) {
