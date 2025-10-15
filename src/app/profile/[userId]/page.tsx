@@ -12,11 +12,12 @@ import { EditProfileDialog } from '../components/EditProfileDialog';
 export default function ProfilePage({ params }: { params: { userId: string } }) {
   const firestore = useFirestore();
   const { user: currentUser } = useAuth();
+  const userId = params.userId; // Extract userId at the top level
 
   const userRef = useMemoFirebase(() => {
-    if (!firestore || !params.userId) return null;
-    return doc(firestore, 'users', params.userId);
-  }, [firestore, params.userId]);
+    if (!firestore || !userId) return null;
+    return doc(firestore, 'users', userId);
+  }, [firestore, userId]);
 
   const { data: user, isLoading } = useDoc<User>(userRef);
 
