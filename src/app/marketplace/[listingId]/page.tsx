@@ -8,23 +8,108 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Star, MapPin } from 'lucide-react';
+import { Star, MapPin, Sparkles, AlertCircle } from 'lucide-react';
 import { useDoc, useFirestore, useMemoFirebase, useCollection } from '@/firebase';
 import { doc, collection, query, where, Query as FirestoreQuery } from 'firebase/firestore';
 import type { Listing, User, Review as ReviewType } from '@/lib/types';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { AddReviewForm } from './components/AddReviewForm';
 import { ReviewCard } from './components/ReviewCard';
 import { useAuth } from '@/hooks/use-auth';
+import { analyzeListing, AnalyzeListingOutput } from '@/ai/flows/analyze-listing';
+import { Skeleton } from '@/components/ui/skeleton';
 
-export default function ListingDetailPage({ params }: { params: { listingId: string } }) {
+function AiAnalysisCard({ listing }: { listing: Listing }) {
+  const [analysis, setAnalysis] = useState<AnalyzeListingOutput | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function getAnalysis() {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const result = await analyzeListing({
+          title: listing.title,
+          description: listing.description,
+          price: listing.price,
+          category: listing.category,
+        });
+        setAnalysis(result);
+      } catch (e) {
+        setError("Couldn't generate AI analysis.");
+        console.error(e);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    getAnalysis();
+  }, [listing]);
+
+  const valueScoreColor = {
+    'Great Deal': 'text-green-600 bg-green-100 dark:text-green-300 dark:bg-green-900/50',
+    'Good Deal': 'text-emerald-600 bg-emerald-100 dark:text-emerald-300 dark:bg-emerald-900/50',
+    'Fair Price': 'text-blue-600 bg-blue-100 dark:text-blue-300 dark:bg-blue-900/50',
+    'A bit pricey': 'text-amber-600 bg-amber-100 dark:text-amber-300 dark:bg-amber-900/50',
+    'Overpriced': 'text-red-600 bg-red-100 dark:text-red-300 dark:bg-red-900/50',
+  };
+  
+  if (isLoading) {
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg"><Sparkles className="text-primary h-5 w-5" /> AI Analysis</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+                <div className="flex justify-between items-center pt-2">
+                    <Skeleton className="h-6 w-24 rounded-full" />
+                    <Skeleton className="h-4 w-1/2" />
+                </div>
+            </CardContent>
+        </Card>
+    )
+  }
+  
+  if (error || !analysis) {
+    return (
+        <Card className="border-destructive/50">
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg text-destructive"><AlertCircle className="h-5 w-5" /> AI Analysis Failed</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <p className="text-destructive">{error}</p>
+            </CardContent>
+        </Card>
+    );
+  }
+
+  return (
+    <Card className="bg-accent/20 border-accent">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-lg font-headline"><Sparkles className="text-primary h-5 w-5" /> AI Analysis</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <p className="italic text-foreground/80">&quot;{analysis.summary}&quot;</p>
+        <div className="flex justify-between items-center gap-4">
+            <Badge className={`text-base ${valueScoreColor[analysis.valueScore]}`}>{analysis.valueScore}</Badge>
+            <p className="text-sm text-muted-foreground text-right">{analysis.priceAnalysis}</p>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+export default function ListingDetailPage({ params }: { params: { userId: string, listingId: string } }) {
   const firestore = useFirestore();
   const { user: currentUser } = useAuth();
+  const {listingId} = params;
 
   const listingRef = useMemoFirebase(() => {
-    if (!firestore || !params.listingId) return null;
-    return doc(firestore, 'listings', params.listingId);
-  }, [firestore, params.listingId]);
+    if (!firestore || !listingId) return null;
+    return doc(firestore, 'listings', listingId);
+  }, [firestore, listingId]);
   
   const { data: listing, isLoading: isLoadingListing } = useDoc<Listing>(listingRef);
 
@@ -36,9 +121,9 @@ export default function ListingDetailPage({ params }: { params: { listingId: str
   const { data: seller, isLoading: isLoadingSeller } = useDoc<User>(sellerRef);
 
   const reviewsQuery = useMemoFirebase(() => {
-    if (!firestore || !params.listingId) return null;
-    return query(collection(firestore, 'reviews'), where('listingId', '==', params.listingId)) as FirestoreQuery<ReviewType>;
-  }, [firestore, params.listingId]);
+    if (!firestore || !listingId) return null;
+    return query(collection(firestore, 'reviews'), where('listingId', '==', listingId)) as FirestoreQuery<ReviewType>;
+  }, [firestore, listingId]);
 
   const { data: reviews, isLoading: isLoadingReviews } = useCollection<ReviewType>(reviewsQuery);
 
@@ -61,17 +146,18 @@ export default function ListingDetailPage({ params }: { params: { listingId: str
         <div className="container mx-auto py-8">
             <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
                 <div className="md:col-span-2 space-y-4">
-                    <div className="animate-pulse bg-muted aspect-video w-full rounded-lg"></div>
-                    <div className="animate-pulse bg-muted h-10 w-3/4 rounded-md"></div>
-                    <div className="animate-pulse bg-muted h-6 w-1/2 rounded-md"></div>
+                    <Skeleton className="aspect-video w-full rounded-lg" />
+                    <Skeleton className="h-10 w-3/4 rounded-md" />
+                    <Skeleton className="h-6 w-1/2 rounded-md" />
                     <div className="space-y-2 mt-4">
-                        <div className="animate-pulse bg-muted h-4 w-full rounded-md"></div>
-                        <div className="animate-pulse bg-muted h-4 w-full rounded-md"></div>
-                        <div className="animate-pulse bg-muted h-4 w-5/6 rounded-md"></div>
+                        <Skeleton className="h-4 w-full rounded-md" />
+                        <Skeleton className="h-4 w-full rounded-md" />
+                        <Skeleton className="h-4 w-5/6 rounded-md" />
                     </div>
                 </div>
-                <div className="md:col-span-1">
-                     <div className="animate-pulse bg-muted rounded-lg h-64"></div>
+                <div className="md:col-span-1 space-y-4">
+                     <Skeleton className="rounded-lg h-64" />
+                     <Skeleton className="rounded-lg h-48" />
                 </div>
             </div>
         </div>
@@ -88,15 +174,25 @@ export default function ListingDetailPage({ params }: { params: { listingId: str
     <div className="container mx-auto py-8">
       <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
         <div className="md:col-span-2">
-          <div className="relative aspect-video w-full overflow-hidden rounded-lg mb-4">
-            <Image
-              src={listing.mediaUrl || "https://picsum.photos/seed/placeholder/800/600"}
-              alt={listing.title}
-              fill
-              className="object-cover"
-              data-ai-hint="product image"
-            />
-          </div>
+            <div className="relative aspect-video w-full overflow-hidden rounded-lg mb-4 bg-muted">
+            {listing.mediaType === 'video' ? (
+                <video
+                    src={listing.mediaUrl}
+                    controls
+                    className="w-full h-full object-cover"
+                >
+                    Your browser does not support the video tag.
+                </video>
+            ) : (
+                <Image
+                    src={listing.mediaUrl || "https://picsum.photos/seed/placeholder/800/600"}
+                    alt={listing.title}
+                    fill
+                    className="object-cover"
+                    data-ai-hint="product image"
+                />
+            )}
+            </div>
           <h1 className="text-3xl md:text-4xl font-bold font-headline mb-2">{listing.title}</h1>
           <div className="flex items-center gap-2 flex-wrap">
             <Badge variant="secondary">{listing.category}</Badge>
@@ -108,7 +204,7 @@ export default function ListingDetailPage({ params }: { params: { listingId: str
           </div>
           <p className="text-lg mt-4 text-foreground/80">{listing.description}</p>
         </div>
-        <div className="md:col-span-1">
+        <div className="md:col-span-1 space-y-6">
           <Card className="sticky top-24">
             <CardHeader>
               <CardTitle className="text-4xl font-headline text-primary">
@@ -138,6 +234,7 @@ export default function ListingDetailPage({ params }: { params: { listingId: str
               )}
             </CardContent>
           </Card>
+          <AiAnalysisCard listing={listing} />
         </div>
       </div>
       

@@ -5,6 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import { Video } from 'lucide-react';
 
 interface ListingCardProps {
   listing: Listing;
@@ -24,7 +25,7 @@ export function ListingCard({ listing, className }: ListingCardProps) {
     <Link href={`/marketplace/${listing.id}`}>
       <Card className={cn("overflow-hidden h-full flex flex-col transition-all hover:scale-[1.02] hover:shadow-lg", className)}>
         <CardHeader className="p-0">
-          <div className="relative aspect-video">
+          <div className="relative aspect-video bg-muted">
             <Image
               src={listing.mediaUrl || "https://picsum.photos/seed/placeholder/600/400"}
               alt={listing.title}
@@ -32,6 +33,11 @@ export function ListingCard({ listing, className }: ListingCardProps) {
               className="object-cover"
               data-ai-hint="product image"
             />
+            {listing.mediaType === 'video' && (
+                <div className="absolute bottom-2 right-2 bg-black/50 text-white p-1 rounded-md">
+                    <Video className="h-5 w-5" />
+                </div>
+            )}
           </div>
         </CardHeader>
         <CardContent className="p-4 flex-grow">

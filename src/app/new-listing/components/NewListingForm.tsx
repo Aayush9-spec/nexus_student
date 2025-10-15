@@ -28,7 +28,7 @@ const formSchema = z.object({
   description: z.string().min(20, "Description must be at least 20 characters."),
   category: z.enum(listingCategories, { required_error: "Please select a category." }),
   price: z.coerce.number().min(0, "Price must be a positive number."),
-  media: z.instanceof(File).refine(file => file.size > 0, "Image is required."),
+  media: z.instanceof(File).refine(file => file.size > 0, "Image or video is required."),
 });
 
 export function NewListingForm() {
@@ -38,7 +38,7 @@ export function NewListingForm() {
   const firestore = useFirestore();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isCategorizing, setIsCategorizing] = React.useState(false);
-  const [previewImage, setPreviewImage] = React.useState<string | null>(null);
+  const [preview, setPreview] = React.useState<{url: string; type: 'image' | 'video'} | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -85,7 +85,11 @@ export function NewListingForm() {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => setPreviewImage(reader.result as string);
+      reader.onloadend = () => {
+          const url = reader.result as string;
+          const type = file.type.startsWith('video') ? 'video' : 'image';
+          setPreview({ url, type });
+      };
       reader.readAsDataURL(file);
       form.setValue('media', file);
     }
@@ -98,9 +102,10 @@ export function NewListingForm() {
     }
     setIsSubmitting(true);
     try {
-      // 1. Upload image to Firebase Storage
+      // 1. Upload media to Firebase Storage
       const storage = getStorage();
       const mediaFile = values.media;
+      const mediaType = mediaFile.type.startsWith('video') ? 'video' : 'image';
       const storageRef = ref(storage, `listings/${user.id}/${Date.now()}_${mediaFile.name}`);
       const uploadResult = await uploadBytes(storageRef, mediaFile);
       const mediaUrl = await getDownloadURL(uploadResult.ref);
@@ -112,6 +117,7 @@ export function NewListingForm() {
         category: values.category,
         price: values.price,
         mediaUrl: mediaUrl,
+        mediaType: mediaType,
         sellerId: user.id,
         college: user.college, // Assuming user object has college info
         createdAt: serverTimestamp(),
@@ -179,19 +185,27 @@ export function NewListingForm() {
 
             <FormField control={form.control} name="media" render={({ field }) => (
                 <FormItem>
-                    <FormLabel>Image</FormLabel>
+                    <FormLabel>Image or Video</FormLabel>
                      <FormControl>
                         <div>
                             <Button type="button" variant="outline" onClick={() => document.getElementById('media-upload')?.click()}>
-                                <Upload className="mr-2 h-4 w-4"/> Upload Image
+                                <Upload className="mr-2 h-4 w-4"/> Upload Media
                             </Button>
-                            <input type="file" id="media-upload" className="hidden" accept="image/*" onChange={(e) => {
+                            <input type="file" id="media-upload" className="hidden" accept="image/*,video/*" onChange={(e) => {
                                 handleFileChange(e);
                                 field.onChange(e.target.files?.[0]);
                             }} />
                         </div>
                     </FormControl>
-                    {previewImage && <div className="relative w-20 h-20 rounded-md overflow-hidden mt-2"><Image src={previewImage} alt="Preview" fill className="object-cover" /></div>}
+                    {preview && (
+                        <div className="relative w-full aspect-video rounded-md overflow-hidden mt-2">
+                            {preview.type === 'image' ? (
+                                <Image src={preview.url} alt="Preview" fill className="object-cover" />
+                            ) : (
+                                <video src={preview.url} controls className="w-full h-full object-cover" />
+                            )}
+                        </div>
+                    )}
                     <FormMessage />
                 </FormItem>
             )} />

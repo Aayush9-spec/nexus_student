@@ -21,7 +21,8 @@ export type Listing = {
   description:string;
   category: ListingCategory;
   price: number;
-  mediaUrl: string; // Changed from mediaUrl?: string to be required and single
+  mediaUrl: string;
+  mediaType: 'image' | 'video';
   sellerId: string;
   seller?: User;
   createdAt: string;
