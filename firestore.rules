@@ -1,30 +1,18 @@
 /**
- * @fileoverview Firestore Security Rules for Nexus Student Marketplace.
- *
- * Core Philosophy:
- * This ruleset enforces a user-ownership model for user profiles and listings.
- * Users can only read and write their own profile data. Listings are publicly readable
- * but can only be created, updated, or deleted by their respective owners.
- *
- * Data Structure:
- * - /users/{userId}: Stores user profiles, with the document ID matching the user's UID.
- * - /listings/{listingId}: Stores listings, with a 'sellerId' field indicating the owner.
- * - /transactions/{transactionId}: Stores transaction data, with references to listings, buyers, and sellers.
- * - /reviews/{reviewId}: Stores reviews, associated with a listing and reviewer.
- * - /messages/{messageId}: Stores chat messages between users.
- *
- * Key Security Decisions:
- * - User listing is disallowed for privacy reasons.
- * - Public read access is granted for listings to enable discovery.
- * - Data validation is limited to ownership checks to ensure relational integrity.
- *
- * Denormalization for Authorization:
- * - The 'Listing' entity denormalizes the 'sellerId' to enable ownership checks
- *   without requiring additional reads.
- *
- * Structural Segregation:
- * - Publicly readable listings are stored in a top-level collection, while user-specific
- *   data is stored under the /users/{userId} path.
+ * @file Nexus Student Marketplace - Firestore Security Rules
+ * @core_philosophy This ruleset enforces a strict user-ownership model for user profiles and allows public read access to listings while restricting write access to the owner. Transactions, reviews, and messages are publicly accessible.
+ * @data_structure
+ *  - `/users/{userId}`: Stores user profiles.  Access is restricted to the user themselves.
+ *  - `/listings/{listingId}`: Stores marketplace listings. Public read, owner-only write.
+ *  - `/transactions/{transactionId}`: Stores transaction data.
+ *  - `/reviews/{reviewId}`: Stores reviews data.
+ *  - `/messages/{messageId}`: Stores messages data.
+ * @key_security_decisions
+ *  - User listing is disallowed.
+ *  - Public read access is granted for listings.
+ *  - Owner-only write access is enforced for listings.
+ * @denormalization_for_authorization
+ *  - Listings store the `sellerId` to avoid needing to read the UserProfile for authorization.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -33,114 +21,109 @@ service cloud.firestore {
     /**
      * @description Controls access to user profiles.
      * @path /users/{userId}
-     * @allow (get, create, update, delete, list): Authenticated user can access their own profile.
-     * @deny (get, create, update, delete, list): Authenticated user tries to access another user's profile.
+     * @allow (get) Authenticated user can read their own profile.
+     * @allow (create) Authenticated user can create their own profile if the userId matches their auth UID.
+     * @allow (update) Authenticated user can update their own profile if the userId matches their auth UID.
+     * @allow (delete) Authenticated user can delete their own profile if the userId matches their auth UID.
+     * @deny (get) Authenticated user cannot read another user's profile.
+     * @deny (create) Authenticated user cannot create a profile with a userId that does not match their auth UID.
+     * @deny (update) Authenticated user cannot update another user's profile.
+     * @deny (delete) Authenticated user cannot delete another user's profile.
      * @principle Enforces document ownership for all operations.
      */
     match /users/{userId} {
-      function isSignedIn() {
-        return request.auth != null;
-      }
-
-      function isOwner(userId) {
-        return request.auth.uid == userId;
-      }
-
-      function isExistingOwner(userId) {
-        return isOwner(userId) && resource != null;
-      }
-      allow get: if isSignedIn() && isOwner(userId);
+      allow get: if isOwner(userId);
       allow list: if false;
-      allow create: if isSignedIn() && isOwner(userId);
-      allow update: if isSignedIn() && isExistingOwner(userId);
-      allow delete: if isSignedIn() && isExistingOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.email == request.auth.token.email;
+      allow update: if isOwner(userId) && (request.resource.data.email == resource.data.email);
+      allow delete: if isOwner(userId);
     }
 
     /**
-     * @description Controls access to listings.
+     * @description Controls access to marketplace listings.
      * @path /listings/{listingId}
-     * @allow (get, list): Public read access for all listings.
-     * @allow (create): Authenticated user can create a listing with their UID as the sellerId.
-     * @allow (update, delete): Only the owner can update or delete their listing.
-     * @deny (create): Authenticated user tries to create a listing with a sellerId that doesn't match their UID.
-     * @deny (update, delete): Non-owner attempts to update or delete a listing.
-     * @principle Public read with owner-only writes, enforces sellerId ownership.
+     * @allow (get) Any user can read any listing.
+     * @allow (list) Any user can list listings.
+     * @allow (create) Authenticated user can create a listing if the sellerId matches their auth UID.
+     * @allow (update) Authenticated user can update a listing if they are the seller.
+     * @allow (delete) Authenticated user can delete a listing if they are the seller.
+     * @deny (create) Authenticated user cannot create a listing with a sellerId that does not match their auth UID.
+     * @deny (update) Authenticated user cannot update a listing if they are not the seller.
+     * @deny (delete) Authenticated user cannot delete a listing if they are not the seller.
+     * @principle Allows public read access but enforces document ownership for writes.
      */
     match /listings/{listingId} {
-        function isSignedIn() {
-          return request.auth != null;
-        }
-
-        function isOwner() {
-          return request.auth.uid == resource.data.sellerId;
-        }
-
-        function isCreatingWithOwnerId() {
-            return request.auth.uid == request.resource.data.sellerId;
-        }
-
-        function isExistingOwner() {
-            return isOwner() && resource != null;
-        }
-
-        allow get, list: if true;
-        allow create: if isSignedIn() && isCreatingWithOwnerId();
-        allow update: if isSignedIn() && isExistingOwner();
-        allow delete: if isSignedIn() && isExistingOwner();
+      allow get, list: if true;
+      allow create: if isSignedIn() && request.resource.data.sellerId == request.auth.uid;
+      allow update: if isSignedIn() && isExistingOwner(resource.data.sellerId);
+      allow delete: if isSignedIn() && isExistingOwner(resource.data.sellerId);
     }
 
-     /**
-      * @description Controls access to transactions.
-      * @path /transactions/{transactionId}
-      * @allow (get): Allow anyone to read transactions
-      * @allow (create): Allow anyone to create transactions
-      * @allow (update): Deny
-      * @allow (delete): Deny
-      * @allow (list): Deny
-      * @principle Currently, no specific ownership is enforced.
-      */
+    /**
+     * @description Controls access to transactions.
+     * @path /transactions/{transactionId}
+     * @allow (get) Any user can read any transaction.
+     * @allow (list) Any user can list transactions.
+     * @allow (create) Any authenticated user can create a transaction.
+     *  // TODO: Add owner validation once the schema is updated with an ownership field.
+     * @allow update: if false;  // TODO: Add owner validation once the schema is updated with an ownership field.
+     * @allow delete: if false;  // TODO: Add owner validation once the schema is updated with an ownership field.
+     * @principle Open access for all operations.
+     */
     match /transactions/{transactionId} {
-        allow get: if true;
-        allow list: if false;
-        allow create: if true;
-        allow update: if false;
-        allow delete: if false;
+      allow get, list: if true;
+      allow create: if isSignedIn();
+      allow update: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
+      allow delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
     }
 
-     /**
-      * @description Controls access to reviews.
-      * @path /reviews/{reviewId}
-      * @allow (get): Allow anyone to read reviews.
-      * @allow (create): Allow anyone to create reviews
-      * @allow (update): Deny
-      * @allow (delete): Deny
-      * @allow (list): Deny
-      * @principle: Currently, no specific ownership is enforced.
-      */
+    /**
+     * @description Controls access to reviews.
+     * @path /reviews/{reviewId}
+     * @allow (get) Any user can read any review.
+     * @allow (list) Any user can list reviews.
+     * @allow (create) Any authenticated user can create a review.
+     *  // TODO: Add owner validation once the schema is updated with an ownership field.
+     * @allow update: if false;  // TODO: Add owner validation once the schema is updated with an ownership field.
+     * @allow delete: if false;  // TODO: Add owner validation once the schema is updated with an ownership field.
+     * @principle Open access for all operations.
+     */
     match /reviews/{reviewId} {
-        allow get: if true;
-        allow list: if false;
-        allow create: if true;
-        allow update: if false;
-        allow delete: if false;
+      allow get, list: if true;
+      allow create: if isSignedIn();
+      allow update: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
+      allow delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
     }
 
-     /**
-      * @description Controls access to messages.
-      * @path /messages/{messageId}
-      * @allow (get): Allow anyone to read messages.
-      * @allow (create): Allow anyone to create messages
-      * @allow (update): Deny
-      * @allow (delete): Deny
-      * @allow (list): Deny
-      * @principle: Currently, no specific ownership is enforced.
-      */
+    /**
+     * @description Controls access to chat messages.
+     * @path /messages/{messageId}
+     * @allow (get) Any user can read any message.
+     * @allow (list) Any user can list messages.
+     * @allow (create) Any authenticated user can create a message.
+     *  // TODO: Add owner validation once the schema is updated with an ownership field.
+     * @allow update: if false;  // TODO: Add owner validation once the schema is updated with an ownership field.
+     * @allow delete: if false;  // TODO: Add owner validation once the schema is updated with an ownership field.
+     * @principle Open access for all operations.
+     */
     match /messages/{messageId} {
-        allow get: if true;
-        allow list: if false;
-        allow create: if true;
-        allow update: if false;
-        allow delete: if false;
+      allow get, list: if true;
+      allow create: if isSignedIn();
+      allow update: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
+      allow delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
     }
+  }
+
+  // Helper functions
+  function isSignedIn() {
+    return request.auth != null;
+  }
+
+  function isOwner(userId) {
+    return request.auth.uid == userId;
+  }
+
+    function isExistingOwner(userId) {
+    return isOwner(userId) && resource != null;
   }
 }
