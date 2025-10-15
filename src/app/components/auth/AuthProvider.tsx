@@ -1,11 +1,11 @@
+
 "use client";
 
 import React, { createContext, useState, ReactNode, useEffect } from 'react';
 import { Auth, User as FirebaseAuthUser, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { useAuth as useFirebaseAuth, useFirestore } from '@/firebase';
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { useAuth as useFirebaseAuthHook, useFirestore } from '@/firebase';
 import type { User } from '@/lib/types';
-import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   user: User | null;
@@ -18,13 +18,14 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const auth = useFirebaseAuth();
+  const auth = useFirebaseAuthHook();
   const firestore = useFirestore();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
 
   useEffect(() => {
+    if (!auth || !firestore) return;
+
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser: FirebaseAuthUser | null) => {
       if (firebaseUser) {
         const userDocRef = doc(firestore, "users", firebaseUser.uid);
@@ -32,8 +33,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (userDoc.exists()) {
           setUser({ id: userDoc.id, ...userDoc.data() } as User);
         } else {
-          // Handle case where user exists in Auth but not Firestore
-          setUser(null); 
+          // This case might happen if a user is created in Auth but their Firestore doc creation fails.
+           setUser(null);
         }
       } else {
         setUser(null);
@@ -45,14 +46,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [auth, firestore]);
 
   const login = async (email: string, pass: string) => {
+    if (!auth) throw new Error("Auth service is not available.");
     await signInWithEmailAndPassword(auth, email, pass);
   };
 
   const logout = async () => {
+    if (!auth) throw new Error("Auth service is not available.");
     await signOut(auth);
   };
 
   const signup = async (name: string, email: string, pass: string, college: string, profilePictureUrl: string) => {
+    if (!auth || !firestore) throw new Error("Firebase services are not available.");
+    
     const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
     const firebaseUser = userCredential.user;
 
