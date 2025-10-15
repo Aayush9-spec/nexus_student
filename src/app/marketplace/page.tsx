@@ -2,7 +2,8 @@
 "use client";
 
 import { useMemo } from 'react';
-import { collection, query, where, Query, doc } from 'firebase/firestore';
+import { useSearchParams } from 'next/navigation';
+import { collection, query, Query, doc } from 'firebase/firestore';
 import { useFirestore, useCollection, useDoc, useMemoFirebase } from '@/firebase';
 import type { Listing, User } from '@/lib/types';
 import { ListingGrid } from './components/ListingGrid';
@@ -35,15 +36,9 @@ function ListingWithSeller({ listing }: { listing: Listing }) {
 }
 
 
-export default function MarketplacePage({ searchParams }: {
-  searchParams: {
-    q?: string;
-    category?: string;
-    maxPrice?: string;
-    location?: string;
-  };
-}) {
+export default function MarketplacePage() {
   const firestore = useFirestore();
+  const searchParams = useSearchParams();
 
   const listingsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -67,10 +62,10 @@ export default function MarketplacePage({ searchParams }: {
     return listingsData || [];
   }, [listingsData, isLoadingListings])
 
-  const q = searchParams?.q;
-  const category = searchParams?.category;
-  const maxPrice = searchParams?.maxPrice;
-  const location = searchParams?.location;
+  const q = searchParams.get('q');
+  const category = searchParams.get('category');
+  const maxPrice = searchParams.get('maxPrice');
+  const location = searchParams.get('location');
 
   const filteredListings = useMemo(() => {
     const source = (!isLoadingListings && (!listingsData || listingsData.length === 0)) ? getDummyListingsWithSellers() : listingsData;
