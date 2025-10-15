@@ -70,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       skills: [],
       following: [],
       followers: [],
-      role: 'student',
+      role: email === 'admin@nexus.com' ? 'admin' : 'student',
     };
     
     await setDoc(doc(firestore, "users", firebaseUser.uid), newUser);

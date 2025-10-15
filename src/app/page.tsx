@@ -13,6 +13,7 @@ import { useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase
 import { collection, query, limit, Query, doc } from 'firebase/firestore';
 import type { Listing, User } from '@/lib/types';
 import { useMemo } from 'react';
+import { dummyListings, dummyUsers } from '@/lib/dummy-data';
 
 function TrendingListingCard({ listing }: { listing: Listing }) {
     const firestore = useFirestore();
@@ -67,21 +68,21 @@ function FeaturedStudentCard({ user }: { user: User }) {
 function FeaturedStudentsSection() {
     const firestore = useFirestore();
     
-    // Instead of querying users, we query recent listings to find active sellers
     const recentListingsQuery = useMemoFirebase(() => {
         if (!firestore) return null;
-        // Let's get more listings to increase the chance of getting unique sellers
         return query(collection(firestore, 'listings'), limit(10)) as Query<Listing>;
     }, [firestore]);
 
     const { data: listings, isLoading: isLoadingListings } = useCollection<Listing>(recentListingsQuery);
 
     const uniqueSellerIds = useMemo(() => {
+        if (!isLoadingListings && (!listings || listings.length === 0)) {
+            return [...new Set(dummyListings.map(l => l.sellerId))].slice(0, 3);
+        }
         if (!listings) return [];
-        // Get unique seller IDs, up to 3
         const ids = listings.map(l => l.sellerId);
         return [...new Set(ids)].slice(0, 3);
-    }, [listings]);
+    }, [listings, isLoadingListings]);
 
     if (isLoadingListings) {
         return (
@@ -93,8 +94,8 @@ function FeaturedStudentsSection() {
     
     if (uniqueSellerIds.length === 0 && !isLoadingListings) {
         return (
-            <div className="text-center text-muted-foreground">
-                <p>No student sellers featured yet. Be the first!</p>
+             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {dummyUsers.slice(0,3).map(user => <FeaturedStudentCard key={user.id} user={user} />)}
             </div>
         )
     }
@@ -134,6 +135,9 @@ export default function Home() {
 
   const { data: trendingListings, isLoading: trendingLoading } = useCollection<Listing>(trendingQuery);
   
+  const listingsToDisplay = (!trendingLoading && (!trendingListings || trendingListings.length === 0))
+    ? dummyListings.slice(0, 4)
+    : trendingListings;
 
   return (
     <div className="flex flex-col">
@@ -172,12 +176,20 @@ export default function Home() {
             </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {trendingLoading ? (
+          {trendingLoading && (!listingsToDisplay || listingsToDisplay.length === 0) ? (
             [...Array(4)].map((_, i) => <div key={i} className="animate-pulse bg-muted rounded-lg h-80"></div>)
           ) : (
-            trendingListings?.map((listing) => (
-              <TrendingListingCard key={listing.id} listing={listing} />
-            ))
+            listingsToDisplay?.map((listing) => {
+              const listingWithSeller = {
+                ...listing,
+                seller: dummyUsers.find(u => u.id === listing.sellerId)
+              }
+              return (
+                 (!trendingListings || trendingListings.length === 0) 
+                  ? <ListingCard key={listing.id} listing={listingWithSeller} />
+                  : <TrendingListingCard key={listing.id} listing={listing} />
+              )
+            })
           )}
         </div>
       </section>

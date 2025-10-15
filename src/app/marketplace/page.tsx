@@ -9,6 +9,7 @@ import { ListingGrid } from './components/ListingGrid';
 import { FilterSidebar } from './components/FilterSidebar';
 import { Suspense } from 'react';
 import { ListingCard } from './components/ListingCard';
+import { dummyListings, dummyUsers } from '@/lib/dummy-data';
 
 
 function ListingWithSeller({ listing }: { listing: Listing }) {
@@ -52,41 +53,59 @@ export default function MarketplacePage({ searchParams }: {
 
   const { data: listingsData, isLoading: isLoadingListings } = useCollection<Listing>(listingsQuery);
   
+  const getDummyListingsWithSellers = () => {
+    return dummyListings.map(listing => ({
+      ...listing,
+      seller: dummyUsers.find(user => user.id === listing.sellerId)
+    }));
+  };
+  
+  const allListings = useMemo(() => {
+    if (!isLoadingListings && (!listingsData || listingsData.length === 0)) {
+        return getDummyListingsWithSellers();
+    }
+    return listingsData || [];
+  }, [listingsData, isLoadingListings])
+
+
   const filteredListings = useMemo(() => {
-    if (!listingsData) return [];
-    return listingsData.filter(listing => {
+    const source = (!isLoadingListings && (!listingsData || listingsData.length === 0)) ? getDummyListingsWithSellers() : listingsData;
+    if (!source) return [];
+    
+    return source.filter(listing => {
         const queryMatch = searchParams.q ? listing.title.toLowerCase().includes(searchParams.q.toLowerCase()) || listing.description.toLowerCase().includes(searchParams.q.toLowerCase()) : true;
-        const categoryMatch = searchParams.category ? listing.category === searchParams.category : true;
+        const categoryMatch = searchParams.category && searchParams.category !== 'All' ? listing.category === searchParams.category : true;
         const priceMatch = searchParams.maxPrice ? listing.price <= Number(searchParams.maxPrice) : true;
         const locationMatch = searchParams.location ? listing.college.toLowerCase().includes(searchParams.location.toLowerCase()) : true;
         return queryMatch && categoryMatch && priceMatch && locationMatch;
     });
-  }, [listingsData, searchParams]);
+  }, [listingsData, isLoadingListings, searchParams]);
 
 
-  if (isLoadingListings) {
-    return (
-      <div className="container mx-auto py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <aside className="lg:col-span-1">
-            <div className="sticky top-20">
-              <Suspense fallback={<div>Loading filters...</div>}>
-                <FilterSidebar />
-              </Suspense>
-            </div>
-          </aside>
-          <main className="lg:col-span-3">
-            <h1 className="text-3xl font-bold font-headline mb-6">Explore the Marketplace</h1>
+  const renderListings = () => {
+    if (isLoadingListings) {
+        return (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {[...Array(8)].map((_, i) => (
-                <div key={i} className="animate-pulse bg-muted rounded-lg h-80"></div>
-              ))}
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="animate-pulse bg-muted rounded-lg h-80"></div>
+                ))}
             </div>
-          </main>
+        );
+    }
+
+    if (!listingsData || listingsData.length === 0) {
+        // Show filtered dummy data if live data is empty
+        return <ListingGrid listings={filteredListings} isLoading={false} />;
+    }
+    
+    // Show live listings
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredListings.map(listing => <ListingWithSeller key={listing.id} listing={listing} />)}
         </div>
-      </div>
-    )
-  }
+    );
+  };
+
 
   return (
     <div className="container mx-auto py-8">
@@ -100,16 +119,7 @@ export default function MarketplacePage({ searchParams }: {
         </aside>
         <main className="lg:col-span-3">
           <h1 className="text-3xl font-bold font-headline mb-6">Explore the Marketplace</h1>
-           {filteredListings && filteredListings.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredListings.map(listing => <ListingWithSeller key={listing.id} listing={listing} />)}
-              </div>
-            ) : (
-               <div className="text-center py-16 text-muted-foreground col-span-full">
-                  <h2 className="text-2xl font-semibold">No listings found</h2>
-                  <p>Try adjusting your search or filters, or create a new listing!</p>
-              </div>
-            )}
+           {renderListings()}
         </main>
       </div>
     </div>
