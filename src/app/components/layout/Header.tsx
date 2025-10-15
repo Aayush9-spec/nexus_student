@@ -17,6 +17,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/hooks/use-auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Logo } from "@/components/Logo";
+import { ThemeToggle } from "@/app/components/ThemeToggle";
 
 export function Header() {
   const { user, logout, loading } = useAuth();
@@ -89,6 +90,7 @@ export function Header() {
          <Link href="/new-listing" className="hidden md:inline-flex">
           <Button>New Listing</Button>
         </Link>
+        <ThemeToggle />
         {loading ? (
           <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
         ) : user ? (
