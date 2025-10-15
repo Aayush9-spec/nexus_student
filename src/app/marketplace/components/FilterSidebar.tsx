@@ -1,3 +1,4 @@
+
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -18,19 +19,6 @@ export function FilterSidebar() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const firestore = useFirestore();
-
-  const usersQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return collection(firestore, 'users') as Query<User>;
-  }, [firestore]);
-
-  const { data: usersData } = useCollection<User>(usersQuery);
-
-  const colleges = useMemo(() => {
-    if (!usersData) return [];
-    return [...new Set(usersData.map(u => u.college))];
-  }, [usersData]);
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
@@ -53,18 +41,6 @@ export function FilterSidebar() {
       router.push(pathname + '?' + createQueryString('maxPrice', String(values[0])));
   };
 
-  const handleCollegeChange = (college: string) => {
-    const currentColleges = searchParams.get('colleges')?.split(',') || [];
-    let newColleges: string[];
-    if (currentColleges.includes(college)) {
-        newColleges = currentColleges.filter(c => c !== college);
-    } else {
-        newColleges = [...currentColleges, college];
-    }
-    const collegeQuery = newColleges.length > 0 ? newColleges.join(',') : '';
-    router.push(pathname + '?' + createQueryString('colleges', collegeQuery));
-  }
-  
   const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     router.push(pathname + '?' + createQueryString('location', e.target.value));
   };
@@ -75,7 +51,6 @@ export function FilterSidebar() {
 
   const selectedCategory = searchParams.get('category') || 'All';
   const maxPrice = Number(searchParams.get('maxPrice')) || 500;
-  const selectedColleges = searchParams.get('colleges')?.split(',') || [];
   const location = searchParams.get('location') || '';
 
   return (
@@ -117,22 +92,6 @@ export function FilterSidebar() {
               </div>
             ))}
           </RadioGroup>
-        </div>
-
-        <div>
-          <Label className="font-semibold">College</Label>
-          <div className="mt-2 space-y-1 max-h-48 overflow-y-auto">
-            {colleges.map(college => (
-                <div key={college} className="flex items-center space-x-2">
-                    <Checkbox 
-                        id={`college-${college.replace(/\s/g, '')}`}
-                        checked={selectedColleges.includes(college)}
-                        onCheckedChange={() => handleCollegeChange(college)}
-                    />
-                    <Label htmlFor={`college-${college.replace(/\s/g, '')}`} className="font-normal">{college}</Label>
-                </div>
-            ))}
-          </div>
         </div>
 
         <div>

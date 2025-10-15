@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -35,6 +36,82 @@ function TrendingListingCard({ listing }: { listing: Listing }) {
     return <ListingCard listing={listingWithSeller} />;
 }
 
+function FeaturedStudentCard({ user }: { user: User }) {
+    const getInitials = (name: string) => {
+        if (!name) return '';
+        const names = name.split(' ');
+        if (names.length > 1) {
+          return `${names[0][0]}${names[names.length - 1][0]}`;
+        }
+        return name.substring(0, 2);
+    };
+
+    return (
+        <Link href={`/profile/${user.id}`}>
+            <Card className="hover:shadow-lg transition-shadow">
+                <CardContent className="flex flex-col items-center text-center p-6">
+                    <Avatar className="w-24 h-24 mb-4 border-4 border-accent">
+                        <AvatarImage src={user.profilePictureUrl} alt={user.name} />
+                        <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+                    </Avatar>
+                    <h3 className="font-bold text-lg">{user.name}</h3>
+                    <p className="text-primary font-semibold">{user.college}</p>
+                    <p className="text-muted-foreground text-sm mt-2 line-clamp-2">{user.bio}</p>
+                </CardContent>
+            </Card>
+        </Link>
+    );
+}
+
+function FeaturedStudentsSection() {
+    const firestore = useFirestore();
+    
+    const listingsForStudentsQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, 'listings'), limit(3)) as Query<Listing>;
+    }, [firestore]);
+
+    const { data: listings, isLoading: isLoadingListings } = useCollection<Listing>(listingsForStudentsQuery);
+
+    const sellerIds = useMemo(() => {
+        if (!listings) return [];
+        const ids = listings.map(l => l.sellerId);
+        return [...new Set(ids)];
+    }, [listings]);
+
+    // This is not ideal as it makes a request per user, but it respects security rules.
+    // For a production app, we would denormalize this or use a function.
+    if (isLoadingListings) {
+        return (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(3)].map((_, i) => <div key={i} className="animate-pulse bg-card rounded-lg h-64"></div>)}
+            </div>
+        );
+    }
+    
+    return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {sellerIds.map(id => <FeaturedStudentLoader key={id} userId={id} />)}
+        </div>
+    );
+}
+
+function FeaturedStudentLoader({ userId }: { userId: string }) {
+    const firestore = useFirestore();
+    const userRef = useMemoFirebase(() => {
+        if (!firestore || !userId) return null;
+        return doc(firestore, 'users', userId);
+    }, [firestore, userId]);
+    
+    const { data: user, isLoading } = useDoc<User>(userRef);
+
+    if (isLoading || !user) {
+        return <div className="animate-pulse bg-card rounded-lg h-64"></div>;
+    }
+
+    return <FeaturedStudentCard user={user} />;
+}
+
 
 export default function Home() {
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-image');
@@ -45,22 +122,8 @@ export default function Home() {
     return query(collection(firestore, 'listings'), limit(4)) as Query<Listing>;
   }, [firestore]);
 
-  const featuredQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(collection(firestore, 'users'), limit(3)) as Query<User>;
-  }, [firestore]);
-
   const { data: trendingListings, isLoading: trendingLoading } = useCollection<Listing>(trendingQuery);
-  const { data: featuredStudents, isLoading: featuredLoading } = useCollection<User>(featuredQuery);
   
-  const getInitials = (name: string) => {
-    if (!name) return '';
-    const names = name.split(' ');
-    if (names.length > 1) {
-      return `${names[0][0]}${names[names.length - 1][0]}`;
-    }
-    return name.substring(0, 2);
-  };
 
   return (
     <div className="flex flex-col">
@@ -112,27 +175,7 @@ export default function Home() {
       <section className="bg-muted py-12 md:py-16">
         <div className="container mx-auto">
             <h2 className="text-2xl md:text-3xl font-headline font-bold text-center mb-8">Featured Students</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {featuredLoading ? (
-                  [...Array(3)].map((_, i) => <div key={i} className="animate-pulse bg-card rounded-lg h-64"></div>)
-                ) : (
-                  featuredStudents && featuredStudents.map(student => (
-                      <Link href={`/profile/${student.id}`} key={student.id}>
-                          <Card className="hover:shadow-lg transition-shadow">
-                              <CardContent className="flex flex-col items-center text-center p-6">
-                                  <Avatar className="w-24 h-24 mb-4 border-4 border-accent">
-                                      <AvatarImage src={student.profilePictureUrl} alt={student.name} />
-                                      <AvatarFallback>{getInitials(student.name)}</AvatarFallback>
-                                  </Avatar>
-                                  <h3 className="font-bold text-lg">{student.name}</h3>
-                                  <p className="text-primary font-semibold">{student.college}</p>
-                                  <p className="text-muted-foreground text-sm mt-2 line-clamp-2">{student.bio}</p>
-                              </CardContent>
-                          </Card>
-                      </Link>
-                  ))
-                )}
-            </div>
+            <FeaturedStudentsSection />
         </div>
       </section>
     </div>
