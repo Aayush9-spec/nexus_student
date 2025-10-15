@@ -13,7 +13,7 @@ import { Star, MapPin, Sparkles, AlertCircle } from 'lucide-react';
 import { useDoc, useFirestore, useMemoFirebase, useCollection } from '@/firebase';
 import { doc, collection, query, where, Query as FirestoreQuery } from 'firebase/firestore';
 import type { Listing, User, Review as ReviewType } from '@/lib/types';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, use } from 'react';
 import { AddReviewForm } from './components/AddReviewForm';
 import { ReviewCard } from './components/ReviewCard';
 import { useAuth } from '@/hooks/use-auth';
@@ -105,7 +105,8 @@ function AiAnalysisCard({ listing }: { listing: Listing }) {
 export default function ListingDetailPage({ params }: { params: { userId: string, listingId: string } }) {
   const firestore = useFirestore();
   const { user: currentUser } = useAuth();
-  const {listingId} = params;
+  const resolvedParams = use(Promise.resolve(params));
+  const {listingId} = resolvedParams;
 
   const listingRef = useMemoFirebase(() => {
     if (!firestore || !listingId) return null;
@@ -275,5 +276,3 @@ export default function ListingDetailPage({ params }: { params: { userId: string
     </div>
   );
 }
-
-    
