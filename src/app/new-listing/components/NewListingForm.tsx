@@ -139,7 +139,7 @@ export function NewListingForm() {
     <Card>
       <CardContent className="p-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form. handleSubmit(onSubmit)} className="space-y-6">
             <FormField control={form.control} name="title" render={({ field }) => (
               <FormItem><FormLabel>Listing Title</FormLabel><FormControl><Input placeholder="e.g., Used Engineering Mechanics Textbook" {...field} /></FormControl><FormMessage /></FormItem>
             )} />

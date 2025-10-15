@@ -52,6 +52,7 @@ export const dummyListings: Listing[] = [
     mediaUrl: findImage('listing-gate-notes'),
     sellerId: 'user_1',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
+    college: 'IIT Bombay',
   },
   {
     id: 'listing_2',
@@ -62,6 +63,7 @@ export const dummyListings: Listing[] = [
     mediaUrl: findImage('listing-fest-design'),
     sellerId: 'user_2',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
+    college: 'Christ University, Bangalore',
   },
   {
     id: 'listing_3',
@@ -72,6 +74,7 @@ export const dummyListings: Listing[] = [
     mediaUrl: findImage('listing-engg-books'),
     sellerId: 'user_1',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1).toISOString(),
+    college: 'IIT Bombay',
   },
   {
     id: 'listing_4',
@@ -82,6 +85,7 @@ export const dummyListings: Listing[] = [
     mediaUrl: findImage('listing-hackathon'),
     sellerId: 'user_1',
     createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+    college: 'IIT Bombay',
   },
   {
     id: 'listing_5',
@@ -92,6 +96,7 @@ export const dummyListings: Listing[] = [
     mediaUrl: findImage('listing-tiffin'),
     sellerId: 'user_3',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10).toISOString(),
+    college: 'Delhi University',
   },
   {
     id: 'listing_8',
@@ -102,6 +107,7 @@ export const dummyListings: Listing[] = [
     mediaUrl: findImage('listing-bicycle'),
     sellerId: 'user_3',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString(),
+    college: 'Delhi University',
   },
   {
     id: 'listing_7',
@@ -112,5 +118,6 @@ export const dummyListings: Listing[] = [
     mediaUrl: findImage('listing-novels'),
     sellerId: 'user_3',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 6).toISOString(),
+    college: 'Delhi University',
   },
 ];

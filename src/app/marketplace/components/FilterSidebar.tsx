@@ -59,7 +59,7 @@ export function FilterSidebar() {
     if (debouncedLocation !== initialLocation) {
         router.push(pathname + '?' + createQueryString([{ name: 'location', value: debouncedLocation }]));
     }
-  }, [debouncedLocation]);
+  }, [debouncedLocation, initialLocation, pathname, createQueryString, router]);
 
 
   const clearFilters = () => {
