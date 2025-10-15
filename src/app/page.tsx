@@ -8,10 +8,33 @@ import { ArrowRight } from 'lucide-react';
 import { ListingCard } from './marketplace/components/ListingCard';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, limit, Query } from 'firebase/firestore';
+import { useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase';
+import { collection, query, limit, Query, doc } from 'firebase/firestore';
 import type { Listing, User } from '@/lib/types';
 import { useMemo } from 'react';
+
+function TrendingListingCard({ listing }: { listing: Listing }) {
+    const firestore = useFirestore();
+
+    const sellerRef = useMemoFirebase(() => {
+        if (!firestore || !listing.sellerId) return null;
+        return doc(firestore, 'users', listing.sellerId);
+    }, [firestore, listing.sellerId]);
+
+    const { data: seller, isLoading } = useDoc<User>(sellerRef);
+
+    if (isLoading) {
+        return <div className="animate-pulse bg-muted rounded-lg h-80"></div>;
+    }
+
+    const listingWithSeller = {
+        ...listing,
+        seller: seller || undefined,
+    };
+
+    return <ListingCard listing={listingWithSeller} />;
+}
+
 
 export default function Home() {
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-image');
@@ -29,17 +52,7 @@ export default function Home() {
 
   const { data: trendingListings, isLoading: trendingLoading } = useCollection<Listing>(trendingQuery);
   const { data: featuredStudents, isLoading: featuredLoading } = useCollection<User>(featuredQuery);
-  const { data: allUsers } = useCollection<User>(useMemoFirebase(() => firestore ? collection(firestore, 'users') as Query<User> : null, [firestore]));
-
-  const trendingListingsWithSellers = useMemo(() => {
-    if (!trendingListings || !allUsers) return [];
-    const usersMap = new Map(allUsers.map(u => [u.id, u]));
-    return trendingListings.map(listing => ({
-      ...listing,
-      seller: usersMap.get(listing.sellerId),
-    }));
-  }, [trendingListings, allUsers]);
-
+  
   const getInitials = (name: string) => {
     if (!name) return '';
     const names = name.split(' ');
@@ -89,8 +102,8 @@ export default function Home() {
           {trendingLoading ? (
             [...Array(4)].map((_, i) => <div key={i} className="animate-pulse bg-muted rounded-lg h-80"></div>)
           ) : (
-            trendingListingsWithSellers.map((listing) => (
-              <ListingCard key={listing.id} listing={listing} />
+            trendingListings?.map((listing) => (
+              <TrendingListingCard key={listing.id} listing={listing} />
             ))
           )}
         </div>
