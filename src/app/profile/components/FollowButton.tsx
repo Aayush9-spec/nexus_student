@@ -1,23 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Check, Loader2 } from "lucide-react";
+import { useFirestore, useDoc, useMemoFirebase } from "@/firebase";
+import { doc, updateDoc, arrayUnion, arrayRemove, runTransaction } from "firebase/firestore";
+import type { User } from "@/lib/types";
+
 
 export function FollowButton({ targetUserId }: { targetUserId: string }) {
-  const { user } = useAuth();
+  const { user: currentUser } = useAuth();
+  const firestore = useFirestore();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Mock initial followed state
-  const [isFollowing, setIsFollowing] = useState(
-    user?.following.includes(targetUserId) || false
-  );
+  const currentUserRef = useMemoFirebase(() => {
+    if (!firestore || !currentUser?.id) return null;
+    return doc(firestore, 'users', currentUser.id);
+  }, [firestore, currentUser?.id]);
+
+  const { data: currentUserData } = useDoc<User>(currentUserRef);
+
+  const isFollowing = currentUserData?.following?.includes(targetUserId) || false;
 
   const handleFollowToggle = async () => {
-    if (!user) {
+    if (!currentUser || !firestore) {
       toast({
         variant: "destructive",
         title: "Not Logged In",
@@ -26,7 +35,7 @@ export function FollowButton({ targetUserId }: { targetUserId: string }) {
       return;
     }
     
-    if (user.id === targetUserId) {
+    if (currentUser.id === targetUserId) {
       toast({
         title: "Well this is awkward...",
         description: "You can't follow yourself!",
@@ -35,16 +44,40 @@ export function FollowButton({ targetUserId }: { targetUserId: string }) {
     }
 
     setIsLoading(true);
-    // Simulate API call
-    await new Promise(res => setTimeout(res, 500));
-    setIsFollowing(!isFollowing);
-    setIsLoading(false);
-    toast({
+
+    const currentUserDocRef = doc(firestore, "users", currentUser.id);
+    const targetUserDocRef = doc(firestore, "users", targetUserId);
+
+    try {
+      await runTransaction(firestore, async (transaction) => {
+        if (isFollowing) {
+          // Unfollow
+          transaction.update(currentUserDocRef, { following: arrayRemove(targetUserId) });
+          transaction.update(targetUserDocRef, { followers: arrayRemove(currentUser.id) });
+        } else {
+          // Follow
+          transaction.update(currentUserDocRef, { following: arrayUnion(targetUserId) });
+          transaction.update(targetUserDocRef, { followers: arrayUnion(currentUser.id) });
+        }
+      });
+
+      toast({
         title: isFollowing ? "Unfollowed" : "Followed!",
-    });
+      });
+
+    } catch (error) {
+       console.error("Follow/unfollow error:", error);
+       toast({
+         variant: "destructive",
+         title: "Something went wrong",
+         description: "Could not update follow status. Please try again.",
+       });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  if (!user || user.id === targetUserId) {
+  if (!currentUser || currentUser.id === targetUserId) {
     return null;
   }
 
