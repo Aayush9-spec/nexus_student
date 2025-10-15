@@ -2,12 +2,15 @@ import type { User } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { FollowButton } from "./FollowButton";
+import { EditProfileDialog } from "./EditProfileDialog";
+
 
 interface ProfileHeaderProps {
   user: User;
+  isOwnProfile: boolean;
 }
 
-export function ProfileHeader({ user }: ProfileHeaderProps) {
+export function ProfileHeader({ user, isOwnProfile }: ProfileHeaderProps) {
   const getInitials = (name: string) => {
     const names = name.split(' ');
     if (names.length > 1) {
@@ -28,17 +31,17 @@ export function ProfileHeader({ user }: ProfileHeaderProps) {
                 <p className="text-lg text-muted-foreground">{user.college}</p>
                 <div className="flex gap-4 mt-4 justify-center md:justify-start">
                     <div>
-                        <p className="font-bold text-lg">{user.followers.length}</p>
+                        <p className="font-bold text-lg">{user.followers?.length || 0}</p>
                         <p className="text-sm text-muted-foreground">Followers</p>
                     </div>
                     <div>
-                        <p className="font-bold text-lg">{user.following.length}</p>
+                        <p className="font-bold text-lg">{user.following?.length || 0}</p>
                         <p className="text-sm text-muted-foreground">Following</p>
                     </div>
                 </div>
             </div>
             <div className="md:ml-auto">
-                <FollowButton targetUserId={user.id} />
+                {isOwnProfile ? <EditProfileDialog user={user} /> : <FollowButton targetUserId={user.id} />}
             </div>
         </div>
         <div className="mt-6 space-y-4 text-center md:text-left">

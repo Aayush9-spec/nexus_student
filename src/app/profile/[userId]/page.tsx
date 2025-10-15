@@ -6,9 +6,13 @@ import { UserListings } from "../components/UserListings";
 import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import type { User } from '@/lib/types';
+import { useAuth } from '@/hooks/use-auth';
+import { Button } from '@/components/ui/button';
+import { EditProfileDialog } from '../components/EditProfileDialog';
 
 export default function ProfilePage({ params }: { params: { userId: string } }) {
   const firestore = useFirestore();
+  const { user: currentUser } = useAuth();
 
   const userRef = useMemoFirebase(() => {
     if (!firestore || !params.userId) return null;
@@ -46,11 +50,13 @@ export default function ProfilePage({ params }: { params: { userId: string } }) 
   if (!user) {
     notFound();
   }
+  
+  const isOwnProfile = currentUser?.id === user.id;
 
   return (
     <div className="container mx-auto py-8">
       <div className="space-y-8">
-        <ProfileHeader user={user} />
+        <ProfileHeader user={user} isOwnProfile={isOwnProfile} />
         <UserListings userId={user.id} />
       </div>
     </div>

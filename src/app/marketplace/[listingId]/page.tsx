@@ -9,13 +9,17 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Star, MapPin } from 'lucide-react';
-import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { useDoc, useFirestore, useMemoFirebase, useCollection } from '@/firebase';
+import { doc, collection, query, where, Query as FirestoreQuery } from 'firebase/firestore';
 import type { Listing, User, Review as ReviewType } from '@/lib/types';
 import { useMemo } from 'react';
+import { AddReviewForm } from './components/AddReviewForm';
+import { ReviewCard } from './components/ReviewCard';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function ListingDetailPage({ params }: { params: { listingId: string } }) {
   const firestore = useFirestore();
+  const { user: currentUser } = useAuth();
 
   const listingRef = useMemoFirebase(() => {
     if (!firestore || !params.listingId) return null;
@@ -31,6 +35,13 @@ export default function ListingDetailPage({ params }: { params: { listingId: str
 
   const { data: seller, isLoading: isLoadingSeller } = useDoc<User>(sellerRef);
 
+  const reviewsQuery = useMemoFirebase(() => {
+    if (!firestore || !params.listingId) return null;
+    return query(collection(firestore, 'reviews'), where('listingId', '==', params.listingId)) as FirestoreQuery<ReviewType>;
+  }, [firestore, params.listingId]);
+
+  const { data: reviews, isLoading: isLoadingReviews } = useCollection<ReviewType>(reviewsQuery);
+
   const getInitials = (name?: string) => {
     if (!name) return '';
     const names = name.split(' ');
@@ -39,11 +50,13 @@ export default function ListingDetailPage({ params }: { params: { listingId: str
     }
     return name.substring(0, 2);
   };
-  
-  // TODO: Replace with real reviews from Firestore
-  const reviews: ReviewType[] = useMemo(() => [], []);
 
-  if (isLoadingListing || isLoadingSeller) {
+  const hasUserReviewed = useMemo(() => {
+    if (!currentUser || !reviews) return false;
+    return reviews.some(review => review.reviewerId === currentUser.id);
+  }, [currentUser, reviews]);
+  
+  if (isLoadingListing || isLoadingSeller || isLoadingReviews) {
     return (
         <div className="container mx-auto py-8">
             <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
@@ -68,6 +81,8 @@ export default function ListingDetailPage({ params }: { params: { listingId: str
   if (!listing) {
     notFound();
   }
+
+  const canAddReview = currentUser && currentUser.id !== listing.sellerId && !hasUserReviewed;
 
   return (
     <div className="container mx-auto py-8">
@@ -129,36 +144,35 @@ export default function ListingDetailPage({ params }: { params: { listingId: str
       <Separator className="my-12" />
 
       <div>
-        <h2 className="text-2xl font-bold font-headline mb-6">Reviews ({reviews.length})</h2>
-        {reviews.length > 0 ? (
+        <h2 className="text-2xl font-bold font-headline mb-6">Reviews ({reviews?.length || 0})</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-6">
-                {reviews.map(review => (
-                    <Card key={review.id}>
-                        <CardContent className="p-4 flex gap-4">
-                            <Avatar>
-                                <AvatarImage src={review.reviewer?.profilePictureUrl} />
-                                <AvatarFallback>{getInitials(review.reviewer?.name)}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <div className="flex items-center gap-2 mb-1">
-                                    <p className="font-semibold">{review.reviewer?.name}</p>
-                                    <div className="flex items-center">
-                                        {[...Array(5)].map((_, i) => (
-                                            <Star key={i} className={`h-4 w-4 ${i < review.rating ? 'fill-primary text-primary' : 'fill-muted stroke-muted-foreground'}`} />
-                                        ))}
-                                    </div>
-                                </div>
-                                <p className="text-muted-foreground">{review.comment}</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
+                {reviews && reviews.length > 0 ? (
+                    reviews.map(review => (
+                        <ReviewCard key={review.id} review={review} />
+                    ))
+                ) : (
+                    <div className="text-center text-muted-foreground py-8">
+                        <p>No reviews yet for this listing. Be the first!</p>
+                    </div>
+                )}
             </div>
-        ) : (
-            <div className="text-center text-muted-foreground py-8">
-                <p>No reviews yet for this listing.</p>
+            <div>
+              {canAddReview ? (
+                  <AddReviewForm listingId={listing.id} />
+              ) : (
+                <Card className="bg-muted p-4 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    { !currentUser ? "You must be logged in to leave a review." 
+                      : currentUser.id === listing.sellerId ? "You cannot review your own listing."
+                      : hasUserReviewed ? "You have already reviewed this listing."
+                      : "Login to leave a review."
+                    }
+                  </p>
+                </Card>
+              )}
             </div>
-        )}
+        </div>
       </div>
     </div>
   );
