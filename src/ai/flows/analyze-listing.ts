@@ -11,7 +11,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-export const AnalyzeListingInputSchema = z.object({
+const AnalyzeListingInputSchema = z.object({
   title: z.string().describe('The title of the listing.'),
   description: z.string().describe('The description of the listing.'),
   price: z.number().describe('The price of the listing in INR.'),
@@ -21,7 +21,7 @@ export type AnalyzeListingInput = z.infer<typeof AnalyzeListingInputSchema>;
 
 const PriceAnalysisSchema = z.enum(['Great Deal', 'Good Deal', 'Fair Price', 'A bit pricey', 'Overpriced']);
 
-export const AnalyzeListingOutputSchema = z.object({
+const AnalyzeListingOutputSchema = z.object({
   summary: z.string().describe('A concise, one-sentence summary of the product for a potential buyer.'),
   valueScore: PriceAnalysisSchema.describe(
     'An assessment of how good the value is for the price, considering the product and category.'
