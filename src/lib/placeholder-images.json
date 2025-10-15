@@ -2,75 +2,69 @@
   "placeholderImages": [
     {
       "id": "user-1",
-      "description": "Profile of Alex Johnson",
-      "imageUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwZXJzb24lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NTkwMTExOTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "person portrait"
+      "description": "Portrait of an Indian female student",
+      "imageUrl": "https://images.unsplash.com/photo-1594291416829-14f5f5124b33?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxJbmRpYW4lMjBzdHVkZW50JTIwZmVtYWxlfGVufDB8fHx8MTc1OTg2ODgxOHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "Indian student"
     },
     {
       "id": "user-2",
-      "description": "Profile of Maria Garcia",
-      "imageUrl": "https://images.unsplash.com/photo-1544717305-2782549b5136?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxzdHVkZW50JTIwc21pbGluZ3xlbnwwfHx8fDE3NTg5NTMwMzN8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "student smiling"
+      "description": "Portrait of an Indian male student",
+      "imageUrl": "https://images.unsplash.com/photo-1620051878345-b565b4f4f3e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxJbmRpYW4lMjBzdHVkZW50JTIwbWFsZXxlbnwwfHx8fDE3NTk4Njg4MTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "Indian student"
     },
     {
       "id": "user-3",
-      "description": "Profile of Chen Wei",
-      "imageUrl": "https://images.unsplash.com/photo-1493612276216-ee3925520721?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxwZXJzb24lMjB0aGlua2luZ3xlbnwwfHx8fDE3NTg5NjgyMDh8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "person thinking"
+      "description": "Portrait of a smiling Indian female student",
+      "imageUrl": "https://images.unsplash.com/photo-1568244951468-3c3de17a52a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxJbmRpYW4lMjBzdHVkZW50JTIwc21pbGluZ3xlbnwwfHx8fDE3NTk4Njg4MTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "student smiling"
     },
     {
-      "id": "listing-1",
-      "description": "Hand-painted custom sneakers",
-      "imageUrl": "https://images.unsplash.com/photo-1717664793398-4602068016f3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxjdXN0b20lMjBzbmVha2Vyc3xlbnwwfHx8fDE3NTkwNDQ1NDl8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "custom sneakers"
+      "id": "listing-gate-notes",
+      "description": "Digital notes for exam preparation",
+      "imageUrl": "https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzdHVkeSUyMG5vdGVzfGVufDB8fHx8MTc1OTg2OTEzNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "study notes"
     },
     {
-      "id": "listing-2",
-      "description": "A set of digital study notes for biology",
-      "imageUrl": "https://images.unsplash.com/photo-1672847900914-3fbd4fa39037?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxkaWdpdGFsJTIwbm90ZXN8ZW58MHx8fHwxNzU5MDQ0NTQ5fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "digital notes"
+      "id": "listing-fest-design",
+      "description": "Colorful graphic design poster for a college festival",
+      "imageUrl": "https://images.unsplash.com/photo-1541560052-77ec1bbc0934?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxjb2xsZWdlJTIwZmVzdGl2YWx8ZW58MHx8fHwxNzU5ODY5MTM1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "college festival"
     },
     {
-      "id": "listing-3",
-      "description": "Tutoring session for calculus",
-      "imageUrl": "https://images.unsplash.com/photo-1758685733940-b1c11d04f553?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxtYXRoJTIwdHV0b3Jpbmd8ZW58MHx8fHwxNzU5MDQ0NTQ5fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "math tutoring"
+      "id": "listing-engg-books",
+      "description": "A stack of engineering textbooks",
+      "imageUrl": "https://images.unsplash.com/photo-1532012197267-da84d127e765?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxib29rcyUyMHN0YWNrfGVufDB8fHx8MTc1OTg2OTEzNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "books stack"
     },
     {
-      "id": "listing-4",
-      "description": "Seeking a collaborator for a hackathon project",
-      "imageUrl": "https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx0ZWFtJTIwY29sbGFib3JhdGlvbnxlbnwwfHx8fDE3NTkwMzMzOTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "id": "listing-hackathon",
+      "description": "People collaborating at a hackathon event",
+      "imageUrl": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxoYWNrYXRob258ZW58MHx8fHwxNzU5ODY5MTM1fDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "team collaboration"
     },
     {
-      "id": "listing-5",
-      "description": "Handmade ceramic mugs",
-      "imageUrl": "https://images.unsplash.com/photo-1669329597053-993120e439ed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxjZXJhbWljJTIwbXVnc3xlbnwwfHx8fDE3NTg5NjY4ODB8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "ceramic mugs"
+      "id": "listing-tiffin",
+      "description": "An Indian tiffin box with home-cooked food",
+      "imageUrl": "https://images.unsplash.com/photo-1615870216519-2f4741369a25?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxJbmRpYW4lMjB0aWZmaW58ZW58MHx8fHwxNzU5ODY5MTM2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "Indian tiffin"
     },
     {
-      "id": "listing-6",
-      "description": "Dorm room poster design",
-      "imageUrl": "https://images.unsplash.com/photo-1543487945-139a97f387d5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwb3N0ZXIlMjBkZXNpZ258ZW58MHx8fHwxNzU5MDE3NDUwfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "poster design"
+      "id": "listing-bicycle",
+      "description": "A simple bicycle parked on a campus",
+      "imageUrl": "https://images.unsplash.com/photo-1507035895480-2b3156c31fc8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxiaWN5Y2xlJTIwSW5kaWF8ZW58MHx8fHwxNzU5ODY5MTM2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "bicycle India"
     },
     {
-      "id": "listing-7",
-      "description": "Resume and cover letter review service",
-      "imageUrl": "https://images.unsplash.com/photo-1629839958207-5400ab5e1e7f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxyZXN1bWUlMjByZXZpZXd8ZW58MHx8fHwxNzU5MDQ0NTUwfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "resume review"
-    },
-    {
-      "id": "listing-8",
-      "description": "Join our startup focused on sustainability",
-      "imageUrl": "https://images.unsplash.com/photo-1711017067637-ade88765c8fd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxzdXN0YWluYWJpbGl0eSUyMHN0YXJ0dXB8ZW58MHx8fHwxNzU5MDQ0NTUwfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "sustainability startup"
+      "id": "listing-novels",
+      "description": "A collection of fiction novels on a shelf",
+      "imageUrl": "https://images.unsplash.com/photo-1524995767963-a7243c3d3e6c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxub3ZlbHMlMjBvbiUyMHNoZWxmfGVufDB8fHx8MTc1OTg2OTEzNnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "novels shelf"
     },
     {
       "id": "hero-image",
-      "description": "Students collaborating on a project",
-      "imageUrl": "https://images.unsplash.com/photo-1758270705317-3ef6142d306f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxzdHVkZW50cyUyMGNvbGxhYm9yYXRpbmd8ZW58MHx8fHwxNzU5MDAxNDUxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "students collaborating"
+      "description": "A group of diverse Indian students collaborating",
+      "imageUrl": "https://images.unsplash.com/photo-1628592395168-874e083a2a6b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxJbmRpYW4lMjBjb2xsZWdlJTIwc3R1ZGVudHN8ZW58MHx8fHwxNzU5ODY5NDcxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "Indian students"
     }
   ]
 }
