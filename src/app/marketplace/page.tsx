@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo } from 'react';
@@ -8,6 +9,29 @@ import { ListingGrid } from './components/ListingGrid';
 import { FilterSidebar } from './components/FilterSidebar';
 import { Suspense } from 'react';
 import { ListingCard } from './components/ListingCard';
+
+
+function ListingWithSeller({ listing }: { listing: Listing }) {
+    const firestore = useFirestore();
+
+    const sellerRef = useMemoFirebase(() => {
+        if (!firestore || !listing.sellerId) return null;
+        return doc(firestore, 'users', listing.sellerId);
+    }, [firestore, listing.sellerId]);
+
+    const { data: seller, isLoading } = useDoc<User>(sellerRef);
+
+    if (isLoading) {
+        return <div className="animate-pulse bg-muted rounded-lg h-80"></div>;
+    }
+
+    const listingWithSeller = {
+        ...listing,
+        seller: seller || undefined,
+    };
+
+    return <ListingCard listing={listingWithSeller} />;
+}
 
 
 export default function MarketplacePage({ searchParams }: {
@@ -23,43 +47,24 @@ export default function MarketplacePage({ searchParams }: {
   const listingsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     let q: Query<Listing> = collection(firestore, 'listings') as Query<Listing>;
-    
-    // These filters are now applied on the client side below.
-    // Firestore queries with inequalities on different fields are not allowed.
-
     return q;
   }, [firestore]);
 
   const { data: listingsData, isLoading: isLoadingListings } = useCollection<Listing>(listingsQuery);
   
-  const { data: usersData, isLoading: isLoadingUsers } = useCollection<User>(
-    useMemoFirebase(() => {
-        if (!firestore) return null;
-        return collection(firestore, 'users') as Query<User>;
-    }, [firestore])
-  );
-
-  const listingsWithSellers = useMemo(() => {
-    if (!listingsData || !usersData) return [];
-    return listingsData.map(listing => {
-      const seller = usersData.find(u => u.id === listing.sellerId);
-      return { ...listing, seller };
-    });
-  }, [listingsData, usersData]);
-
   const filteredListings = useMemo(() => {
-    return listingsWithSellers.filter(listing => {
+    if (!listingsData) return [];
+    return listingsData.filter(listing => {
         const queryMatch = searchParams.q ? listing.title.toLowerCase().includes(searchParams.q.toLowerCase()) || listing.description.toLowerCase().includes(searchParams.q.toLowerCase()) : true;
         const categoryMatch = searchParams.category ? listing.category === searchParams.category : true;
         const priceMatch = searchParams.maxPrice ? listing.price <= Number(searchParams.maxPrice) : true;
-        const locationMatch = searchParams.location ? listing.seller && listing.seller.college.toLowerCase().includes(searchParams.location.toLowerCase()) : true;
+        const locationMatch = searchParams.location ? listing.college.toLowerCase().includes(searchParams.location.toLowerCase()) : true;
         return queryMatch && categoryMatch && priceMatch && locationMatch;
     });
-  }, [listingsWithSellers, searchParams]);
+  }, [listingsData, searchParams]);
 
-  const isLoading = isLoadingListings || isLoadingUsers;
 
-  if (isLoading) {
+  if (isLoadingListings) {
     return (
       <div className="container mx-auto py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -95,9 +100,16 @@ export default function MarketplacePage({ searchParams }: {
         </aside>
         <main className="lg:col-span-3">
           <h1 className="text-3xl font-bold font-headline mb-6">Explore the Marketplace</h1>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <ListingGrid listings={filteredListings} />
-          </div>
+           {filteredListings && filteredListings.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {filteredListings.map(listing => <ListingWithSeller key={listing.id} listing={listing} />)}
+              </div>
+            ) : (
+               <div className="text-center py-16 text-muted-foreground col-span-full">
+                  <h2 className="text-2xl font-semibold">No listings found</h2>
+                  <p>Try adjusting your search or filters, or create a new listing!</p>
+              </div>
+            )}
         </main>
       </div>
     </div>

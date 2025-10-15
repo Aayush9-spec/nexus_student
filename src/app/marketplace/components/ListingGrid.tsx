@@ -3,9 +3,20 @@ import { ListingCard } from './ListingCard';
 
 interface ListingGridProps {
   listings: Listing[];
+  isLoading?: boolean;
 }
 
-export function ListingGrid({ listings }: ListingGridProps) {
+export function ListingGrid({ listings, isLoading }: ListingGridProps) {
+  if (isLoading) {
+    return (
+      <>
+        {[...Array(8)].map((_, i) => (
+          <div key={i} className="animate-pulse bg-muted rounded-lg h-80"></div>
+        ))}
+      </>
+    );
+  }
+
   if (listings.length === 0) {
     return (
         <div className="text-center py-16 text-muted-foreground col-span-full">
