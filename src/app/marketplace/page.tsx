@@ -67,7 +67,10 @@ export default function MarketplacePage({ searchParams }: {
     return listingsData || [];
   }, [listingsData, isLoadingListings])
 
-  const { q, category, maxPrice, location } = searchParams;
+  const q = searchParams?.q;
+  const category = searchParams?.category;
+  const maxPrice = searchParams?.maxPrice;
+  const location = searchParams?.location;
 
   const filteredListings = useMemo(() => {
     const source = (!isLoadingListings && (!listingsData || listingsData.length === 0)) ? getDummyListingsWithSellers() : listingsData;
