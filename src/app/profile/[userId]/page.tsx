@@ -1,6 +1,7 @@
 
 "use client";
 
+import React from 'react';
 import { notFound } from 'next/navigation';
 import { ProfileHeader } from "../components/ProfileHeader";
 import { UserListings } from "../components/UserListings";
@@ -9,10 +10,10 @@ import { doc } from 'firebase/firestore';
 import type { User } from '@/lib/types';
 import { useAuth } from '@/hooks/use-auth';
 
-export default function ProfilePage({ params }: { params: { userId: string } }) {
+// Helper component to handle the data fetching and rendering logic
+function ProfileView({ userId }: { userId: string }) {
   const firestore = useFirestore();
   const { user: currentUser } = useAuth();
-  const userId = params.userId; // Extract userId at the top level
 
   const userRef = useMemoFirebase(() => {
     if (!firestore || !userId) return null;
@@ -44,7 +45,7 @@ export default function ProfilePage({ params }: { params: { userId: string } }) 
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   if (!user) {
@@ -61,4 +62,16 @@ export default function ProfilePage({ params }: { params: { userId: string } }) 
         </div>
     </div>
   );
+}
+
+
+export default function ProfilePage({ params }: { params: { userId: string } }) {
+  // The 'params' object is a "thenable" and must be unwrapped.
+  // We can create a simple component that awaits the params and then renders the actual page content.
+  // Or, more simply, we can extract the userId here and pass it down.
+  // The error log suggests `React.use()` but that can only be used in a Client Component that is not async.
+  // A simple way to solve this is to pass the param to a client component that handles the logic.
+  const userId = params.userId;
+
+  return <ProfileView userId={userId} />;
 }
