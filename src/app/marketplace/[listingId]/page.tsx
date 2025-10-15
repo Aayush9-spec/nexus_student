@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from 'next/image';
@@ -274,3 +275,5 @@ export default function ListingDetailPage({ params }: { params: { userId: string
     </div>
   );
 }
+
+    
