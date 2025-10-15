@@ -2,18 +2,16 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { listingCategories, ListingCategory, User } from '@/lib/types';
+import { listingCategories } from '@/lib/types';
 import { X, MapPin } from 'lucide-react';
-import { Checkbox } from '@/components/ui/checkbox';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, Query } from 'firebase/firestore';
+import { useDebounce } from 'use-debounce';
 
 export function FilterSidebar() {
   const router = useRouter();
@@ -21,37 +19,55 @@ export function FilterSidebar() {
   const searchParams = useSearchParams();
 
   const createQueryString = useCallback(
-    (name: string, value: string) => {
+    (paramsToUpdate: { name: string; value: string }[]) => {
       const params = new URLSearchParams(searchParams.toString());
-      if (value) {
-        params.set(name, value);
-      } else {
-        params.delete(name);
-      }
+      paramsToUpdate.forEach(({ name, value }) => {
+        if (value) {
+          params.set(name, value);
+        } else {
+          params.delete(name);
+        }
+      });
       return params.toString();
     },
     [searchParams]
   );
   
+  const selectedCategory = searchParams.get('category') || 'All';
+  const maxPrice = Number(searchParams.get('maxPrice')) || 500;
+  const initialLocation = searchParams.get('location') || '';
+
+  const [locationInput, setLocationInput] = useState(initialLocation);
+  const [debouncedLocation] = useDebounce(locationInput, 500);
+
   const handleCategoryChange = (category: string) => {
-    router.push(pathname + '?' + createQueryString('category', category === 'All' ? '' : category));
+    router.push(pathname + '?' + createQueryString([{ name: 'category', value: category === 'All' ? '' : category }]));
   };
   
   const handlePriceChange = (values: number[]) => {
-      router.push(pathname + '?' + createQueryString('maxPrice', String(values[0])));
-  };
-
-  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    router.push(pathname + '?' + createQueryString('location', e.target.value));
+    router.push(pathname + '?' + createQueryString([{ name: 'maxPrice', value: String(values[0]) }]));
   };
   
+  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newLocation = e.target.value;
+    setLocationInput(newLocation);
+  };
+  
+  // Effect to update URL when debounced location changes
+  const [isInitialMount, setIsInitialMount] = useState(true);
+  useCallback(() => {
+    if (isInitialMount) {
+      setIsInitialMount(false);
+      return;
+    }
+    router.push(pathname + '?' + createQueryString([{ name: 'location', value: debouncedLocation }]));
+  }, [debouncedLocation, router, pathname, createQueryString, isInitialMount])();
+
+
   const clearFilters = () => {
     router.push(pathname);
+    setLocationInput('');
   };
-
-  const selectedCategory = searchParams.get('category') || 'All';
-  const maxPrice = Number(searchParams.get('maxPrice')) || 500;
-  const location = searchParams.get('location') || '';
 
   return (
     <Card>
@@ -69,7 +85,7 @@ export function FilterSidebar() {
                 <Input 
                     placeholder="Search by college..." 
                     className="pl-8" 
-                    value={location}
+                    value={locationInput}
                     onChange={handleLocationChange}
                 />
             </div>
@@ -99,13 +115,13 @@ export function FilterSidebar() {
           <div className='flex items-center gap-4 mt-2'>
             <Slider
               id="price-range"
-              max={500}
-              step={10}
-              value={[maxPrice]}
+              max={5000}
+              step={100}
+              defaultValue={[maxPrice]}
               onValueChange={handlePriceChange}
             />
             <div className="relative">
-                <span className="absolute inset-y-0 left-3 flex items-center text-muted-foreground">$</span>
+                <span className="absolute inset-y-0 left-3 flex items-center text-muted-foreground">₹</span>
                 <Input value={maxPrice} readOnly className="w-24 pl-6" />
             </div>
           </div>
