@@ -1,24 +1,36 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { listingCategories, ListingCategory } from '@/lib/types';
+import { listingCategories, ListingCategory, User } from '@/lib/types';
 import { X, MapPin } from 'lucide-react';
-import { dummyUsers } from '@/lib/dummy-data';
 import { Checkbox } from '@/components/ui/checkbox';
-
-const colleges = [...new Set(dummyUsers.map(u => u.college))];
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, Query } from 'firebase/firestore';
 
 export function FilterSidebar() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const firestore = useFirestore();
+
+  const usersQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return collection(firestore, 'users') as Query<User>;
+  }, [firestore]);
+
+  const { data: usersData } = useCollection<User>(usersQuery);
+
+  const colleges = useMemo(() => {
+    if (!usersData) return [];
+    return [...new Set(usersData.map(u => u.college))];
+  }, [usersData]);
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
@@ -109,7 +121,7 @@ export function FilterSidebar() {
 
         <div>
           <Label className="font-semibold">College</Label>
-          <div className="mt-2 space-y-1">
+          <div className="mt-2 space-y-1 max-h-48 overflow-y-auto">
             {colleges.map(college => (
                 <div key={college} className="flex items-center space-x-2">
                     <Checkbox 

@@ -11,7 +11,7 @@ export const dummyUsers: User[] = [
     college: 'Stanford University',
     bio: 'CS student passionate about AI and building cool projects. Looking to collaborate on web apps.',
     skills: ['React', 'Node.js', 'Python', 'Machine Learning'],
-    profilePictureUrl: findImage('user-1'),
+    profilePictureUrl: findImage('user-1') || "https://picsum.photos/seed/user1/200",
     role: 'student',
     following: ['user_2'],
     followers: ['user_3'],
@@ -23,7 +23,7 @@ export const dummyUsers: User[] = [
     college: 'New York University',
     bio: 'Fine Arts major with a knack for digital illustration and design. Selling custom portraits and prints.',
     skills: ['Digital Art', 'Adobe Illustrator', 'Graphic Design'],
-    profilePictureUrl: findImage('user-2'),
+    profilePictureUrl: findImage('user-2') || "https://picsum.photos/seed/user2/200",
     role: 'student',
     following: [],
     followers: ['user_1', 'user_3'],
@@ -35,7 +35,7 @@ export const dummyUsers: User[] = [
     college: 'Massachusetts Institute of Technology',
     bio: 'Mechanical engineering student who loves to tinker and build things. Check out my 3D printed gadgets!',
     skills: ['CAD', '3D Printing', 'Prototyping'],
-    profilePictureUrl: findImage('user-3'),
+    profilePictureUrl: findImage('user-3') || "https://picsum.photos/seed/user3/200",
     role: 'student',
     following: ['user_1', 'user_2'],
     followers: [],
@@ -51,7 +51,6 @@ export const dummyListings: Listing[] = [
     price: 85.00,
     mediaUrl: findImage('listing-1'),
     sellerId: 'user_2',
-    seller: dummyUsers[1],
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
   },
   {
@@ -62,7 +61,6 @@ export const dummyListings: Listing[] = [
     price: 15.50,
     mediaUrl: findImage('listing-2'),
     sellerId: 'user_1',
-    seller: dummyUsers[0],
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
   },
   {
@@ -73,7 +71,6 @@ export const dummyListings: Listing[] = [
     price: 40.00,
     mediaUrl: findImage('listing-3'),
     sellerId: 'user_1',
-    seller: dummyUsers[0],
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1).toISOString(),
   },
   {
@@ -84,7 +81,6 @@ export const dummyListings: Listing[] = [
     price: 0.00,
     mediaUrl: findImage('listing-4'),
     sellerId: 'user_1',
-    seller: dummyUsers[0],
     createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
   },
   {
@@ -95,7 +91,6 @@ export const dummyListings: Listing[] = [
     price: 25.00,
     mediaUrl: findImage('listing-5'),
     sellerId: 'user_2',
-    seller: dummyUsers[1],
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10).toISOString(),
   },
   {
@@ -106,7 +101,6 @@ export const dummyListings: Listing[] = [
     price: 0,
     mediaUrl: findImage('listing-8'),
     sellerId: 'user_3',
-    seller: dummyUsers[2],
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString(),
   },
   {
@@ -117,7 +111,6 @@ export const dummyListings: Listing[] = [
     price: 30,
     mediaUrl: findImage('listing-7'),
     sellerId: 'user_1',
-    seller: dummyUsers[0],
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 6).toISOString(),
   },
 ];
