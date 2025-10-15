@@ -2,7 +2,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -34,7 +34,7 @@ export function FilterSidebar() {
   );
   
   const selectedCategory = searchParams.get('category') || 'All';
-  const maxPrice = Number(searchParams.get('maxPrice')) || 500;
+  const maxPrice = Number(searchParams.get('maxPrice')) || 5000;
   const initialLocation = searchParams.get('location') || '';
 
   const [locationInput, setLocationInput] = useState(initialLocation);
@@ -54,14 +54,12 @@ export function FilterSidebar() {
   };
   
   // Effect to update URL when debounced location changes
-  const [isInitialMount, setIsInitialMount] = useState(true);
-  useCallback(() => {
-    if (isInitialMount) {
-      setIsInitialMount(false);
-      return;
+  useEffect(() => {
+    // We don't want to trigger a route change on the initial render.
+    if (debouncedLocation !== initialLocation) {
+        router.push(pathname + '?' + createQueryString([{ name: 'location', value: debouncedLocation }]));
     }
-    router.push(pathname + '?' + createQueryString([{ name: 'location', value: debouncedLocation }]));
-  }, [debouncedLocation, router, pathname, createQueryString, isInitialMount])();
+  }, [debouncedLocation]);
 
 
   const clearFilters = () => {
