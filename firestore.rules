@@ -1,58 +1,75 @@
 /**
- * @file Nexus Student Marketplace - Firestore Security Rules
- * @core_philosophy This ruleset enforces a strict user-ownership model for user profiles and allows public read access to listings while restricting write access to the owner. Transactions, reviews, and messages are publicly accessible.
- * @data_structure
- *  - `/users/{userId}`: Stores user profiles.  Access is restricted to the user themselves.
- *  - `/listings/{listingId}`: Stores marketplace listings. Public read, owner-only write.
- *  - `/transactions/{transactionId}`: Stores transaction data.
- *  - `/reviews/{reviewId}`: Stores reviews data.
- *  - `/messages/{messageId}`: Stores messages data.
- * @key_security_decisions
- *  - User listing is disallowed.
- *  - Public read access is granted for listings.
- *  - Owner-only write access is enforced for listings.
- * @denormalization_for_authorization
- *  - Listings store the `sellerId` to avoid needing to read the UserProfile for authorization.
+ * @fileoverview Firestore Security Rules for Nexus Student Marketplace.
+ *
+ * Core Philosophy:
+ * This ruleset enforces a user-ownership model for user profiles and listings,
+ * with public read access for listings. Transactions, reviews, and messages are accessible
+ * with authorization checks.
+ *
+ * Data Structure:
+ * - /users/{userId}: Stores user profiles, accessible only to the user themselves.
+ * - /listings/{listingId}: Stores listings, publicly readable but owner-writable based on sellerId.
+ * - /transactions/{transactionId}: Stores transaction data, only accessible with authorization.
+ * - /reviews/{reviewId}: Stores reviews, only accessible with authorization.
+ * - /messages/{messageId}: Stores chat messages, only accessible with authorization.
+ *
+ * Key Security Decisions:
+ * - User profiles are strictly private and only accessible to the owning user.
+ * - Listings are publicly readable to facilitate discovery but can only be created, updated, or deleted by the seller.
+ * - Transactions and reviews are only accessible with authorization.
+ * - Listing is denormalized with 'sellerId' to avoid having to look up UserProfile when querying Listings.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Controls access to user profiles.
+     * @description Controls access to user profile documents.
      * @path /users/{userId}
-     * @allow (get) Authenticated user can read their own profile.
-     * @allow (create) Authenticated user can create their own profile if the userId matches their auth UID.
-     * @allow (update) Authenticated user can update their own profile if the userId matches their auth UID.
-     * @allow (delete) Authenticated user can delete their own profile if the userId matches their auth UID.
-     * @deny (get) Authenticated user cannot read another user's profile.
-     * @deny (create) Authenticated user cannot create a profile with a userId that does not match their auth UID.
-     * @deny (update) Authenticated user cannot update another user's profile.
-     * @deny (delete) Authenticated user cannot delete another user's profile.
-     * @principle Enforces document ownership for all operations.
+     * @allow (read, write) User with matching {userId} can access their profile.
+     * @deny (read, write) User tries to access another user's profile.
+     * @principle Enforces document ownership for user profiles.
      */
     match /users/{userId} {
-      allow get: if isOwner(userId);
+      // function to check if the user is signed in
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      // function to check if the user is the owner
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+      allow get: if isSignedIn() && isOwner(userId);
       allow list: if false;
-      allow create: if isOwner(userId) && request.resource.data.email == request.auth.token.email;
-      allow update: if isOwner(userId) && (request.resource.data.email == resource.data.email);
-      allow delete: if isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isOwner(userId);
+      allow delete: if isSignedIn() && isOwner(userId);
     }
 
     /**
-     * @description Controls access to marketplace listings.
+     * @description Controls access to listing documents.
      * @path /listings/{listingId}
-     * @allow (get) Any user can read any listing.
-     * @allow (list) Any user can list listings.
-     * @allow (create) Authenticated user can create a listing if the sellerId matches their auth UID.
-     * @allow (update) Authenticated user can update a listing if they are the seller.
-     * @allow (delete) Authenticated user can delete a listing if they are the seller.
-     * @deny (create) Authenticated user cannot create a listing with a sellerId that does not match their auth UID.
-     * @deny (update) Authenticated user cannot update a listing if they are not the seller.
-     * @deny (delete) Authenticated user cannot delete a listing if they are not the seller.
-     * @principle Allows public read access but enforces document ownership for writes.
+     * @allow (read) Any user can read listings.
+     * @allow (create) Any authenticated user can create a listing with their sellerId.
+     * @allow (update, delete) Only the seller can modify or delete their listing.
+     * @deny (create) User attempts to create a listing with incorrect sellerId.
+     * @deny (update, delete) Non-seller attempts to modify or delete a listing.
+     * @principle Public read access with owner-only writes, validates sellerId on create/update.
      */
     match /listings/{listingId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      function isOwner(sellerId) {
+        return request.auth.uid == sellerId;
+      }
+
+      function isExistingOwner(sellerId) {
+        return isOwner(sellerId) && resource != null;
+      }
+
       allow get, list: if true;
       allow create: if isSignedIn() && request.resource.data.sellerId == request.auth.uid;
       allow update: if isSignedIn() && isExistingOwner(resource.data.sellerId);
@@ -60,70 +77,84 @@ service cloud.firestore {
     }
 
     /**
-     * @description Controls access to transactions.
+     * @description Controls access to transaction documents.
      * @path /transactions/{transactionId}
-     * @allow (get) Any user can read any transaction.
-     * @allow (list) Any user can list transactions.
-     * @allow (create) Any authenticated user can create a transaction.
-     *  // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @allow update: if false;  // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @allow delete: if false;  // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @principle Open access for all operations.
+     * @allow (create) Any authenticated user can create transaction.
+     * @allow (read, update, delete) Only the buyer or seller can access transactions.
+     * @deny (read, update, delete) User is not either buyer or seller.
      */
     match /transactions/{transactionId} {
-      allow get, list: if true;
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      function isBuyerOrSeller(buyerId, sellerId) {
+        return request.auth.uid == buyerId || request.auth.uid == sellerId;
+      }
+
+      function isExistingBuyerOrSeller(buyerId, sellerId) {
+          return isBuyerOrSeller(buyerId, sellerId) && resource != null;
+      }
+
+      allow get: if isSignedIn() && isExistingBuyerOrSeller(resource.data.buyerId, resource.data.sellerId);
+      allow list: if false;
       allow create: if isSignedIn();
-      allow update: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
-      allow delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
+      allow update: if isSignedIn() && isExistingBuyerOrSeller(resource.data.buyerId, resource.data.sellerId);
+      allow delete: if isSignedIn() && isExistingBuyerOrSeller(resource.data.buyerId, resource.data.sellerId);
     }
 
     /**
-     * @description Controls access to reviews.
+     * @description Controls access to review documents.
      * @path /reviews/{reviewId}
-     * @allow (get) Any user can read any review.
-     * @allow (list) Any user can list reviews.
      * @allow (create) Any authenticated user can create a review.
-     *  // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @allow update: if false;  // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @allow delete: if false;  // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @principle Open access for all operations.
+     * @allow (read, update, delete) Only the reviewer can access review.
+     * @deny (read, update, delete) User is not the reviewer.
      */
     match /reviews/{reviewId} {
-      allow get, list: if true;
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      function isReviewer(reviewerId) {
+        return request.auth.uid == reviewerId;
+      }
+
+      function isExistingReviewer(reviewerId) {
+        return isReviewer(reviewerId) && resource != null;
+      }
+
+      allow get: if isSignedIn() && isExistingReviewer(resource.data.reviewerId);
+      allow list: if false;
       allow create: if isSignedIn();
-      allow update: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
-      allow delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
+      allow update: if isSignedIn() && isExistingReviewer(resource.data.reviewerId);
+      allow delete: if isSignedIn() && isExistingReviewer(resource.data.reviewerId);
     }
 
     /**
-     * @description Controls access to chat messages.
+     * @description Controls access to chat message documents.
      * @path /messages/{messageId}
-     * @allow (get) Any user can read any message.
-     * @allow (list) Any user can list messages.
      * @allow (create) Any authenticated user can create a message.
-     *  // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @allow update: if false;  // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @allow delete: if false;  // TODO: Add owner validation once the schema is updated with an ownership field.
-     * @principle Open access for all operations.
+     * @allow (read, update, delete) Only the sender or receiver can access messages.
+     * @deny (read, update, delete) User is not either sender or receiver.
      */
     match /messages/{messageId} {
-      allow get, list: if true;
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      function isSenderOrReceiver(senderId, receiverId) {
+        return request.auth.uid == senderId || request.auth.uid == receiverId;
+      }
+
+      function isExistingSenderOrReceiver(senderId, receiverId) {
+          return isSenderOrReceiver(senderId, receiverId) && resource != null;
+      }
+
+      allow get: if isSignedIn() && isExistingSenderOrReceiver(resource.data.senderId, resource.data.receiverId);
+      allow list: if false;
       allow create: if isSignedIn();
-      allow update: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
-      allow delete: if false; // TODO: Add owner validation once the schema is updated with an ownership field.
+      allow update: if isSignedIn() && isExistingSenderOrReceiver(resource.data.senderId, resource.data.receiverId);
+      allow delete: if isSignedIn() && isExistingSenderOrReceiver(resource.data.senderId, resource.data.receiverId);
     }
-  }
-
-  // Helper functions
-  function isSignedIn() {
-    return request.auth != null;
-  }
-
-  function isOwner(userId) {
-    return request.auth.uid == userId;
-  }
-
-    function isExistingOwner(userId) {
-    return isOwner(userId) && resource != null;
   }
 }
