@@ -67,19 +67,20 @@ export default function MarketplacePage({ searchParams }: {
     return listingsData || [];
   }, [listingsData, isLoadingListings])
 
+  const { q, category, maxPrice, location } = searchParams;
 
   const filteredListings = useMemo(() => {
     const source = (!isLoadingListings && (!listingsData || listingsData.length === 0)) ? getDummyListingsWithSellers() : listingsData;
     if (!source) return [];
     
     return source.filter(listing => {
-        const queryMatch = searchParams.q ? listing.title.toLowerCase().includes(searchParams.q.toLowerCase()) || listing.description.toLowerCase().includes(searchParams.q.toLowerCase()) : true;
-        const categoryMatch = searchParams.category && searchParams.category !== 'All' ? listing.category === searchParams.category : true;
-        const priceMatch = searchParams.maxPrice ? listing.price <= Number(searchParams.maxPrice) : true;
-        const locationMatch = searchParams.location ? listing.college.toLowerCase().includes(searchParams.location.toLowerCase()) : true;
+        const queryMatch = q ? listing.title.toLowerCase().includes(q.toLowerCase()) || listing.description.toLowerCase().includes(q.toLowerCase()) : true;
+        const categoryMatch = category && category !== 'All' ? listing.category === category : true;
+        const priceMatch = maxPrice ? listing.price <= Number(maxPrice) : true;
+        const locationMatch = location ? listing.college.toLowerCase().includes(location.toLowerCase()) : true;
         return queryMatch && categoryMatch && priceMatch && locationMatch;
     });
-  }, [listingsData, isLoadingListings, searchParams]);
+  }, [listingsData, isLoadingListings, q, category, maxPrice, location]);
 
 
   const renderListings = () => {
