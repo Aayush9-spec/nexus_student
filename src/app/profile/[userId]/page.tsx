@@ -47,20 +47,18 @@ export default function ProfilePage({ params }: { params: { userId: string } }) 
     )
   }
 
-  if (!user && !isLoading) {
+  if (!user) {
     notFound();
   }
   
-  const isOwnProfile = currentUser?.id === user?.id;
+  const isOwnProfile = currentUser?.id === user.id;
 
   return (
     <div className="container mx-auto py-8">
-        {user && (
-            <div className="space-y-8">
-                <ProfileHeader user={user} isOwnProfile={isOwnProfile} />
-                <UserListings userId={user.id} />
-            </div>
-        )}
+        <div className="space-y-8">
+            <ProfileHeader user={user} isOwnProfile={isOwnProfile} />
+            <UserListings userId={user.id} />
+        </div>
     </div>
   );
 }
