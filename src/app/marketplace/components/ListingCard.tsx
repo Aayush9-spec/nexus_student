@@ -38,7 +38,7 @@ export function ListingCard({ listing, className }: ListingCardProps) {
           <Badge variant="secondary" className="mb-2">{listing.category}</Badge>
           <CardTitle className="text-lg font-bold line-clamp-2 mb-2">{listing.title}</CardTitle>
           <p className="text-xl font-headline font-semibold text-primary">
-            {listing.price > 0 ? `$${listing.price.toFixed(2)}` : 'Free'}
+            {listing.price > 0 ? `₹${listing.price.toFixed(2)}` : 'Free'}
           </p>
         </CardContent>
         <CardFooter className="p-4 pt-0">

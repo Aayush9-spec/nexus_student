@@ -138,13 +138,13 @@ export function SignupForm() {
             </FormItem>
             
             <FormField control={form.control} name="name" render={({ field }) => (
-                <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Alex Johnson" {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Priya Sharma" {...field} /></FormControl><FormMessage /></FormItem>
             )}/>
             <FormField control={form.control} name="email" render={({ field }) => (
-                <FormItem><FormLabel>Email</FormLabel><FormControl><Input placeholder="alex.johnson@example.com" {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>Email</FormLabel><FormControl><Input placeholder="priya.sharma@example.com" {...field} /></FormControl><FormMessage /></FormItem>
             )}/>
             <FormField control={form.control} name="college" render={({ field }) => (
-                <FormItem><FormLabel>College/University</FormLabel><FormControl><Input placeholder="Stanford University" {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>College/University</FormLabel><FormControl><Input placeholder="IIT Bombay" {...field} /></FormControl><FormMessage /></FormItem>
             )}/>
             <FormField control={form.control} name="password" render={({ field }) => (
                 <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" {...field} /></FormControl><FormMessage /></FormItem>

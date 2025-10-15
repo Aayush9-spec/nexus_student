@@ -13,7 +13,6 @@ import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import type { Listing, User, Review as ReviewType } from '@/lib/types';
 import { useMemo } from 'react';
-import { dummyUsers } from '@/lib/dummy-data'; // This will be removed
 
 export default function ListingDetailPage({ params }: { params: { listingId: string } }) {
   const firestore = useFirestore();
@@ -98,7 +97,7 @@ export default function ListingDetailPage({ params }: { params: { listingId: str
           <Card className="sticky top-24">
             <CardHeader>
               <CardTitle className="text-4xl font-headline text-primary">
-                {listing.price > 0 ? `$${listing.price.toFixed(2)}` : 'Free'}
+                {listing.price > 0 ? `₹${listing.price.toFixed(2)}` : 'Free'}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">

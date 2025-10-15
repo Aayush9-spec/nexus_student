@@ -141,7 +141,7 @@ export function NewListingForm() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField control={form.control} name="title" render={({ field }) => (
-              <FormItem><FormLabel>Listing Title</FormLabel><FormControl><Input placeholder="e.g., Hand-Painted Custom Sneakers" {...field} /></FormControl><FormMessage /></FormItem>
+              <FormItem><FormLabel>Listing Title</FormLabel><FormControl><Input placeholder="e.g., Used Engineering Mechanics Textbook" {...field} /></FormControl><FormMessage /></FormItem>
             )} />
             
             <FormField control={form.control} name="description" render={({ field }) => (
@@ -174,7 +174,7 @@ export function NewListingForm() {
             </div>
 
             <FormField control={form.control} name="price" render={({ field }) => (
-              <FormItem><FormLabel>Price</FormLabel><FormControl><div className="relative"><span className="absolute inset-y-0 left-3 flex items-center text-muted-foreground">$</span><Input type="number" step="0.01" placeholder="25.00" className="pl-6" {...field} /></div></FormControl><FormMessage /></FormItem>
+              <FormItem><FormLabel>Price</FormLabel><FormControl><div className="relative"><span className="absolute inset-y-0 left-3 flex items-center text-muted-foreground">₹</span><Input type="number" step="10" placeholder="500" className="pl-6" {...field} /></div></FormControl><FormMessage /></FormItem>
             )} />
 
             <FormField control={form.control} name="media" render={({ field }) => (

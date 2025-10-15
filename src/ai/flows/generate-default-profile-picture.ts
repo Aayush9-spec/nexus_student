@@ -34,7 +34,7 @@ const prompt = ai.definePrompt({
   name: 'generateDefaultProfilePicturePrompt',
   input: {schema: GenerateDefaultProfilePictureInputSchema},
   output: {schema: GenerateDefaultProfilePictureOutputSchema},
-  prompt: `Generate a professional-looking profile picture for a student named {{{studentName}}}. The image should be suitable for use on a student marketplace platform, conveying a sense of trustworthiness and competence. The image MUST be returned as a data URI, in PNG format with Base64 encoding, and MUST be less than 1MB in size.
+  prompt: `Generate a professional-looking profile picture for an Indian student named {{{studentName}}}. The image should be suitable for use on a student marketplace platform, conveying a sense of trustworthiness and competence. The image MUST be returned as a data URI, in PNG format with Base64 encoding, and MUST be less than 1MB in size.
 `,
 });
 
@@ -46,7 +46,7 @@ const generateDefaultProfilePictureFlow = ai.defineFlow(
   },
   async input => {
     const {media} = await ai.generate({
-      prompt: `Generate a professional-looking profile picture for a student named ${input.studentName}. The image should be suitable for use on a student marketplace platform, conveying a sense of trustworthiness and competence. The image MUST be returned as a data URI, in PNG format with Base64 encoding, and MUST be less than 1MB in size.`,
+      prompt: `Generate a professional-looking profile picture for an Indian student named ${input.studentName}. The image should be suitable for use on a student marketplace platform, conveying a sense of trustworthiness and competence. The image MUST be returned as a data URI, in PNG format with Base64 encoding, and MUST be less than 1MB in size.`,
       model: 'googleai/imagen-4.0-fast-generate-001',
     });
     return {profilePictureDataUri: media.url!};
