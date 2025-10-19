@@ -6,7 +6,7 @@ export type User = {
   email: string;
   college: string;
   verified: boolean;
-  profilePictureUrl: string; // Renamed from profileImageURL to match frontend
+  profilePictureUrl: string; 
   bio?: string;
   rating?: number;
   totalSales?: number;
@@ -15,8 +15,6 @@ export type User = {
   badges?: string[];
   nexusCredits?: number;
   createdAt: string; // ISO string
-  // Fields from old schema, kept for compatibility during transition
-  role?: 'student' | 'admin';
   skills?: string[];
   following?: string[];
   followers?: string[];
@@ -102,7 +100,7 @@ export type CommunityFeedPost = {
 };
 
 export type Report = {
-    id: string;
+    id:string;
     reportId: string;
     reportedUserId: string;
     reason: string;
@@ -122,5 +120,3 @@ export type Transaction = {
     paymentMethod: string;
     createdAt: string; // ISO string
 };
-
-    

@@ -33,12 +33,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (userDoc.exists()) {
           setUser({ id: userDoc.id, ...userDoc.data() } as User);
         } else {
-           // If doc doesn't exist, create it. This can happen with Google Sign-In.
-          const newUser: Omit<User, 'id'> = {
+          // If doc doesn't exist, create it. This happens with Google Sign-In or if a user was created before the profile page existed.
+          const newUser: User = {
+            id: firebaseUser.uid,
             uid: firebaseUser.uid,
             name: firebaseUser.displayName || 'Nexus User',
             email: firebaseUser.email!,
-            college: 'Unknown', // Or try to infer from email
+            college: 'Unknown',
             verified: firebaseUser.emailVerified,
             profilePictureUrl: firebaseUser.photoURL || '',
             createdAt: new Date().toISOString(),
@@ -49,9 +50,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             xpPoints: 0,
             badges: [],
             nexusCredits: 0,
+            skills: [],
+            following: [],
+            followers: [],
           };
           await setDoc(userDocRef, newUser);
-          setUser({ id: firebaseUser.uid, ...newUser } as User);
+          setUser(newUser);
         }
       } else {
         setUser(null);
@@ -93,6 +97,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       xpPoints: 0,
       badges: [],
       nexusCredits: 0,
+      skills: [],
+      followers: [],
+      following: [],
     };
     
     await setDoc(doc(firestore, "users", firebaseUser.uid), newUser);
@@ -108,5 +115,3 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
-
-    
