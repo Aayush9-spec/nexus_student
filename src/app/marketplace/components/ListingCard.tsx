@@ -1,4 +1,3 @@
-
 import Image from 'next/image';
 import Link from 'next/link';
 import type { Listing, User } from '@/lib/types';
@@ -63,5 +62,3 @@ export function ListingCard({ listing, className }: ListingCardProps) {
     </Link>
   );
 }
-
-    

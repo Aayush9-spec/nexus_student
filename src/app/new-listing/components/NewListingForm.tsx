@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -122,6 +121,7 @@ export function NewListingForm() {
         sellerId: user.id,
         college: user.college, // Assuming user object has college info
         createdAt: serverTimestamp(),
+        status: 'active',
       });
 
       toast({
@@ -199,7 +199,7 @@ export function NewListingForm() {
                         </div>
                     </FormControl>
                     {preview && (
-                        <div className="relative w-full aspect-video rounded-md overflow-hidden mt-2">
+                        <div className="relative w-full aspect-video rounded-md overflow-hidden mt-2 bg-muted">
                             {preview.type === 'image' ? (
                                 <Image src={preview.url} alt="Preview" fill className="object-cover" />
                             ) : (
@@ -221,5 +221,3 @@ export function NewListingForm() {
     </Card>
   );
 }
-
-    

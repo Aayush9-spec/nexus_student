@@ -1,4 +1,3 @@
-
 export type User = {
   id: string; // This is the uid from Firebase Auth
   uid: string;
@@ -26,21 +25,19 @@ export const listingCategories: ListingCategory[] = ['Physical Products', 'Digit
 
 export type Listing = {
   id: string; // This is the documentId from Firestore
-  listingId: string;
   sellerId: string;
   seller?: User;
   title: string;
   description: string;
   category: ListingCategory;
   price: number;
-  images: string[];
-  mediaUrl: string; // Keep for compatibility
-  mediaType: 'image' | 'video'; // Keep for compatibility
+  mediaUrl: string;
+  mediaType: 'image' | 'video';
   isFeatured?: boolean;
   status: 'active' | 'sold' | 'deleted';
   views?: number;
   likes?: number;
-  college: string; // Renamed from collegeTag
+  college: string;
   createdAt: string; // ISO string
 };
 
@@ -121,5 +118,3 @@ export type Transaction = {
     paymentMethod: string;
     createdAt: string; // ISO string
 };
-
-    

@@ -1,9 +1,8 @@
-
 "use client";
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, useSearchParams } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -102,7 +101,7 @@ function AiAnalysisCard({ listing }: { listing: Listing }) {
   )
 }
 
-export default function ListingDetailPage({ params }: { params: { userId: string, listingId: string } }) {
+export default function ListingDetailPage({ params }: { params: { listingId: string } }) {
   const firestore = useFirestore();
   const { user: currentUser } = useAuth();
   const resolvedParams = use(Promise.resolve(params));
@@ -276,5 +275,3 @@ export default function ListingDetailPage({ params }: { params: { userId: string
     </div>
   );
 }
-
-    
