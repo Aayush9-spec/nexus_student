@@ -45,7 +45,7 @@ export function AddReviewForm({ listingId }: { listingId: string }) {
       await addDoc(collection(firestore, 'reviews'), {
         ...values,
         listingId,
-        reviewerId: user.id,
+        reviewerId: user.uid, // Use uid to match other refs
         createdAt: serverTimestamp(),
       });
       toast({ title: 'Review submitted!', description: 'Thank you for your feedback.' });
@@ -121,3 +121,5 @@ export function AddReviewForm({ listingId }: { listingId: string }) {
     </Card>
   );
 }
+
+    

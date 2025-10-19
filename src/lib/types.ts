@@ -64,10 +64,11 @@ export type Message = {
 export type Review = {
     id: string;
     reviewId: string;
-    listingId: string; // Added this to link review to a listing
+    listingId: string;
     sellerId: string;
     buyerId: string;
-    reviewer?: User; // From previous schema
+    reviewerId: string;
+    reviewer?: User;
     rating: number; // 1-5
     comment: string;
     createdAt: string; // ISO string
@@ -120,3 +121,5 @@ export type Transaction = {
     paymentMethod: string;
     createdAt: string; // ISO string
 };
+
+    

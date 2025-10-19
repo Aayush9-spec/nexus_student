@@ -4,7 +4,7 @@ import type { Review as ReviewType, User } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Star } from 'lucide-react';
-import { doc, DocumentReference } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
 import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 
 function getInitials(name?: string) {
@@ -67,3 +67,5 @@ export function ReviewCard({ review }: { review: ReviewType }) {
     </Card>
   );
 }
+
+    
