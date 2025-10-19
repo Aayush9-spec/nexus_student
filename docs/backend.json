@@ -1,154 +1,454 @@
 {
   "entities": {
     "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
-      "description": "Represents a user profile in the Nexus 2.0 student marketplace.",
       "type": "object",
+      "description": "Represents a user profile in the student marketplace.",
       "properties": {
-        "uid": { "type": "string", "description": "Unique identifier for the user." },
-        "name": { "type": "string", "description": "The user's full name." },
-        "email": { "type": "string", "format": "email", "description": "The user's email address." },
-        "college": { "type": "string", "description": "The college or university the user attends." },
-        "verified": { "type": "boolean", "description": "Indicates if the user is verified." },
-        "profileImageURL": { "type": "string", "format": "uri", "description": "URL of the user's profile picture." },
-        "bio": { "type": "string", "description": "A short biography of the user." },
-        "rating": { "type": "number", "description": "The user's average seller rating." },
-        "totalSales": { "type": "number", "description": "Total number of sales made by the user." },
-        "sellerLevel": { "type": "string", "description": "Gamified seller level (e.g., Bronze, Silver, Gold)." },
-        "xpPoints": { "type": "number", "description": "Experience points for gamification." },
-        "badges": { "type": "array", "items": { "type": "string" }, "description": "Array of badges earned by the user." },
-        "nexusCredits": { "type": "number", "description": "In-app currency balance." },
-        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp of account creation." }
+        "uid": {
+          "type": "string",
+          "description": "Unique identifier for the user. (Primary Key)"
+        },
+        "name": {
+          "type": "string",
+          "description": "The user's full name."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address.",
+          "format": "email"
+        },
+        "college": {
+          "type": "string",
+          "description": "The college the user attends."
+        },
+        "verified": {
+          "type": "boolean",
+          "description": "Indicates whether the user's account is verified."
+        },
+        "profileImageURL": {
+          "type": "string",
+          "description": "URL of the user's profile image."
+        },
+        "bio": {
+          "type": "string",
+          "description": "A short biography of the user."
+        },
+        "rating": {
+          "type": "number",
+          "description": "The user's average rating as a seller."
+        },
+        "totalSales": {
+          "type": "number",
+          "description": "The total number of sales the user has made."
+        },
+        "sellerLevel": {
+          "type": "string",
+          "description": "The user's seller level (e.g., Bronze, Silver, Gold)."
+        },
+        "xpPoints": {
+          "type": "number",
+          "description": "The user's experience points in the gamification system."
+        },
+        "badges": {
+          "type": "array",
+          "description": "List of badges the user has earned.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "nexusCredits": {
+          "type": "number",
+          "description": "The number of Nexus Credits the user has."
+        }
       },
-      "required": ["uid", "name", "email", "college", "verified", "createdAt"]
+      "required": [
+        "uid",
+        "name",
+        "email",
+        "college",
+        "verified",
+        "profileImageURL",
+        "bio",
+        "rating",
+        "totalSales",
+        "sellerLevel",
+        "xpPoints",
+        "badges",
+        "nexusCredits"
+      ]
     },
     "Listing": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Listing",
-      "description": "Represents a product or service listing on the marketplace.",
       "type": "object",
+      "description": "Represents a listing (product or service) in the marketplace.",
       "properties": {
-        "listingId": { "type": "string", "description": "Unique identifier for the listing." },
-        "sellerId": { "type": "string", "description": "The UID of the user who created the listing." },
-        "title": { "type": "string", "description": "The title of the listing." },
-        "description": { "type": "string", "description": "A detailed description of the listing." },
-        "category": { "type": "string", "description": "The category of the listing." },
-        "price": { "type": "number", "description": "The price of the item." },
-        "images": { "type": "array", "items": { "type": "string", "format": "uri" }, "description": "An array of image URLs for the listing." },
-        "isFeatured": { "type": "boolean", "description": "Indicates if the listing is featured by an admin." },
-        "status": { "type": "string", "enum": ["active", "sold", "deleted"], "description": "The status of the listing." },
-        "views": { "type": "number", "description": "Number of times the listing has been viewed." },
-        "likes": { "type": "number", "description": "Number of likes the listing has received." },
-        "collegeTag": { "type": "string", "description": "The college this listing is associated with." },
-        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp of listing creation." }
+        "listingId": {
+          "type": "string",
+          "description": "Unique identifier for the listing. (Primary Key)"
+        },
+        "sellerId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Listing) The ID of the user who created the listing."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the listing."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the listing."
+        },
+        "category": {
+          "type": "string",
+          "description": "The category of the listing (e.g., Physical Products, Digital Products, Services, Community/Collaboration)."
+        },
+        "price": {
+          "type": "number",
+          "description": "The price of the listing."
+        },
+        "images": {
+          "type": "array",
+          "description": "URLs of the images associated with the listing.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "isFeatured": {
+          "type": "boolean",
+          "description": "Indicates whether the listing is featured."
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the listing (e.g., Active, Sold, Inactive)."
+        },
+        "views": {
+          "type": "number",
+          "description": "The number of views the listing has received."
+        },
+        "likes": {
+          "type": "number",
+          "description": "The number of likes the listing has received."
+        },
+        "collegeTag": {
+          "type": "string",
+          "description": "The college tag associated with the listing (if applicable)."
+        }
       },
-      "required": ["listingId", "sellerId", "title", "description", "category", "price", "images", "status", "collegeTag", "createdAt"]
+      "required": [
+        "listingId",
+        "sellerId",
+        "title",
+        "description",
+        "category",
+        "price",
+        "images",
+        "isFeatured",
+        "status",
+        "views",
+        "likes",
+        "collegeTag"
+      ]
     },
     "Chat": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Chat",
-      "description": "Represents a single conversation between two or more users.",
       "type": "object",
+      "description": "Represents a chat conversation between two or more users.",
       "properties": {
-        "chatId": { "type": "string", "description": "Unique identifier for the chat." },
-        "participants": { "type": "array", "items": { "type": "string" }, "description": "An array of user UIDs participating in the chat." },
-        "lastMessage": { "type": "string", "description": "The content of the last message sent in the chat." },
-        "updatedAt": { "type": "string", "format": "date-time", "description": "Timestamp of the last message." }
+        "chatId": {
+          "type": "string",
+          "description": "Unique identifier for the chat. (Primary Key)"
+        },
+        "participants": {
+          "type": "array",
+          "description": "An array of user IDs participating in the chat.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "lastMessage": {
+          "type": "string",
+          "description": "The text of the last message sent in the chat."
+        }
       },
-      "required": ["chatId", "participants", "updatedAt"]
+      "required": [
+        "chatId",
+        "participants",
+        "lastMessage"
+      ]
     },
     "Message": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Message",
-      "description": "Represents a single message within a chat.",
       "type": "object",
+      "description": "Represents a single message within a chat conversation.",
       "properties": {
-        "messageId": { "type": "string", "description": "Unique identifier for the message." },
-        "senderId": { "type": "string", "description": "The UID of the user who sent the message." },
-        "text": { "type": "string", "description": "The content of the message." },
-        "timestamp": { "type": "string", "format": "date-time", "description": "Timestamp when the message was sent." },
-        "isRead": { "type": "boolean", "description": "Indicates if the message has been read." }
+        "messageId": {
+          "type": "string",
+          "description": "Unique identifier for the message. (Primary Key)"
+        },
+        "chatId": {
+          "type": "string",
+          "description": "Reference to Chat. (Relationship: Chat 1:N Message) The ID of the chat this message belongs to."
+        },
+        "senderId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Message) The ID of the user who sent the message."
+        },
+        "text": {
+          "type": "string",
+          "description": "The content of the message."
+        },
+        "isRead": {
+          "type": "boolean",
+          "description": "Indicates whether the message has been read by the recipient."
+        }
       },
-      "required": ["messageId", "senderId", "text", "timestamp"]
+      "required": [
+        "messageId",
+        "chatId",
+        "senderId",
+        "text",
+        "isRead"
+      ]
     },
     "Review": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Review",
-      "description": "Represents a review left by a buyer for a seller.",
       "type": "object",
+      "description": "Represents a review of a seller by a buyer.",
       "properties": {
-        "reviewId": { "type": "string", "description": "Unique identifier for the review." },
-        "sellerId": { "type": "string", "description": "The UID of the seller being reviewed." },
-        "buyerId": { "type": "string", "description": "The UID of the buyer who wrote the review." },
-        "rating": { "type": "number", "description": "The rating given (e.g., 1-5 stars)." },
-        "comment": { "type": "string", "description": "The text comment of the review." },
-        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp when the review was created." }
+        "reviewId": {
+          "type": "string",
+          "description": "Unique identifier for the review. (Primary Key)"
+        },
+        "sellerId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Review) The ID of the seller being reviewed."
+        },
+        "buyerId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Review) The ID of the buyer who wrote the review."
+        },
+        "rating": {
+          "type": "number",
+          "description": "The rating given by the buyer (e.g., 1-5 stars)."
+        },
+        "comment": {
+          "type": "string",
+          "description": "The text of the review comment."
+        }
       },
-      "required": ["reviewId", "sellerId", "buyerId", "rating", "createdAt"]
+      "required": [
+        "reviewId",
+        "sellerId",
+        "buyerId",
+        "rating",
+        "comment"
+      ]
     },
     "Event": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Event",
-      "description": "Represents a campus event.",
       "type": "object",
+      "description": "Represents an event organized by a student or organization.",
       "properties": {
-        "eventId": { "type": "string", "description": "Unique identifier for the event." },
-        "organizerId": { "type": "string", "description": "The UID of the user or group organizing the event." },
-        "title": { "type": "string", "description": "The title of the event." },
-        "description": { "type": "string", "description": "A detailed description of the event." },
-        "location": { "type": "string", "description": "The location of the event." },
-        "price": { "type": "number", "description": "The price of a ticket." },
-        "ticketsAvailable": { "type": "number", "description": "Number of available tickets." },
-        "images": { "type": "array", "items": { "type": "string", "format": "uri" }, "description": "Image URLs for the event." },
-        "startDate": { "type": "string", "format": "date-time", "description": "The start date and time of the event." },
-        "endDate": { "type": "string", "format": "date-time", "description": "The end date and time of the event." }
+        "eventId": {
+          "type": "string",
+          "description": "Unique identifier for the event. (Primary Key)"
+        },
+        "organizerId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Event) The ID of the user who organized the event."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the event."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the event."
+        },
+        "location": {
+          "type": "string",
+          "description": "The location of the event."
+        },
+        "price": {
+          "type": "number",
+          "description": "The price of the event tickets."
+        },
+        "ticketsAvailable": {
+          "type": "number",
+          "description": "The number of tickets available for the event."
+        },
+        "images": {
+          "type": "array",
+          "description": "URLs of the images associated with the event.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "startDate": {
+          "type": "string",
+          "description": "The start date and time of the event.",
+          "format": "date-time"
+        },
+        "endDate": {
+          "type": "string",
+          "description": "The end date and time of the event.",
+          "format": "date-time"
+        }
       },
-      "required": ["eventId", "organizerId", "title", "startDate", "endDate"]
+      "required": [
+        "eventId",
+        "organizerId",
+        "title",
+        "description",
+        "location",
+        "price",
+        "ticketsAvailable",
+        "images",
+        "startDate",
+        "endDate"
+      ]
     },
-    "CommunityFeedPost": {
-      "title": "CommunityFeedPost",
-      "description": "Represents a post in the community feed.",
+    "CommunityFeed": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "CommunityFeed",
       "type": "object",
+      "description": "Represents a post in the community feed.",
       "properties": {
-        "postId": { "type": "string", "description": "Unique identifier for the post." },
-        "authorId": { "type": "string", "description": "The UID of the user who created the post." },
-        "content": { "type": "string", "description": "The text content of the post." },
-        "images": { "type": "array", "items": { "type": "string", "format": "uri" }, "description": "Image URLs associated with the post." },
-        "upvotes": { "type": "number", "description": "Number of upvotes the post has received." },
-        "commentsCount": { "type": "number", "description": "Number of comments on the post." },
-        "collegeTag": { "type": "string", "description": "The college this post is associated with." },
-        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp of post creation." }
+        "postId": {
+          "type": "string",
+          "description": "Unique identifier for the post. (Primary Key)"
+        },
+        "authorId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N CommunityFeed) The ID of the user who created the post."
+        },
+        "content": {
+          "type": "string",
+          "description": "The content of the post."
+        },
+        "images": {
+          "type": "array",
+          "description": "URLs of the images associated with the post.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "upvotes": {
+          "type": "number",
+          "description": "The number of upvotes the post has received."
+        },
+        "commentsCount": {
+          "type": "number",
+          "description": "The number of comments the post has received."
+        },
+        "collegeTag": {
+          "type": "string",
+          "description": "The college tag associated with the post (if applicable)."
+        }
       },
-      "required": ["postId", "authorId", "content", "collegeTag", "createdAt"]
+      "required": [
+        "postId",
+        "authorId",
+        "content",
+        "images",
+        "upvotes",
+        "commentsCount",
+        "collegeTag"
+      ]
     },
     "Report": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Report",
-      "description": "Represents a report filed against a user or listing.",
       "type": "object",
+      "description": "Represents a report of a user or content.",
       "properties": {
-        "reportId": { "type": "string", "description": "Unique identifier for the report." },
-        "reportedUserId": { "type": "string", "description": "The UID of the user being reported." },
-        "reason": { "type": "string", "description": "The reason for the report." },
-        "description": { "type": "string", "description": "A detailed description of the issue." },
-        "status": { "type": "string", "enum": ["pending", "reviewed", "resolved"], "description": "The status of the report." },
-        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp when the report was filed." }
+        "reportId": {
+          "type": "string",
+          "description": "Unique identifier for the report. (Primary Key)"
+        },
+        "reportedUserId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Report) The ID of the user who was reported."
+        },
+        "reason": {
+          "type": "string",
+          "description": "The reason for the report."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the report."
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the report (e.g., Pending, Resolved)."
+        }
       },
-      "required": ["reportId", "reportedUserId", "reason", "status", "createdAt"]
+      "required": [
+        "reportId",
+        "reportedUserId",
+        "reason",
+        "description",
+        "status"
+      ]
     },
     "Transaction": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Transaction",
-      "description": "Represents a payment transaction.",
       "type": "object",
+      "description": "Represents a financial transaction between a buyer and a seller.",
       "properties": {
-        "transactionId": { "type": "string", "description": "Unique identifier for the transaction." },
-        "buyerId": { "type": "string", "description": "The UID of the buyer." },
-        "sellerId": { "type": "string", "description": "The UID of the seller." },
-        "listingId": { "type": "string", "description": "The ID of the listing involved in the transaction." },
-        "amount": { "type": "number", "description": "The transaction amount." },
-        "status": { "type": "string", "enum": ["pending", "completed", "failed", "refunded"], "description": "The status of the transaction." },
-        "paymentMethod": { "type": "string", "description": "The payment method used (e.g., 'razorpay', 'stripe', 'nexus_credits')." },
-        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp of the transaction." }
+        "transactionId": {
+          "type": "string",
+          "description": "Unique identifier for the transaction. (Primary Key)"
+        },
+        "buyerId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Transaction) The ID of the buyer in the transaction."
+        },
+        "sellerId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Transaction) The ID of the seller in the transaction."
+        },
+        "listingId": {
+          "type": "string",
+          "description": "Reference to Listing. (Relationship: Listing 1:N Transaction) The ID of the listing being purchased."
+        },
+        "amount": {
+          "type": "number",
+          "description": "The amount of the transaction."
+        },
+        "status": {
+          "type": "string",
+          "description": "The status of the transaction (e.g., Pending, Completed, Refunded)."
+        },
+        "paymentMethod": {
+          "type": "string",
+          "description": "The method of payment used for the transaction."
+        }
       },
-      "required": ["transactionId", "buyerId", "sellerId", "listingId", "amount", "status", "createdAt"]
+      "required": [
+        "transactionId",
+        "buyerId",
+        "sellerId",
+        "listingId",
+        "amount",
+        "status",
+        "paymentMethod"
+      ]
     }
   },
   "auth": {
-    "providers": ["password", "google.com"]
+    "providers": [
+      "password",
+      "anonymous"
+    ]
   },
   "firestore": {
     "structure": [
@@ -156,76 +456,167 @@
         "path": "/users/{userId}",
         "definition": {
           "entityName": "User",
-          "schema": { "$ref": "#/backend/entities/User" },
-          "description": "Stores individual user profiles."
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profiles. Uses path-based ownership for private data. The `userId` parameter corresponds to the user's UID.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            }
+          ]
         }
       },
       {
         "path": "/listings/{listingId}",
         "definition": {
           "entityName": "Listing",
-          "schema": { "$ref": "#/backend/entities/Listing" },
-          "description": "Stores all marketplace listings."
+          "schema": {
+            "$ref": "#/backend/entities/Listing"
+          },
+          "description": "Stores all listings. Includes `sellerId` for authorization independence. The `listingId` parameter is a unique identifier for each listing.",
+          "params": [
+            {
+              "name": "listingId",
+              "description": "The unique identifier of the listing."
+            }
+          ]
         }
       },
       {
         "path": "/chats/{chatId}",
         "definition": {
           "entityName": "Chat",
-          "schema": { "$ref": "#/backend/entities/Chat" },
-          "description": "Stores metadata for each chat conversation."
+          "schema": {
+            "$ref": "#/backend/entities/Chat"
+          },
+          "description": "Stores chat metadata, including participants. Includes the `participants` array for authorization. `chatId` is the unique identifier for each chat.",
+          "params": [
+            {
+              "name": "chatId",
+              "description": "The unique identifier of the chat."
+            }
+          ]
         }
       },
       {
         "path": "/chats/{chatId}/messages/{messageId}",
         "definition": {
           "entityName": "Message",
-          "schema": { "$ref": "#/backend/entities/Message" },
-          "description": "Subcollection storing messages for a specific chat."
+          "schema": {
+            "$ref": "#/backend/entities/Message"
+          },
+          "description": "Stores messages within a chat. `chatId` links to the parent chat, and `messageId` is unique within the chat.",
+          "params": [
+            {
+              "name": "chatId",
+              "description": "The unique identifier of the chat."
+            },
+            {
+              "name": "messageId",
+              "description": "The unique identifier of the message."
+            }
+          ]
         }
       },
       {
         "path": "/reviews/{reviewId}",
         "definition": {
           "entityName": "Review",
-          "schema": { "$ref": "#/backend/entities/Review" },
-          "description": "Stores all reviews."
+          "schema": {
+            "$ref": "#/backend/entities/Review"
+          },
+          "description": "Stores reviews for sellers. Includes `sellerId` and `buyerId` for authorization. `reviewId` is the unique identifier.",
+          "params": [
+            {
+              "name": "reviewId",
+              "description": "The unique identifier of the review."
+            }
+          ]
         }
       },
       {
         "path": "/events/{eventId}",
         "definition": {
           "entityName": "Event",
-          "schema": { "$ref": "#/backend/entities/Event" },
-          "description": "Stores all campus events."
+          "schema": {
+            "$ref": "#/backend/entities/Event"
+          },
+          "description": "Stores event information. Includes `organizerId` for authorization. `eventId` is the unique identifier.",
+          "params": [
+            {
+              "name": "eventId",
+              "description": "The unique identifier of the event."
+            }
+          ]
         }
       },
       {
-        "path": "/communityFeed/{postId}",
+        "path": "/community_feed/{postId}",
         "definition": {
-          "entityName": "CommunityFeedPost",
-          "schema": { "$ref": "#/backend/entities/CommunityFeedPost" },
-          "description": "Stores all posts for the community feed."
+          "entityName": "CommunityFeed",
+          "schema": {
+            "$ref": "#/backend/entities/CommunityFeed"
+          },
+          "description": "Stores community feed posts. Includes `authorId` and `collegeTag`. `postId` is the unique identifier.",
+          "params": [
+            {
+              "name": "postId",
+              "description": "The unique identifier of the community feed post."
+            }
+          ]
         }
       },
       {
         "path": "/reports/{reportId}",
         "definition": {
           "entityName": "Report",
-          "schema": { "$ref": "#/backend/entities/Report" },
-          "description": "Stores all user-filed reports."
+          "schema": {
+            "$ref": "#/backend/entities/Report"
+          },
+          "description": "Stores reports of users or content. `reportId` is the unique identifier.",
+          "params": [
+            {
+              "name": "reportId",
+              "description": "The unique identifier of the report."
+            }
+          ]
         }
       },
       {
         "path": "/transactions/{transactionId}",
         "definition": {
           "entityName": "Transaction",
-          "schema": { "$ref": "#/backend/entities/Transaction" },
-          "description": "Stores all payment transactions."
+          "schema": {
+            "$ref": "#/backend/entities/Transaction"
+          },
+          "description": "Stores transaction information. Includes `buyerId`, `sellerId`, and `listingId`. `transactionId` is the unique identifier.",
+          "params": [
+            {
+              "name": "transactionId",
+              "description": "The unique identifier of the transaction."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admin/{userId}",
+        "definition": {
+          "entityName": "roles_admin",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Collection to store admin roles. The existence of a document with the user's ID indicates admin privileges. Existence over content. Do not store any data other than the document ID, which is the user's UID.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user with admin privileges."
+            }
+          ]
         }
       }
-    ]
+    ],
+    "reasoning": "The Firestore structure is designed to ensure security, scalability, and debuggability, adhering to the core principles of Authorization Independence, Clarity of Intent, DBAC (Database-Based Access Control), and QAPs (Rules are not Filters). Authorization Independence is achieved through denormalization. For example, `Listings` include the `sellerId`, allowing rules to validate ownership without `get()` calls. The `Chats` collection utilizes a membership map within each document to explicitly define the participants, ensuring only authorized users can access chat data. Segregation is applied to differentiate user data and administrative data. Path-based ownership (`/users/{userId}/listings/{listingId}`) is preferred for user-owned resources, providing clear ownership and simplifying security rules. The membership map pattern in `chats` and the use of dedicated role collections (`/roles_admin/{uid}`) facilitates secure `list` operations. Global roles are managed via existence checks in dedicated collections."
   }
 }
-
-    
