@@ -33,8 +33,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (userDoc.exists()) {
           setUser({ id: userDoc.id, ...userDoc.data() } as User);
         } else {
-          // This case might happen if a user is created in Auth but their Firestore doc creation fails.
-           setUser(null);
+           // If doc doesn't exist, create it. This can happen with Google Sign-In.
+          const newUser: Omit<User, 'id'> = {
+            uid: firebaseUser.uid,
+            name: firebaseUser.displayName || 'Nexus User',
+            email: firebaseUser.email!,
+            college: 'Unknown', // Or try to infer from email
+            verified: firebaseUser.emailVerified,
+            profilePictureUrl: firebaseUser.photoURL || '',
+            createdAt: new Date().toISOString(),
+            bio: 'Welcome to Nexus 2.0!',
+            rating: 0,
+            totalSales: 0,
+            sellerLevel: 'Newbie',
+            xpPoints: 0,
+            badges: [],
+            nexusCredits: 0,
+          };
+          await setDoc(userDocRef, newUser);
+          setUser({ id: firebaseUser.uid, ...newUser } as User);
         }
       } else {
         setUser(null);
@@ -62,15 +79,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const firebaseUser = userCredential.user;
 
     const newUser: Omit<User, 'id'> = {
+      uid: firebaseUser.uid,
       name,
       email,
       college,
+      verified: false, // Email not verified on signup
       profilePictureUrl,
+      createdAt: new Date().toISOString(),
       bio: 'A new member of the Nexus community!',
-      skills: [],
-      following: [],
-      followers: [],
-      role: email === 'admin@nexus.com' ? 'admin' : 'student',
+      rating: 0,
+      totalSales: 0,
+      sellerLevel: 'Newbie',
+      xpPoints: 0,
+      badges: [],
+      nexusCredits: 0,
     };
     
     await setDoc(doc(firestore, "users", firebaseUser.uid), newUser);
@@ -86,3 +108,5 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
+
+    
