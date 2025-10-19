@@ -6,6 +6,7 @@ import { Auth, User as FirebaseAuthUser, createUserWithEmailAndPassword, signInW
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth as useFirebaseAuthHook, useFirestore } from '@/firebase';
 import type { User } from '@/lib/types';
+import { getStorage, ref, uploadString, getDownloadURL } from 'firebase/storage';
 
 interface AuthContextType {
   user: User | null;
@@ -76,11 +77,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await signOut(auth);
   };
 
-  const signup = async (name: string, email: string, pass: string, college: string, profilePictureUrl: string) => {
+  const signup = async (name: string, email: string, pass: string, college: string, profilePictureDataUri: string) => {
     if (!auth || !firestore) throw new Error("Firebase services are not available.");
     
     const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
     const firebaseUser = userCredential.user;
+
+    // Upload the profile picture to Firebase Storage
+    const storage = getStorage();
+    const storageRef = ref(storage, `profilePictures/${firebaseUser.uid}`);
+    const uploadResult = await uploadString(storageRef, profilePictureDataUri, 'data_url');
+    const profilePictureUrl = await getDownloadURL(uploadResult.ref);
 
     const newUser: Omit<User, 'id'> = {
       uid: firebaseUser.uid,
