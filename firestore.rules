@@ -54,8 +54,8 @@ service cloud.firestore {
       allow get: if isOwner(userId);
       allow list: if false; // Listing users is disallowed.
       allow create: if isOwner(userId);
-      allow update: if isExistingOwner(userId);
-      allow delete: if isExistingOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
     }
 
     /**
@@ -84,8 +84,8 @@ service cloud.firestore {
       allow get: if true;
       allow list: if true;
       allow create: if isSignedIn() && request.resource.data.sellerId == request.auth.uid;
-      allow update: if isSignedIn() && request.resource.data.sellerId == request.auth.uid;
-      allow delete: if isSignedIn() && resource.data.sellerId == request.auth.uid;
+      allow update: if isSignedIn() && request.auth.uid == resource.data.sellerId;
+      allow delete: if isSignedIn() && request.auth.uid == resource.data.sellerId;
     }
 
     /**
@@ -162,7 +162,7 @@ service cloud.firestore {
      * @allow (create) if request.auth.uid == request.resource.data.organizerId
      * @allow (update, delete) if request.auth.uid == resource.data.organizerId
      * @deny (create) if request.auth.uid != request.resource.data.organizerId
-     * @deny (update, delete) if request.auth.uid != resource.data.organizerId
+     * @deny (update, delete) if request.auth.uid != request.resource.data.organizerId
      * @principle Allows public read, enforces organizer ownership for writes, validates organizerId on create.
      */
     match /events/{eventId} {
@@ -181,8 +181,8 @@ service cloud.firestore {
       allow get: if true;
       allow list: if true;
       allow create: if isSignedIn() && request.resource.data.organizerId == request.auth.uid;
-      allow update: if isSignedIn() && resource.data.organizerId == request.auth.uid;
-      allow delete: if isSignedIn() && resource.data.organizerId == request.auth.uid;
+      allow update: if isSignedIn() && request.auth.uid == resource.data.organizerId;
+      allow delete: if isSignedIn() && request.auth.uid == resource.data.organizerId;
     }
 
     /**
@@ -192,7 +192,7 @@ service cloud.firestore {
      * @allow (create) if request.auth.uid == request.resource.data.authorId
      * @allow (update, delete) if request.auth.uid == resource.data.authorId
      * @deny (create) if request.auth.uid != request.resource.data.authorId
-     * @deny (update, delete) if request.auth.uid != resource.data.authorId
+     * @deny (update, delete) if request.auth.uid != request.resource.data.authorId
      * @principle Allows public read, enforces author ownership for writes, validates authorId on create.
      */
     match /community_feed/{postId} {
@@ -211,8 +211,8 @@ service cloud.firestore {
       allow get: if true;
       allow list: if true;
       allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
-      allow update: if isSignedIn() && resource.data.authorId == request.auth.uid;
-      allow delete: if isSignedIn() && resource.data.authorId == request.auth.uid;
+      allow update: if isSignedIn() && request.auth.uid == resource.data.authorId;
+      allow delete: if isSignedIn() && request.auth.uid == resource.data.authorId;
     }
 
     /**
@@ -266,7 +266,7 @@ service cloud.firestore {
         allow create: if isSignedIn() && request.auth.uid == userId;
 
         // Only admins can update or delete admin entries
-        allow update: if false;
+        allow update: if isAdmin();
         allow delete: if isAdmin();
     }
   }
