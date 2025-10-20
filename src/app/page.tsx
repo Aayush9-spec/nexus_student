@@ -13,7 +13,7 @@ import { useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase
 import { collection, query, limit, Query, doc } from 'firebase/firestore';
 import type { Listing, User } from '@/lib/types';
 import { useMemo } from 'react';
-import { dummyListings, dummyUsers } from '@/lib/dummy-data';
+import { Skeleton } from '@/components/ui/skeleton';
 
 function TrendingListingCard({ listing }: { listing: Listing }) {
     const firestore = useFirestore();
@@ -26,7 +26,7 @@ function TrendingListingCard({ listing }: { listing: Listing }) {
     const { data: seller, isLoading } = useDoc<User>(sellerRef);
 
     if (isLoading) {
-        return <div className="animate-pulse bg-muted rounded-lg h-80"></div>;
+        return <Skeleton className="h-full w-full rounded-lg" />;
     }
 
     const listingWithSeller = {
@@ -50,7 +50,7 @@ function FeaturedStudentCard({ user }: { user: User }) {
 
     return (
         <Link href={`/profile/${user.id}`}>
-            <Card className="hover:shadow-lg transition-shadow">
+            <Card className="hover:shadow-lg transition-shadow h-full">
                 <CardContent className="flex flex-col items-center text-center p-6">
                     <Avatar className="w-24 h-24 mb-4 border-4 border-accent">
                         <AvatarImage src={user.profilePictureUrl} alt={user.name} />
@@ -68,59 +68,35 @@ function FeaturedStudentCard({ user }: { user: User }) {
 function FeaturedStudentsSection() {
     const firestore = useFirestore();
     
-    const recentListingsQuery = useMemoFirebase(() => {
+    // Fetch users with recent activity, for now just grabbing first few from the collection
+    const usersQuery = useMemoFirebase(() => {
         if (!firestore) return null;
-        return query(collection(firestore, 'listings'), limit(10)) as Query<Listing>;
+        return query(collection(firestore, 'users'), limit(3)) as Query<User>;
     }, [firestore]);
 
-    const { data: listings, isLoading: isLoadingListings } = useCollection<Listing>(recentListingsQuery);
+    const { data: users, isLoading: isLoadingUsers } = useCollection<User>(usersQuery);
 
-    const uniqueSellerIds = useMemo(() => {
-        if (!isLoadingListings && (!listings || listings.length === 0)) {
-            return [...new Set(dummyListings.map(l => l.sellerId))].slice(0, 3);
-        }
-        if (!listings) return [];
-        const ids = listings.map(l => l.sellerId);
-        return [...new Set(ids)].slice(0, 3);
-    }, [listings, isLoadingListings]);
-
-    if (isLoadingListings) {
+    if (isLoadingUsers) {
         return (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(3)].map((_, i) => <div key={i} className="animate-pulse bg-card rounded-lg h-64"></div>)}
+                {[...Array(3)].map((_, i) => <Skeleton key={i} className="bg-card rounded-lg h-64" />)}
             </div>
         );
     }
     
-    if (uniqueSellerIds.length === 0 && !isLoadingListings) {
+    if (!users || users.length === 0) {
         return (
-             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {dummyUsers.slice(0,3).map(user => <FeaturedStudentCard key={user.id} user={user} />)}
+            <div className="text-center text-muted-foreground py-8 col-span-full">
+                <p>No featured students to show right now.</p>
             </div>
         )
     }
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {uniqueSellerIds.map(id => <FeaturedStudentLoader key={id} userId={id} />)}
+            {users.map(user => <FeaturedStudentCard key={user.id} user={user} />)}
         </div>
     );
-}
-
-function FeaturedStudentLoader({ userId }: { userId: string }) {
-    const firestore = useFirestore();
-    const userRef = useMemoFirebase(() => {
-        if (!firestore || !userId) return null;
-        return doc(firestore, 'users', userId);
-    }, [firestore, userId]);
-    
-    const { data: user, isLoading } = useDoc<User>(userRef);
-
-    if (isLoading || !user) {
-        return <div className="animate-pulse bg-card rounded-lg h-64"></div>;
-    }
-
-    return <FeaturedStudentCard user={user} />;
 }
 
 
@@ -134,10 +110,6 @@ export default function Home() {
   }, [firestore]);
 
   const { data: trendingListings, isLoading: trendingLoading } = useCollection<Listing>(trendingQuery);
-  
-  const listingsToDisplay = (!trendingLoading && (!trendingListings || trendingListings.length === 0))
-    ? dummyListings.slice(0, 4)
-    : trendingListings;
 
   return (
     <div className="flex flex-col">
@@ -176,20 +148,10 @@ export default function Home() {
             </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {trendingLoading && (!listingsToDisplay || listingsToDisplay.length === 0) ? (
-            [...Array(4)].map((_, i) => <div key={i} className="animate-pulse bg-muted rounded-lg h-80"></div>)
+          {trendingLoading ? (
+            [...Array(4)].map((_, i) => <Skeleton key={i} className="h-96 rounded-lg" />)
           ) : (
-            listingsToDisplay?.map((listing) => {
-              const listingWithSeller = {
-                ...listing,
-                seller: dummyUsers.find(u => u.id === listing.sellerId)
-              }
-              return (
-                 (!trendingListings || trendingListings.length === 0) 
-                  ? <ListingCard key={listing.id} listing={listingWithSeller} />
-                  : <TrendingListingCard key={listing.id} listing={listing} />
-              )
-            })
+            trendingListings?.map((listing) => <TrendingListingCard key={listing.id} listing={listing} />)
           )}
         </div>
       </section>

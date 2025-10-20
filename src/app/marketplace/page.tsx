@@ -3,15 +3,14 @@
 
 import { useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { collection, query, Query, doc } from 'firebase/firestore';
+import { collection, query, where, Query, doc } from 'firebase/firestore';
 import { useFirestore, useCollection, useDoc, useMemoFirebase } from '@/firebase';
 import type { Listing, User } from '@/lib/types';
 import { ListingGrid } from './components/ListingGrid';
 import { FilterSidebar } from './components/FilterSidebar';
 import { Suspense } from 'react';
 import { ListingCard } from './components/ListingCard';
-import { dummyListings, dummyUsers } from '@/lib/dummy-data';
-
+import { Skeleton } from '@/components/ui/skeleton';
 
 function ListingWithSeller({ listing }: { listing: Listing }) {
     const firestore = useFirestore();
@@ -24,7 +23,7 @@ function ListingWithSeller({ listing }: { listing: Listing }) {
     const { data: seller, isLoading } = useDoc<User>(sellerRef);
 
     if (isLoading) {
-        return <div className="animate-pulse bg-muted rounded-lg h-80"></div>;
+        return <Skeleton className="h-96 rounded-lg" />;
     }
 
     const listingWithSeller = {
@@ -40,87 +39,67 @@ export default function MarketplacePage() {
   const firestore = useFirestore();
   const searchParams = useSearchParams();
 
-  const listingsQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    let q: Query<Listing> = collection(firestore, 'listings') as Query<Listing>;
-    return q;
-  }, [firestore]);
-
-  const { data: listingsData, isLoading: isLoadingListings } = useCollection<Listing>(listingsQuery);
-  
-  const getDummyListingsWithSellers = () => {
-    return dummyListings.map(listing => ({
-      ...listing,
-      seller: dummyUsers.find(user => user.id === listing.sellerId)
-    }));
-  };
-  
-  const allListings = useMemo(() => {
-    if (!isLoadingListings && (!listingsData || listingsData.length === 0)) {
-        return getDummyListingsWithSellers();
-    }
-    return listingsData || [];
-  }, [listingsData, isLoadingListings])
-
   const q = searchParams.get('q');
   const category = searchParams.get('category');
   const maxPrice = searchParams.get('maxPrice');
   const location = searchParams.get('location');
 
+  const listingsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    
+    const constraints = [];
+    if (category && category !== 'All') {
+        constraints.push(where('category', '==', category));
+    }
+    if (maxPrice) {
+        constraints.push(where('price', '<=', Number(maxPrice)));
+    }
+     if (location) {
+        // Note: Firestore can't do partial string matches with inequalities.
+        // For a real app, a search service like Algolia is better.
+        // Here we will filter client-side.
+    }
+    
+    let q: Query<Listing> = query(collection(firestore, 'listings') as Query<Listing>, ...constraints);
+    return q;
+  }, [firestore, category, maxPrice]);
+
+  const { data: listingsData, isLoading: isLoadingListings } = useCollection<Listing>(listingsQuery);
+  
   const filteredListings = useMemo(() => {
-    const source = (!isLoadingListings && (!listingsData || listingsData.length === 0)) ? getDummyListingsWithSellers() : listingsData;
-    if (!source) return [];
+    if (!listingsData) return [];
     
-    return source.filter(listing => {
+    return listingsData.filter(listing => {
         const queryMatch = q ? listing.title.toLowerCase().includes(q.toLowerCase()) || listing.description.toLowerCase().includes(q.toLowerCase()) : true;
-        const categoryMatch = category && category !== 'All' ? listing.category === category : true;
-        const priceMatch = maxPrice ? listing.price <= Number(maxPrice) : true;
-        const locationMatch = location ? listing.college.toLowerCase().includes(location.toLowerCase()) : true;
-        return queryMatch && categoryMatch && priceMatch && locationMatch;
+        const locationMatch = location ? (listing.college || '').toLowerCase().includes(location.toLowerCase()) : true;
+        return queryMatch && locationMatch;
     });
-  }, [listingsData, isLoadingListings, q, category, maxPrice, location]);
-
-
-  const renderListings = () => {
-    if (isLoadingListings) {
-        return (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {[...Array(8)].map((_, i) => (
-                  <div key={i} className="animate-pulse bg-muted rounded-lg h-80"></div>
-                ))}
-            </div>
-        );
-    }
-
-    if (!listingsData || listingsData.length === 0) {
-        // Show filtered dummy data if live data is empty
-        return <ListingGrid listings={filteredListings} isLoading={false} />;
-    }
-    
-    // Show live listings
-    return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredListings.map(listing => <ListingWithSeller key={listing.id} listing={listing} />)}
-        </div>
-    );
-  };
+  }, [listingsData, q, location]);
 
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        <aside className="lg:col-span-1">
-          <div className="sticky top-20">
-            <Suspense fallback={<div>Loading filters...</div>}>
+    <Suspense fallback={<div className="container mx-auto py-8">Loading...</div>}>
+      <div className="container mx-auto py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <aside className="lg:col-span-1">
+            <div className="sticky top-20">
               <FilterSidebar />
-            </Suspense>
-          </div>
-        </aside>
-        <main className="lg:col-span-3">
-          <h1 className="text-3xl font-bold font-headline mb-6">Explore the Marketplace</h1>
-           {renderListings()}
-        </main>
+            </div>
+          </aside>
+          <main className="lg:col-span-3">
+            <h1 className="text-3xl font-bold font-headline mb-6">Explore the Marketplace</h1>
+            {isLoadingListings ? (
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[...Array(9)].map((_, i) => <Skeleton key={i} className="h-96 rounded-lg" />)}
+                </div>
+            ) : (
+                <ListingGrid listings={filteredListings.map(l => ({ ...l, seller: undefined }))} isLoading={false}>
+                    {filteredListings.map(listing => <ListingWithSeller key={listing.id} listing={listing} />)}
+                </ListingGrid>
+            )}
+          </main>
+        </div>
       </div>
-    </div>
+    </Suspense>
   );
 }
