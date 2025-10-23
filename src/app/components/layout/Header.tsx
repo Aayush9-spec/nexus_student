@@ -18,6 +18,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/app/components/ThemeToggle";
+import { SeedDatabaseButton } from "../SeedDatabaseButton";
 
 export function Header() {
   const { user, logout, loading } = useAuth();
@@ -25,6 +26,7 @@ export function Header() {
   const searchParams = useSearchParams();
 
   const getInitials = (name: string) => {
+    if (!name) return '';
     const names = name.split(' ');
     if (names.length > 1) {
       return `${names[0][0]}${names[names.length - 1][0]}`;
@@ -90,6 +92,7 @@ export function Header() {
          <Link href="/new-listing" className="hidden md:inline-flex">
           <Button>New Listing</Button>
         </Link>
+        <SeedDatabaseButton />
         <ThemeToggle />
         {loading ? (
           <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
