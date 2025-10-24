@@ -59,7 +59,7 @@ export function SignupForm() {
         toast({ title: "Profile picture generated!", description: "Looking good!" });
       }
     } catch (error) {
-      toast({ variant: "destructive", title: "Generation Failed", description: "Could not generate image. Please try again." });
+      toast({ variant: "destructive", title: "Generation Failed", description: "Could not generate image. This may be due to API limitations." });
     } finally {
       setIsGenerating(false);
     }
@@ -84,13 +84,9 @@ export function SignupForm() {
     try {
         let finalProfilePicUrl = values.profilePictureUrl;
         if (!finalProfilePicUrl) {
-            toast({ title: "Generating a profile picture for you..." });
-            const result = await generateDefaultProfilePicture({ studentName: values.name });
-            finalProfilePicUrl = result.profilePictureDataUri;
-        }
-
-        if (!finalProfilePicUrl) {
-            throw new Error("Could not set a profile picture.");
+            // Fallback to a default placeholder if no image is uploaded or generated.
+            toast({ title: "Setting a default profile picture..." });
+            finalProfilePicUrl = "https://picsum.photos/seed/defaultuser/200";
         }
 
         await signup(values.name, values.email, values.password, values.college, finalProfilePicUrl);
