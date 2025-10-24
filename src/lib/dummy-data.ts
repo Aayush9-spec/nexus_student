@@ -1,3 +1,4 @@
+
 import type { User, Listing } from '@/lib/types';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
@@ -17,6 +18,12 @@ export const dummyUsers: User[] = [
     following: ['user_2'],
     followers: ['user_3'],
     createdAt: new Date().toISOString(),
+    rating: 4.8,
+    totalSales: 15,
+    sellerLevel: 'Gold',
+    xpPoints: 1250,
+    badges: ['Top Seller', 'Quick Responder'],
+    nexusCredits: 50,
   },
   {
     id: 'user_2',
@@ -31,6 +38,12 @@ export const dummyUsers: User[] = [
     following: [],
     followers: ['user_1', 'user_3'],
     createdAt: new Date().toISOString(),
+    rating: 4.9,
+    totalSales: 25,
+    sellerLevel: 'Platinum',
+    xpPoints: 2100,
+    badges: ['Creative Pro', 'Community Helper'],
+    nexusCredits: 120,
   },
   {
     id: 'user_3',
@@ -45,6 +58,12 @@ export const dummyUsers: User[] = [
     following: ['user_1', 'user_2'],
     followers: [],
     createdAt: new Date().toISOString(),
+    rating: 4.7,
+    totalSales: 30,
+    sellerLevel: 'Gold',
+    xpPoints: 1800,
+    badges: ['Bookworm', 'Top Reviewer'],
+    nexusCredits: 75,
   },
 ];
 
