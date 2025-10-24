@@ -5,11 +5,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, LogIn } from 'lucide-react';
 import { ListingCard } from './marketplace/components/ListingCard';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Card, CardContent } from '@/components/ui/card';
-import { useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useCollection, useFirestore, useMemoFirebase, useDoc, useUser } from '@/firebase';
 import { collection, query, limit, Query, doc } from 'firebase/firestore';
 import type { Listing, User } from '@/lib/types';
 import { useMemo, useState, useEffect } from 'react';
@@ -80,79 +80,85 @@ function FeaturedStudentCard({ user }: { user: User }) {
     );
 }
 
-function FeaturedStudentsSection() {
+function AuthenticatedHomepageContent() {
     const firestore = useFirestore();
-    
+
+    // Featured Students
     const usersQuery = useMemoFirebase(() => {
         if (!firestore) return null;
         return query(collection(firestore, 'users'), limit(3)) as Query<User>;
     }, [firestore]);
-
     const { data: users, isLoading: isLoadingUsers } = useCollection<User>(usersQuery);
 
-    if (isLoadingUsers) {
-        return (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(3)].map((_, i) => <Skeleton key={i} className="bg-card rounded-lg h-64" />)}
-            </div>
-        );
-    }
+    // Trending Listings
+    const trendingQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, 'listings'), limit(4)) as Query<Listing>;
+    }, [firestore]);
+    const { data: trendingListings, isLoading: trendingLoading } = useCollection<Listing>(trendingQuery);
     
-    if (!users || users.length === 0) {
-        return (
-            <div className="text-center text-muted-foreground py-8 col-span-full">
-                <p>No featured students to show right now.</p>
-            </div>
-        )
-    }
-
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {users.map(user => <FeaturedStudentCard key={user.id} user={user} />)}
-        </div>
-    );
+        <>
+            <section className="container mx-auto py-12 md:py-16">
+                <div className="flex justify-between items-center mb-8">
+                    <h2 className="text-2xl md:text-3xl font-headline font-bold">Trending Listings</h2>
+                    <Link href="/marketplace">
+                        <Button variant="outline">View All <ArrowRight className="ml-2 h-4 w-4" /></Button>
+                    </Link>
+                </div>
+                 {trendingLoading ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-96 rounded-lg" />)}
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {trendingListings?.map((listing) => <TrendingListingCard key={listing.id} listing={listing} />)}
+                    </div>
+                )}
+            </section>
+            
+            <section className="bg-muted py-12 md:py-16">
+                <div className="container mx-auto">
+                    <h2 className="text-2xl md:text-3xl font-headline font-bold text-center mb-8">Featured Students</h2>
+                    {isLoadingUsers ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {[...Array(3)].map((_, i) => <Skeleton key={i} className="bg-card rounded-lg h-64" />)}
+                        </div>
+                    ) : (
+                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {users?.map(user => <FeaturedStudentCard key={user.id} user={user} />)}
+                        </div>
+                    )}
+                </div>
+            </section>
+        </>
+    )
 }
 
-function TrendingListingsSection() {
-  const firestore = useFirestore();
-
-  const trendingQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return query(collection(firestore, 'listings'), limit(4)) as Query<Listing>;
-  }, [firestore]);
-
-  const { data: trendingListings, isLoading: trendingLoading } = useCollection<Listing>(trendingQuery);
-
-    if (trendingLoading) {
-        return (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-96 rounded-lg" />)}
-            </div>
-        );
-    }
-
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      {trendingListings?.map((listing) => <TrendingListingCard key={listing.id} listing={listing} />)}
-    </div>
-  );
+function UnauthenticatedHomepageContent() {
+    return (
+        <section className="container mx-auto py-12 md:py-16">
+            <Card className="text-center p-8 md:p-12">
+                <CardHeader>
+                    <CardTitle className="text-2xl md:text-3xl font-headline">Welcome to Nexus!</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-lg text-muted-foreground mb-6">Log in to see trending listings and featured students from your community.</p>
+                    <Link href="/login">
+                        <Button size="lg">
+                            <LogIn className="mr-2 h-5 w-5" /> Login to Continue
+                        </Button>
+                    </Link>
+                </CardContent>
+            </Card>
+        </section>
+    );
 }
 
 
 export default function Home() {
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-image');
-  
-  const trendingSkeleton = (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-96 rounded-lg" />)}
-    </div>
-  );
-
-  const studentsSkeleton = (
-     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[...Array(3)].map((_, i) => <Skeleton key={i} className="bg-card rounded-lg h-64" />)}
-    </div>
-  )
+  const { user, isUserLoading } = useUser();
   
   return (
     <div className="flex flex-col">
@@ -183,26 +189,17 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="container mx-auto py-12 md:py-16">
-        <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-headline font-bold">Trending Listings</h2>
-            <Link href="/marketplace">
-                <Button variant="outline">View All <ArrowRight className="ml-2 h-4 w-4" /></Button>
-            </Link>
-        </div>
-        <ClientOnly fallback={trendingSkeleton}>
-          <TrendingListingsSection />
-        </ClientOnly>
-      </section>
-
-      <section className="bg-muted py-12 md:py-16">
-        <div className="container mx-auto">
-            <h2 className="text-2xl md:text-3xl font-headline font-bold text-center mb-8">Featured Students</h2>
-            <ClientOnly fallback={studentsSkeleton}>
-              <FeaturedStudentsSection />
-            </ClientOnly>
-        </div>
-      </section>
+      <ClientOnly>
+        {isUserLoading ? (
+            <div className="container mx-auto py-12 md:py-16">
+                <Skeleton className="h-64 w-full" />
+            </div>
+        ) : user ? (
+            <AuthenticatedHomepageContent />
+        ) : (
+            <UnauthenticatedHomepageContent />
+        )}
+      </ClientOnly>
     </div>
   );
 }
