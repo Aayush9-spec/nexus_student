@@ -23,7 +23,13 @@ function ClientOnly({ children }: { children: React.ReactNode }) {
     }, []);
 
     if (!hasMounted) {
-        return null;
+        return (
+            <div className="container mx-auto py-12 md:py-16">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-96 rounded-lg" />)}
+                </div>
+            </div>
+        );
     }
 
     return <>{children}</>;
@@ -83,7 +89,6 @@ function FeaturedStudentCard({ user }: { user: User }) {
 function FeaturedStudentsSection() {
     const firestore = useFirestore();
     
-    // Fetch users with recent activity, for now just grabbing first few from the collection
     const usersQuery = useMemoFirebase(() => {
         if (!firestore) return null;
         return query(collection(firestore, 'users'), limit(3)) as Query<User>;
@@ -195,3 +200,4 @@ export default function Home() {
     </div>
   );
 }
+
