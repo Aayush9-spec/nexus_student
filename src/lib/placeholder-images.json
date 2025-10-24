@@ -21,13 +21,13 @@
     {
       "id": "listing-gate-notes",
       "description": "Digital notes for exam preparation",
-      "imageUrl": "https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzdHVkeSUyMG5vdGVzfGVufDB8fHx8MTc1OTg2OTEzNXww&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzdHVkeSUyMG5vdGVzfGVufDB8fHx8MTc1OTg2OTEzNXww&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "study notes"
     },
     {
       "id": "listing-fest-design",
       "description": "Colorful graphic design poster for a college festival",
-      "imageUrl": "https://images.unsplash.com/photo-1719650932791-ba89aac31011?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxjb2xsZWdlJTIwZmVzdGl2YWx8ZW58MHx8fHwxNzYwOTUzMjQyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1719650932791-ba89aac31011?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxjb2xsZWdlJTIwZmVzdGl2YWx8ZW58MHx8fHwxNzYwOTUzMjQyfDA&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "college festival"
     },
     {
@@ -81,8 +81,26 @@
     {
       "id": "hero-image",
       "description": "A group of diverse Indian students collaborating",
-      "imageUrl": "https://images.unsplash.com/photo-1663576139896-f1e9b9537634?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxJbmRpYW4lMjBzdHVkZW50c3xlbnwwfHx8fDE3NjA5NTMwMjh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1663576139896-f1e9b9537634?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxJbmRpYW4lMjBzdHVkZW50c3xlbnwwfHx8fDE3NjA5NTMwMjh8MA&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "Indian students"
+    },
+    {
+      "id": "listing-table-lamp",
+      "description": "A modern LED table lamp on a desk",
+      "imageUrl": "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx0YWJsZSUyMGxhbXB8ZW58MHx8fHwxNzYxMDQwNzMzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "table lamp"
+    },
+    {
+      "id": "listing-drawing-tutoring",
+      "description": "A person sketching with pencils",
+      "imageUrl": "https://images.unsplash.com/photo-1599658880115-a22a3683c3e8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxkcmF3aW5nJTIwdHV0b3Jpbmd8ZW58MHx8fHwxNzYxMDQwNzMzfDA&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageHint": "drawing tutoring"
+    },
+    {
+      "id": "listing-classic-books",
+      "description": "A stack of classic literature books",
+      "imageUrl": "https://images.unsplash.com/photo-1544947950-fa07a98d237f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjbGFzc2ljJTIwYm9va3N8ZW58MHx8fHwxNzYxMDQwNzMzfDA&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageHint": "classic books"
     }
   ]
 }
