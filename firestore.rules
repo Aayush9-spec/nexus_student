@@ -1,226 +1,211 @@
 /**
- * @fileoverview Firestore Security Rules for the Student Marketplace.
+ * @fileoverview Firestore Security Rules for the student marketplace application.
  *
  * Core Philosophy:
- * This ruleset prioritizes a strict authorization model based on user ownership and explicit shared access.
- * All writes are protected by identity checks, and reads are restricted to authorized users.
+ * This ruleset prioritizes secure data access by enforcing strict ownership and role-based access control.
+ * It leverages denormalization to avoid costly `get()` calls and simplify authorization checks.
  *
  * Data Structure:
- * - /users/{userId}: Stores user profiles, accessible only to the user themselves.
- * - /listings/{listingId}: Stores listings, with owner-only write access.
- * - /chats/{chatId}: Stores chat metadata. Access is controlled by a `participants` array.
- * - /chats/{chatId}/messages/{messageId}: Stores messages within chats. Access is controlled by the parent chat's `participants` array.
- * - /reviews/{reviewId}: Stores reviews, writable by the buyer, readable by all.
- * - /events/{eventId}: Stores event data, writable by the organizer, readable by all.
- * - /community_feed/{postId}: Stores community feed posts, writable by the author, readable by all.
- * - /reports/{reportId}: Stores reports, only writable, not readable by users.
- * - /transactions/{transactionId}: Stores transaction data, not readable or writable by users.
- * - /roles_admin/{userId}: Stores admin roles. Existence implies admin privileges.
+ * - `/users/{userId}`: Stores user profiles. Each user can only access their own profile.
+ * - `/listings/{listingId}`: Stores listings. Anyone can read listings, but only the seller can modify them.
+ * - `/chats/{chatId}`: Stores chat metadata. Only participants can access a chat.
+ * - `/chats/{chatId}/messages/{messageId}`: Stores messages within a chat. Only chat participants can access messages.
+ * - `/reviews/{reviewId}`: Stores reviews. No specific access control is enforced beyond authentication for writes.
+ * - `/events/{eventId}`: Stores events. Anyone can read events, but only the organizer can modify them.
+ * - `/community_feed/{postId}`: Stores community feed posts. Anyone can read posts, but only the author can modify them.
+ * - `/reports/{reportId}`: Stores reports. No specific access control is enforced beyond authentication for writes.
+ * - `/transactions/{transactionId}`: Stores transaction data. No specific access control is enforced beyond authentication for writes.
+ * - `/roles_admin/{userId}`: Stores admin roles. The existence of a document with the user's ID indicates admin privileges.
  *
  * Key Security Decisions:
- * - User listing is disabled to protect user privacy.
- * - Public read access is granted to the listings, events, and community feed collections.
- * - The `roles_admin` collection manages global admin privileges.
+ * - **Ownership Enforcement**: Most write operations are restricted to the owner of the data.
+ * - **Public Read Access**: Some collections (e.g., `/listings`, `/events`, `/community_feed`) allow public read access.
+ * - **Chat Access Control**: Chat access is controlled by a membership list within the chat document.
+ * - **Admin Roles**: Admin roles are managed through a dedicated collection.
+ * - **No User Listing**: Listing all users is not allowed to prevent scraping.
  *
  * Denormalization for Authorization:
- * - Listings store the `sellerId` to avoid `get()` calls for ownership checks.
- * - Chats store a `participants` array for efficient access control.
+ * - Listings store the `sellerId` to allow ownership checks without additional reads.
+ * - Chats store the `participants` list to authorize access to the chat and its messages.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Checks if the request is authenticated.
-     */
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    /**
-     * @description Checks if the authenticated user is the owner of the resource.
-     */
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
-
-    /**
-     * @description Checks if the authenticated user is the owner of the existing resource.
-     */
-    function isExistingOwner(userId) {
-      return isOwner(userId) && resource != null;
-    }
-
-    /**
-     * @description Checks if the authenticated user is a participant in the chat.
-     */
-    function isChatParticipant(participantIds) {
-        return isSignedIn() && participantIds.hasAny([request.auth.uid]);
-    }
-
-    /**
-     * @description Checks if the user has admin privileges.
-     * @details This function checks for the existence of a document in the `/roles_admin/{userId}` collection with the user's UID as the document ID.
-     */
-    function isAdmin() {
-      return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-    }
-    
-    /**
-     * @description Rules for the /users/{userId} collection.
+     * @description Enforces user-only access to user profiles.
      * @path /users/{userId}
-     * @allow (create) - If the user's UID matches the userId in the path.
-     * @allow (get, update, delete) - If the user's UID matches the userId in the path.
-     * @deny (create) - If the user's UID does not match the userId in the path.
-     * @deny (get, update, delete) - If the user's UID does not match the userId in the path.
-     * @principle Enforces document ownership for writes.
+     * @allow (read,write) User with ID 'user123' can read and write their own profile.
+     * @deny (read,write) User with ID 'user456' cannot read or write 'user123's profile.
+     * @principle Enforces document ownership for all operations.
      */
     match /users/{userId} {
-      allow get: if isOwner(userId);
-      allow list: if false; // Prevent listing all users
-
-      allow create: if isOwner(userId) && request.resource.data.uid == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.uid == resource.data.uid;
-      allow delete: if isExistingOwner(userId);
+      allow get: if isSignedIn() && isOwner(userId);
+      allow list: if false;
+      allow create: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isExistingOwner(userId);
+      allow delete: if isSignedIn() && isExistingOwner(userId);
     }
 
     /**
-     * @description Rules for the /listings/{listingId} collection.
+     * @description Allows public read access to listings, but restricts modifications to the seller.
      * @path /listings/{listingId}
-     * @allow (get, list) - Anyone can read listings.
-     * @allow (create) - Only authenticated users can create listings.
-     * @allow (update, delete) - Only the owner (seller) can update or delete listings.
-     * @deny (create) - If the authorId field does not match the user's UID.
-     * @deny (update, delete) - If the user is not the owner (seller).
-     * @principle Enforces document ownership for writes; allows public reads.
+     * @allow (read) Any user can read any listing.
+     * @allow (create) User with ID 'user123' can create a listing with `sellerId: 'user123'`.
+     * @allow (update,delete) User with ID 'user123' can update/delete a listing where `resource.data.sellerId == 'user123'`.
+     * @deny (create) User with ID 'user123' cannot create a listing with `sellerId: 'user456'`.
+     * @deny (update,delete) User with ID 'user456' cannot update/delete a listing where `resource.data.sellerId == 'user123'`.
+     * @principle Allows public read access with owner-only writes.
      */
     match /listings/{listingId} {
       allow get, list: if true;
       allow create: if isSignedIn() && request.resource.data.sellerId == request.auth.uid;
-      allow update: if isExistingOwner(resource.data.sellerId);
-      allow delete: if isExistingOwner(resource.data.sellerId);
+      allow update: if isSignedIn() && isExistingOwner(resource.data.sellerId);
+      allow delete: if isSignedIn() && isExistingOwner(resource.data.sellerId);
     }
 
     /**
-     * @description Rules for the /chats/{chatId} collection.
+     * @description Restricts access to chats to only the participants.
      * @path /chats/{chatId}
-     * @allow (get, list) - Only participants can read chats.
-     * @allow (create) - Only authenticated users can create chats.  The create request must include the request user's UID in the list of participants.
-     * @allow (update, delete) - Only participants can update or delete chats. The user must be an owner of the chat resource to delete it.
-     * @deny (create) - If the user is not included in the participants array.
-     * @deny (update, delete) - If the user is not a participant.
-     * @principle Enforces access control based on chat participation.
+     * @allow (read,write) User with ID 'user123' can read and write the chat if they are in the `participants` list.
+     * @deny (read,write) User with ID 'user456' cannot read or write the chat if they are not in the `participants` list.
+     * @principle Enforces shared access between a defined set of collaborators.
      */
     match /chats/{chatId} {
-      allow get, list: if isChatParticipant(resource.data.participants);
-      allow create: if isSignedIn() && request.resource.data.participants.hasAny([request.auth.uid]);
-      allow update: if isChatParticipant(resource.data.participants);
-      allow delete: if isChatParticipant(resource.data.participants);
+      allow get, list: if isSignedIn() && request.auth.uid in resource.data.participants;
+      allow create: if isSignedIn() && request.resource.data.participants.hasAll([request.auth.uid]);
+      allow update: if isSignedIn() && request.auth.uid in resource.data.participants;
+      allow delete: if false; // Deletion is disallowed for chats
     }
 
     /**
-     * @description Rules for the /chats/{chatId}/messages/{messageId} collection.
+     * @description Restricts access to messages within a chat to only the chat participants.
      * @path /chats/{chatId}/messages/{messageId}
-     * @allow (get, list) - Only participants of the parent chat can read messages.
-     * @allow (create) - Only participants of the parent chat can create messages.
-     * @allow (update, delete) - No user can update or delete messages, to preserve message history.
-     * @deny (create) - If the user is not a participant of the parent chat.
-     * @deny (update, delete) - Always deny message updates and deletes.
-     * @principle Enforces access control based on parent chat participation. Messages are immutable.
+     * @allow (read,write) User with ID 'user123' can read and write messages in the chat if they are a participant.
+     * @deny (read,write) User with ID 'user456' cannot read or write messages if they are not a participant.
+     * @principle Inherits access control from the parent chat document.
      */
     match /chats/{chatId}/messages/{messageId} {
-      allow get, list: if isChatParticipant(get(/databases/$(database)/documents/chats/$(chatId)).data.participants);
-      allow create: if isSignedIn() && isChatParticipant(get(/databases/$(database)/documents/chats/$(chatId)).data.participants) && request.resource.data.senderId == request.auth.uid;
-      allow update, delete: if false;
+      allow get, list: if isSignedIn() && get(/databases/$(database)/documents/chats/$(chatId)).data.participants.hasAny([request.auth.uid]);
+      allow create: if isSignedIn() && get(/databases/$(database)/documents/chats/$(chatId)).data.participants.hasAny([request.auth.uid]) && request.resource.data.chatId == chatId;
+      allow update: if isSignedIn() && get(/databases/$(database)/documents/chats/$(chatId)).data.participants.hasAny([request.auth.uid]);
+      allow delete: if false; // Deletion is disallowed for messages
     }
 
     /**
-     * @description Rules for the /reviews/{reviewId} collection.
+     * @description Allows authenticated users to create, update, and delete reviews. No ownership enforced.
      * @path /reviews/{reviewId}
-     * @allow (get, list) - Anyone can read reviews.
-     * @allow (create) - Only authenticated users can create reviews, and the buyerId must match the user's UID.
-     * @allow (update, delete) - No one can update or delete review, as they are immutable.
-     * @deny (create) - If the buyerId does not match the user's UID.
-     * @deny (update, delete) - Always deny review updates and deletes.
-     * @principle Allows public reads and owner-only writes, with immutability.
+     * @allow (create,update,delete) Any authenticated user can create, update, and delete reviews.
+     * @principle Requires authentication for writes, but does not enforce ownership.
      */
     match /reviews/{reviewId} {
       allow get, list: if true;
-      allow create: if isSignedIn() && request.resource.data.buyerId == request.auth.uid;
-      allow update, delete: if false;
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && resource != null;
+      allow delete: if isSignedIn() && resource != null;
     }
 
     /**
-     * @description Rules for the /events/{eventId} collection.
+     * @description Allows public read access to events, but restricts modifications to the organizer.
      * @path /events/{eventId}
-     * @allow (get, list) - Anyone can read event details.
-     * @allow (create) - Only authenticated users can create events. The organizerId field must match the user's UID.
-     * @allow (update, delete) - Only the event organizer can update or delete the event.
-     * @deny (create) - If the organizerId field does not match the user's UID.
-     * @deny (update, delete) - If the user is not the organizer.
-     * @principle Enforces document ownership for writes; allows public reads.
+     * @allow (read) Any user can read any event.
+     * @allow (create) User with ID 'user123' can create an event with `organizerId: 'user123'`.
+     * @allow (update,delete) User with ID 'user123' can update/delete an event where `resource.data.organizerId == 'user123'`.
+     * @deny (create) User with ID 'user123' cannot create an event with `organizerId: 'user456'`.
+     * @deny (update,delete) User with ID 'user456' cannot update/delete an event where `resource.data.organizerId == 'user123'`.
+     * @principle Allows public read access with owner-only writes.
      */
     match /events/{eventId} {
       allow get, list: if true;
       allow create: if isSignedIn() && request.resource.data.organizerId == request.auth.uid;
-      allow update: if isExistingOwner(resource.data.organizerId);
-      allow delete: if isExistingOwner(resource.data.organizerId);
+      allow update: if isSignedIn() && isExistingOwner(resource.data.organizerId);
+      allow delete: if isSignedIn() && isExistingOwner(resource.data.organizerId);
     }
 
     /**
-     * @description Rules for the /community_feed/{postId} collection.
+     * @description Allows public read access to community feed posts, but restricts modifications to the author.
      * @path /community_feed/{postId}
-     * @allow (get, list) - Anyone can read community feed posts.
-     * @allow (create) - Only authenticated users can create posts. The authorId field must match the user's UID.
-     * @allow (update, delete) - Only the author of the post can update or delete it.
-     * @deny (create) - If the authorId field does not match the user's UID.
-     * @deny (update, delete) - If the user is not the author.
-     * @principle Enforces document ownership for writes; allows public reads.
+     * @allow (read) Any user can read any community feed post.
+     * @allow (create) User with ID 'user123' can create a community feed post with `authorId: 'user123'`.
+     * @allow (update,delete) User with ID 'user123' can update/delete a community feed post where `resource.data.authorId == 'user123'`.
+     * @deny (create) User with ID 'user123' cannot create a community feed post with `authorId: 'user456'`.
+     * @deny (update,delete) User with ID 'user456' cannot update/delete a community feed post where `resource.data.authorId == 'user123'`.
+     * @principle Allows public read access with owner-only writes.
      */
     match /community_feed/{postId} {
       allow get, list: if true;
       allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
-      allow update: if isExistingOwner(resource.data.authorId);
-      allow delete: if isExistingOwner(resource.data.authorId);
+      allow update: if isSignedIn() && isExistingOwner(resource.data.authorId);
+      allow delete: if isSignedIn() && isExistingOwner(resource.data.authorId);
     }
 
     /**
-     * @description Rules for the /reports/{reportId} collection.
+     * @description Allows authenticated users to create, update, and delete reports. No ownership enforced.
      * @path /reports/{reportId}
-     * @allow (create) - Only authenticated users can create reports.
-     * @deny (get, list, update, delete) - No one can read, list, update, or delete reports.
-     * @principle Restricts all access to reports except for creation.
+     * @allow (create,update,delete) Any authenticated user can create, update, and delete reports.
+     * @principle Requires authentication for writes, but does not enforce ownership.
      */
     match /reports/{reportId} {
-      allow get, list, update, delete: if false;
+      allow get, list: if isSignedIn();
       allow create: if isSignedIn();
+      allow update: if isSignedIn() && resource != null;
+      allow delete: if isSignedIn() && resource != null;
     }
 
     /**
-     * @description Rules for the /transactions/{transactionId} collection.
+     * @description Allows authenticated users to create, update, and delete transactions. No ownership enforced.
      * @path /transactions/{transactionId}
-     * @deny (get, list, create, update, delete) - No one can read, list, create, update, or delete transactions.
-     * @principle Completely restricts access to transaction data.
+     * @allow (create,update,delete) Any authenticated user can create, update, and delete transactions.
+     * @principle Requires authentication for writes, but does not enforce ownership.
      */
     match /transactions/{transactionId} {
-      allow get, list, create, update, delete: if false;
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && resource != null;
+      allow delete: if isSignedIn() && resource != null;
     }
 
-     /**
-      * @description Rules for the /roles_admin/{userId} collection.
-      * @path /roles_admin/{userId}
-      * @allow get: if isAdmin(); // Admins can check for other admins
-      * @allow list: if false;
-      * @allow create: if isSignedIn(); // Allow creation (claiming admin)
-      * @allow update: if false;
-      * @allow delete: if false;
-      */
+    /**
+     * @description Allows admins to be created if signed in
+     * @path /roles_admin/{userId}
+     * @allow (create) Any authenticated user can create a doc
+     * @principle Checking for signed in
+     */
      match /roles_admin/{userId} {
-       allow get: if isAdmin();
-       allow list: if false;
-       allow create: if isAdmin();
-       allow update: if false;
-       allow delete: if false;
-     }
+        allow get: if isSignedIn();
+        allow list: if false;
+        allow create: if isSignedIn();
+        allow update: if false;
+        allow delete: if false;
+    }
+  }
+
+  /**
+   * @description Checks if the user is signed in.
+   * @return {boolean} True if the user is signed in, false otherwise.
+   * @example isSignedIn() == true if request.auth != null
+   */
+  function isSignedIn() {
+    return request.auth != null;
+  }
+
+  /**
+   * @description Checks if the user is the owner of the document.
+   * @param {string} userId The user ID to check against.
+   * @return {boolean} True if the user is the owner, false otherwise.
+   * @example isOwner('user123') == true if request.auth.uid == 'user123'
+   */
+  function isOwner(userId) {
+    return request.auth.uid == userId;
+  }
+
+    /**
+   * @description Checks if the user is the owner of the existing document.
+   * @param {string} userId The user ID to check against.
+   * @return {boolean} True if the user is the owner and the document exists, false otherwise.
+   * @example isExistingOwner('user123') == true if request.auth.uid == 'user123' and resource != null
+   */
+  function isExistingOwner(userId) {
+    return isOwner(userId) && resource != null;
   }
 }
