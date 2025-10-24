@@ -1,7 +1,7 @@
 
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { notFound } from 'next/navigation';
 import { ProfileHeader } from "../components/ProfileHeader";
 import { UserListings } from "../components/UserListings";
@@ -9,8 +9,8 @@ import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import type { User } from '@/lib/types';
 import { useAuth } from '@/hooks/use-auth';
+import { Skeleton } from '@/components/ui/skeleton';
 
-// Helper component to handle the data fetching and rendering logic
 function ProfileView({ userId }: { userId: string }) {
   const firestore = useFirestore();
   const { user: currentUser } = useAuth();
@@ -64,6 +64,20 @@ function ProfileView({ userId }: { userId: string }) {
   );
 }
 
+function ClientOnly({ children }: { children: React.ReactNode }) {
+    const [hasMounted, setHasMounted] = useState(false);
+    useEffect(() => {
+        setHasMounted(true);
+    }, []);
+
+    if (!hasMounted) {
+        // You can return a loading skeleton here if you want.
+        return null;
+    }
+
+    return <>{children}</>;
+}
+
 
 export default function ProfilePage({ params }: { params: { userId: string } }) {
   const userId = params.userId;
@@ -72,5 +86,9 @@ export default function ProfilePage({ params }: { params: { userId: string } }) 
     notFound();
   }
 
-  return <ProfileView userId={userId} />;
+  return (
+    <ClientOnly>
+      <ProfileView userId={userId} />
+    </ClientOnly>
+  );
 }

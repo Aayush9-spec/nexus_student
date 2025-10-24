@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { notFound, useSearchParams } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -12,7 +12,7 @@ import { Star, MapPin, Sparkles, AlertCircle } from 'lucide-react';
 import { useDoc, useFirestore, useMemoFirebase, useCollection } from '@/firebase';
 import { doc, collection, query, where, Query as FirestoreQuery } from 'firebase/firestore';
 import type { Listing, User, Review as ReviewType } from '@/lib/types';
-import { useMemo, useState, useEffect, use } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { AddReviewForm } from './components/AddReviewForm';
 import { ReviewCard } from './components/ReviewCard';
 import { useAuth } from '@/hooks/use-auth';
@@ -101,12 +101,10 @@ function AiAnalysisCard({ listing }: { listing: Listing }) {
   )
 }
 
-export default function ListingDetailPage({ params }: { params: { listingId: string } }) {
+function ListingDetailContent({ listingId }: { listingId: string }) {
   const firestore = useFirestore();
   const { user: currentUser } = useAuth();
-  const resolvedParams = use(Promise.resolve(params));
-  const {listingId} = resolvedParams;
-
+  
   const listingRef = useMemoFirebase(() => {
     if (!firestore || !listingId) return null;
     return doc(firestore, 'listings', listingId);
@@ -273,5 +271,33 @@ export default function ListingDetailPage({ params }: { params: { listingId: str
         </div>
       </div>
     </div>
+  );
+}
+
+function ClientOnly({ children }: { children: React.ReactNode }) {
+    const [hasMounted, setHasMounted] = useState(false);
+    useEffect(() => {
+        setHasMounted(true);
+    }, []);
+
+    if (!hasMounted) {
+        return null;
+    }
+
+    return <>{children}</>;
+}
+
+
+export default function ListingDetailPage({ params }: { params: { listingId: string } }) {
+  const { listingId } = params;
+
+  if (!listingId) {
+    notFound();
+  }
+
+  return (
+    <ClientOnly>
+      <ListingDetailContent listingId={listingId} />
+    </ClientOnly>
   );
 }

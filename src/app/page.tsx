@@ -12,8 +12,23 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useCollection, useFirestore, useMemoFirebase, useDoc } from '@/firebase';
 import { collection, query, limit, Query, doc } from 'firebase/firestore';
 import type { Listing, User } from '@/lib/types';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+
+
+function ClientOnly({ children }: { children: React.ReactNode }) {
+    const [hasMounted, setHasMounted] = useState(false);
+    useEffect(() => {
+        setHasMounted(true);
+    }, []);
+
+    if (!hasMounted) {
+        return null;
+    }
+
+    return <>{children}</>;
+}
+
 
 function TrendingListingCard({ listing }: { listing: Listing }) {
     const firestore = useFirestore();
@@ -99,9 +114,7 @@ function FeaturedStudentsSection() {
     );
 }
 
-
-export default function Home() {
-  const heroImage = PlaceHolderImages.find(img => img.id === 'hero-image');
+function TrendingListingsSection() {
   const firestore = useFirestore();
 
   const trendingQuery = useMemoFirebase(() => {
@@ -111,6 +124,25 @@ export default function Home() {
 
   const { data: trendingListings, isLoading: trendingLoading } = useCollection<Listing>(trendingQuery);
 
+    if (trendingLoading) {
+        return (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-96 rounded-lg" />)}
+            </div>
+        );
+    }
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {trendingListings?.map((listing) => <TrendingListingCard key={listing.id} listing={listing} />)}
+    </div>
+  );
+}
+
+
+export default function Home() {
+  const heroImage = PlaceHolderImages.find(img => img.id === 'hero-image');
+  
   return (
     <div className="flex flex-col">
       <section className="relative w-full h-[50vh] md:h-[60vh] text-white">
@@ -147,19 +179,17 @@ export default function Home() {
                 <Button variant="outline">View All <ArrowRight className="ml-2 h-4 w-4" /></Button>
             </Link>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {trendingLoading ? (
-            [...Array(4)].map((_, i) => <Skeleton key={i} className="h-96 rounded-lg" />)
-          ) : (
-            trendingListings?.map((listing) => <TrendingListingCard key={listing.id} listing={listing} />)
-          )}
-        </div>
+        <ClientOnly>
+          <TrendingListingsSection />
+        </ClientOnly>
       </section>
 
       <section className="bg-muted py-12 md:py-16">
         <div className="container mx-auto">
             <h2 className="text-2xl md:text-3xl font-headline font-bold text-center mb-8">Featured Students</h2>
-            <FeaturedStudentsSection />
+            <ClientOnly>
+              <FeaturedStudentsSection />
+            </ClientOnly>
         </div>
       </section>
     </div>
