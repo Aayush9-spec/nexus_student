@@ -1,190 +1,228 @@
 /**
- * @file Firebase Security Rules for the Student Marketplace.
+ * @fileoverview Firestore Security Rules for the student marketplace application.
  *
- * @Core Philosophy:
- * This ruleset prioritizes a secure, user-centric data model where users primarily access their own data or participate in shared resources.
- * It leverages denormalization and structural segregation to enforce access control efficiently. Data validation is relaxed for prototyping,
- * focusing on authorization and relational integrity.
+ * Core Philosophy:
+ * This ruleset prioritizes secure data access based on user roles, ownership, and explicit authorization.
+ * It enforces strict access control to protect user data and prevent unauthorized modifications.
  *
- * @Data Structure:
- * - User profiles are stored under `/users/{userId}`.
- * - Listings are stored under `/listings/{listingId}`, with sellerId for ownership.
- * - Chats are stored under `/chats/{chatId}`, with participants array defining access.
- * - Messages are stored under `/chats/{chatId}/messages/{messageId}`.
- * - Reviews are stored under `/reviews/{reviewId}`, with sellerId and buyerId for access control.
- * - Events are stored under `/events/{eventId}`, with organizerId for ownership.
- * - Community feed posts are stored under `/community_feed/{postId}`, with authorId for ownership.
- * - Reports are stored under `/reports/{reportId}`.
- * - Transactions are stored under `/transactions/{transactionId}`, with buyerId, sellerId, and listingId for context.
- * - Admin roles are stored under `/roles_admin/{userId}` as existence-based flags.
+ * Data Structure:
+ * - Users: Stored under `/users/{userId}`, accessible only to the owning user.
+ * - Listings: Stored under `/listings/{listingId}`, with owner-only writes enforced via `sellerId`. Public reads.
+ * - Chats: Stored under `/chats/{chatId}`, accessible only to participants listed in the `participants` array.
+ * - Messages: Stored under `/chats/{chatId}/messages/{messageId}`, accessible only to chat participants.
+ * - Reviews: Stored under `/reviews/{reviewId}`, writes only if buyerId matches auth user, public reads.
+ * - Events: Stored under `/events/{eventId}`, with organizer-only writes enforced via `organizerId`. Public reads.
+ * - Community Feed Posts: Stored under `/community_feed/{postId}`, with author-only writes enforced via `authorId`. Public reads.
+ * - Reports: Stored under `/reports/{reportId}`, write access is denied.
+ * - Transactions: Stored under `/transactions/{transactionId}`, write access is denied.
+ * - Admin Roles: Stored under `/roles_admin/{userId}`, existence indicates admin role.
  *
- * @Key Security Decisions:
- * - User listing is generally disallowed to protect privacy.
- * - Public read access is granted for collections intended for public consumption (e.g., community feed), with ownership enforced for writes.
- * - Ownership is strictly enforced for user-specific data and actions.
- * - Roles are managed using existence checks in a dedicated collection.
- * - Data validation is minimized to essential checks for authorization and relational integrity.
+ * Key Security Decisions:
+ * - User listing is disallowed.
+ * - Public read access is granted for collections like `listings`, `events`, and `community_feed`, but writes are restricted to owners.
+ * - Shared access to chats is managed through the `participants` array.
+ * - Roles are managed via the existence of documents in the `/roles_admin` collection.
  *
- * @Denormalization for Authorization:
- * - Listings include `sellerId` to allow ownership checks without extra reads.
- * - Chats include a `participants` array to define authorized users.
- * - Reviews include `sellerId` and `buyerId` for access control.
- * - Events include `organizerId` for ownership checks.
- * - Community Feed includes `authorId` for ownership checks.
- * - Transactions include `buyerId` and `sellerId` to avoid `get()` calls.
- *
- * @Structural Segregation:
- * - Admin roles are stored in a separate `/roles_admin/{userId}` collection.
- * - User data is separated from public content.
+ * Denormalization for Authorization:
+ * - Listings include `sellerId` to enable owner-only writes without additional `get()` calls.
+ * - Chats include a `participants` array to efficiently authorize access to chat data and messages.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Manages user profiles. Only the user can read/write their own profile.
+     * @description Controls access to user profile data.
      * @path /users/{userId}
-     * @allow (read, write) if request.auth.uid == userId
-     * @deny (read, write) if request.auth.uid != userId
-     * @principle Enforces document ownership for all operations.
+     * @allow (create) If the user is creating their own profile (auth.uid == userId).
+     * @allow (get, list, update, delete) If the user is the owner of the profile (auth.uid == userId).
+     * @deny (create, update, delete) If the user is not the owner of the profile.
+     * @principle Enforces document ownership for all operations on user profiles.
      */
     match /users/{userId} {
-      function isOwner(userId) {
-        return request.auth != null && request.auth.uid == userId;
+      function isSignedIn() {
+        return request.auth != null;
       }
 
-      allow get: if isOwner(userId);
-      allow list: if false; // User listing is generally disallowed for privacy.
-      allow create: if isOwner(userId) && request.resource.data.uid == userId;
-      allow update: if isOwner(userId) && resource.data.uid == userId;
-      allow delete: if isOwner(userId);
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+
+      function isExistingOwner(userId) {
+        return isOwner(userId) && exists(resource);
+      }
+
+      allow get: if isSignedIn() && isOwner(userId);
+      allow list: if false;
+      allow create: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isExistingOwner(userId);
+      allow delete: if isSignedIn() && isExistingOwner(userId);
     }
 
     /**
-     * @description Manages listings. Allows public read access, but restricts writes to the seller.
+     * @description Controls access to listings. Allows public read, but restricts writes to the seller.
      * @path /listings/{listingId}
-     * @allow (read) any authenticated user
-     * @allow (create, update, delete) only the seller with matching sellerId
-     * @deny (create, update, delete) if request.auth.uid != resource.data.sellerId
-     * @principle Public read with owner-only writes, enforcing document ownership for writes.
+     * @allow (get, list) Anyone can read listings.
+     * @allow (create) If the user creating the listing matches the sellerId in the request.
+     * @allow (update, delete) If the user is the owner of the listing (sellerId matches auth.uid).
+     * @deny (create, update, delete) If the user is not the owner of the listing.
+     * @principle Allows public read access while enforcing ownership for write operations.
      */
     match /listings/{listingId} {
-      function isOwner(sellerId) {
-        return request.auth != null && request.auth.uid == sellerId;
+      function isSignedIn() {
+        return request.auth != null;
       }
 
-      allow get, list: if true;
-      allow create: if isOwner(request.resource.data.sellerId) && request.resource.data.sellerId == request.auth.uid;
-      allow update: if isOwner(resource.data.sellerId) && resource != null;
-      allow delete: if isOwner(resource.data.sellerId) && resource != null;
+      function isOwner(sellerId) {
+        return request.auth.uid == sellerId;
+      }
+
+       function isExistingOwner(sellerId) {
+        return isOwner(sellerId) && exists(resource);
+      }
+
+      allow get: if true;
+      allow list: if true;
+      allow create: if isSignedIn() && request.resource.data.sellerId == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.sellerId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.sellerId == request.auth.uid;
     }
 
     /**
-     * @description Manages chats. Only participants can read/write.
+     * @description Controls access to chats.  Only participants can read/write.
      * @path /chats/{chatId}
-     * @allow (read, write) only if the user is a participant in the chat.
-     * @deny (read, write) if the user is not a participant.
-     * @principle Shared Access (Closed Collaborators), ensuring that only members of the chat can access it.
+     * @allow (get, list, create, update, delete) If the user is a participant in the chat.
+     * @deny (get, list, create, update, delete) If the user is not a participant in the chat.
+     * @principle Enforces that only participants can access or modify chat data.
      */
     match /chats/{chatId} {
-      function isParticipant() {
-        return request.auth != null && request.resource.data.participants.hasAny([request.auth.uid]);
-      }
-      function isExistingParticipant() {
-          return request.auth != null && resource.data.participants.hasAny([request.auth.uid]);
+      function isSignedIn() {
+        return request.auth != null;
       }
 
-      allow get: if isExistingParticipant();
-      allow list: if false; // Listing chats is generally disallowed for privacy.
-      allow create: if isParticipant();
-      allow update: if isExistingParticipant() && resource != null;
-      allow delete: if false; // Deleting a chat is not allowed.
+      function isParticipant() {
+        return isSignedIn() && request.auth.uid in resource.data.participants;
+      }
+
+      function isExistingParticipant() {
+          return isSignedIn() && request.auth.uid in resource.data.participants;
+      }
+
+      allow get: if isSignedIn() && isParticipant();
+      allow list: if false;
+      allow create: if isSignedIn() && request.resource.data.participants.hasAll([request.auth.uid]);
+      allow update: if isSignedIn() && isExistingParticipant();
+      allow delete: if false;
     }
 
     /**
-     * @description Manages messages within a chat. Only participants of the chat can read/write messages.
+     * @description Controls access to messages within a chat. Only chat participants can read/write.
      * @path /chats/{chatId}/messages/{messageId}
-     * @allow (read, write) only if the user is a participant in the parent chat.
-     * @deny (read, write) if the user is not a participant in the parent chat.
-     * @principle Shared Access (Closed Collaborators), inheriting access control from the parent chat.
+     * @allow (get, list, create, update, delete) If the user is a participant in the parent chat.
+     * @deny (get, list, create, update, delete) If the user is not a participant in the parent chat.
+     * @principle Enforces that only participants of the chat can access messages.
      */
     match /chats/{chatId}/messages/{messageId} {
-        function isChatParticipant(chatId) {
-            return exists(/databases/$(database)/documents/chats/$(chatId))
-                   && get(/databases/$(database)/documents/chats/$(chatId)).data.participants.hasAny([request.auth.uid]);
-        }
-
-        allow get: if isChatParticipant(chatId);
-        allow list: if isChatParticipant(chatId);
-        allow create: if isChatParticipant(chatId);
-        allow update: if false; // Messages cannot be updated.
-        allow delete: if false; // Messages cannot be deleted.
-    }
-
-    /**
-     * @description Manages reviews. Only the buyer and seller can read, only the buyer can create.
-     * @path /reviews/{reviewId}
-     * @allow (read) only the buyer or seller involved in the review.
-     * @allow (create) only the buyer creating the review.
-     * @deny (update, delete) no one can update or delete reviews.
-     * @principle Enforces access control based on the buyer and seller relationship.
-     */
-    match /reviews/{reviewId} {
-      function isBuyer(buyerId) {
-        return request.auth != null && request.auth.uid == buyerId;
+      function isSignedIn() {
+        return request.auth != null;
       }
-      function isSeller(sellerId) {
-          return request.auth != null && request.auth.uid == sellerId;
+
+      function isParticipant(chatId) {
+          let chat = get(/databases/$(database)/documents/chats/$(chatId)).data;
+          return isSignedIn() && request.auth.uid in chat.participants;
       }
-      allow get: if isBuyer(resource.data.buyerId) || isSeller(resource.data.sellerId);
-      allow list: if false; // Listing reviews is generally disallowed for privacy.
-      allow create: if isBuyer(request.resource.data.buyerId) && request.resource.data.buyerId == request.auth.uid;
+
+      allow get: if isParticipant(chatId);
+      allow list: if isParticipant(chatId);
+      allow create: if isParticipant(chatId);
       allow update: if false;
       allow delete: if false;
     }
 
     /**
-     * @description Manages events. Allows public read access, restricts writes to the organizer.
+     * @description Controls access to reviews.
+     * @path /reviews/{reviewId}
+     * @allow (get, list) Anyone can read reviews.
+     * @allow (create) If the user creating the review matches the buyerId.
+     * @allow (update, delete) Not allowed.
+     * @principle Allows public read access, but restricts writes to the buyer.
+     */
+    match /reviews/{reviewId} {
+        function isSignedIn() {
+            return request.auth != null;
+        }
+
+      allow get: if true;
+      allow list: if true;
+      allow create: if isSignedIn() && request.resource.data.buyerId == request.auth.uid;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    /**
+     * @description Controls access to events. Allows public read, but restricts writes to the organizer.
      * @path /events/{eventId}
-     * @allow (read) any authenticated user
-     * @allow (create, update, delete) only the organizer of the event.
-     * @principle Public read with owner-only writes, enforcing document ownership for writes.
+     * @allow (get, list) Anyone can read events.
+     * @allow (create) If the user creating the event matches the organizerId.
+     * @allow (update, delete) If the user is the owner of the event (organizerId matches auth.uid).
+     * @deny (create, update, delete) If the user is not the owner of the event.
+     * @principle Allows public read access while enforcing ownership for write operations.
      */
     match /events/{eventId} {
-      function isOrganizer(organizerId) {
-        return request.auth != null && request.auth.uid == organizerId;
+        function isSignedIn() {
+            return request.auth != null;
+        }
+
+      function isOwner(organizerId) {
+        return request.auth.uid == organizerId;
       }
 
-      allow get, list: if true;
-      allow create: if isOrganizer(request.resource.data.organizerId) && request.resource.data.organizerId == request.auth.uid;
-      allow update: if isOrganizer(resource.data.organizerId) && resource != null;
-      allow delete: if isOrganizer(resource.data.organizerId) && resource != null;
+       function isExistingOwner(organizerId) {
+        return isOwner(organizerId) && exists(resource);
+      }
+
+
+      allow get: if true;
+      allow list: if true;
+      allow create: if isSignedIn() && request.resource.data.organizerId == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.organizerId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.organizerId == request.auth.uid;
     }
 
     /**
-     * @description Manages community feed posts. Allows public read access, restricts writes to the author.
+     * @description Controls access to community feed posts. Allows public read, but restricts writes to the author.
      * @path /community_feed/{postId}
-     * @allow (read) any authenticated user
-     * @allow (create, update, delete) only the author of the post.
-     * @principle Public read with owner-only writes, enforcing document ownership for writes.
+     * @allow (get, list) Anyone can read community feed posts.
+     * @allow (create) If the user creating the post matches the authorId.
+     * @allow (update, delete) If the user is the owner of the post (authorId matches auth.uid).
+     * @deny (create, update, delete) If the user is not the owner of the post.
+     * @principle Allows public read access while enforcing ownership for write operations.
      */
     match /community_feed/{postId} {
-      function isAuthor(authorId) {
-        return request.auth != null && request.auth.uid == authorId;
+        function isSignedIn() {
+            return request.auth != null;
+        }
+
+      function isOwner(authorId) {
+        return request.auth.uid == authorId;
       }
 
-      allow get, list: if true;
-      allow create: if isAuthor(request.resource.data.authorId) && request.resource.data.authorId == request.auth.uid;
-      allow update: if isAuthor(resource.data.authorId) && resource != null;
-      allow delete: if isAuthor(resource.data.authorId) && resource != null;
+       function isExistingOwner(authorId) {
+        return isOwner(authorId) && exists(resource);
+      }
+
+      allow get: if true;
+      allow list: if true;
+      allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.authorId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.authorId == request.auth.uid;
     }
 
     /**
-     * @description Manages reports.  No write permissions are allowed from the client.
+     * @description Controls access to reports.
      * @path /reports/{reportId}
-     * @allow (read) nobody.
-     * @allow (write) nobody.
-     * @principle Restricts access to reports.
+     * @deny (get, list, create, update, delete) No one is allowed to read or write reports.
+     * @principle Restricts all access to reports.
      */
     match /reports/{reportId} {
       allow get: if false;
@@ -195,44 +233,42 @@ service cloud.firestore {
     }
 
     /**
-     * @description Manages transactions. Only the buyer or seller can read.
+     * @description Controls access to transactions.
      * @path /transactions/{transactionId}
-     * @allow (read) only the buyer or seller involved in the transaction.
-     * @allow (write) nobody.
-     * @principle Enforces access control based on the buyer and seller relationship.
+     * @deny (get, list, create, update, delete) No one is allowed to read or write transactions.
+     * @principle Restricts all access to transactions.
      */
     match /transactions/{transactionId} {
-      function isBuyer(buyerId) {
-        return request.auth != null && request.auth.uid == buyerId;
-      }
-      function isSeller(sellerId) {
-          return request.auth != null && request.auth.uid == sellerId;
-      }
-
-      allow get: if isBuyer(resource.data.buyerId) || isSeller(resource.data.sellerId);
-      allow list: if false; // Listing transactions is generally disallowed for privacy.
+      allow get: if false;
+      allow list: if false;
       allow create: if false;
       allow update: if false;
       allow delete: if false;
     }
 
-       /**
-        * @description Manages admin roles. The existence of a document with the user's ID grants admin privileges.
-        * @path /roles_admin/{userId}
-        * @allow (read) only admins.
-        * @allow (create) only the user themselves, to flag themselves as admins. This requires manual server intervention to delete.
-        *
-        * @principle Global Roles managed via existence checks.
-        */
-        match /roles_admin/{userId} {
-            function isAdmin() {
-              return request.auth != null && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-            }
-            allow get: if isAdmin();
-            allow list: if false;
-            allow create: if request.auth.uid == userId;
-            allow update: if false;
-            allow delete: if false;
+    /**
+     * @description Controls access to admin roles. Existence determines admin status.
+     * @path /roles_admin/{userId}
+     * @allow (get) If the user is authenticated.
+     * @allow (list) Never allow listing of admin roles.
+     * @allow (create) If the user is authenticated and their UID matches the document ID.
+     * @allow (update, delete) Not allowed. Only creation and existence matters.
+     * @principle Manages admin privileges via document existence.
+     */
+     match /roles_admin/{userId} {
+        function isSignedIn() {
+            return request.auth != null;
         }
+
+        function isOwner(userId) {
+            return request.auth.uid == userId;
+        }
+
+        allow get: if isSignedIn() && isOwner(userId);
+        allow list: if false;
+        allow create: if isSignedIn() && isOwner(userId);
+        allow update: if false;
+        allow delete: if false;
+    }
   }
 }
