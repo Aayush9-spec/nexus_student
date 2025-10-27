@@ -8,10 +8,10 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { ArrowRight, LogIn } from 'lucide-react';
 import { ListingCard } from './marketplace/components/ListingCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useCollection, useFirestore, useMemoFirebase, useDoc, useUser } from '@/firebase';
-import { collection, query, limit, Query, doc } from 'firebase/firestore';
-import type { Listing, User } from '@/lib/types';
-import { useMemo, useState, useEffect } from 'react';
+import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
+import { collection, query, limit, Query } from 'firebase/firestore';
+import type { Listing } from '@/lib/types';
+import { useState, useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 
@@ -27,30 +27,6 @@ function ClientOnly({ children, fallback }: { children: React.ReactNode, fallbac
 
     return <>{children}</>;
 }
-
-
-function TrendingListingCard({ listing }: { listing: Listing }) {
-    const firestore = useFirestore();
-
-    const sellerRef = useMemoFirebase(() => {
-        if (!firestore || !listing.sellerId) return null;
-        return doc(firestore, 'users', listing.sellerId);
-    }, [firestore, listing.sellerId]);
-
-    const { data: seller, isLoading } = useDoc<User>(sellerRef);
-
-    if (isLoading) {
-        return <Skeleton className="h-full w-full rounded-lg" />;
-    }
-
-    const listingWithSeller = {
-        ...listing,
-        seller: seller || undefined,
-    };
-
-    return <ListingCard listing={listingWithSeller} />;
-}
-
 
 function AuthenticatedHomepageContent() {
     const firestore = useFirestore();
@@ -77,7 +53,7 @@ function AuthenticatedHomepageContent() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {trendingListings?.map((listing) => <TrendingListingCard key={listing.id} listing={listing} />)}
+                        {trendingListings?.map((listing) => <ListingCard key={listing.id} listing={listing} />)}
                     </div>
                 )}
             </section>

@@ -1,5 +1,5 @@
 
-import type { User, Listing } from '@/lib/types';
+import type { User, Listing, ListingSeller } from '@/lib/types';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const findImage = (id: string) => PlaceHolderImages.find(img => img.id === id)?.imageUrl || '';
@@ -67,6 +67,18 @@ export const dummyUsers: User[] = [
   },
 ];
 
+// Helper to create denormalized seller objects
+const getListingSeller = (userId: string): ListingSeller => {
+    const user = dummyUsers.find(u => u.id === userId);
+    if (!user) throw new Error(`User not found for ID: ${userId}`);
+    return {
+        id: user.id,
+        name: user.name,
+        profilePictureUrl: user.profilePictureUrl
+    };
+};
+
+
 export const dummyListings: Listing[] = [
   {
     id: 'listing_1',
@@ -77,6 +89,7 @@ export const dummyListings: Listing[] = [
     mediaUrl: findImage('listing-gate-notes') || "https://picsum.photos/seed/listing1/600/400",
     mediaType: 'image',
     sellerId: 'user_1',
+    seller: getListingSeller('user_1'),
     status: 'active',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
     college: 'IIT Bombay',
@@ -90,6 +103,7 @@ export const dummyListings: Listing[] = [
     mediaUrl: findImage('listing-fest-design') || "https://picsum.photos/seed/listing2/600/400",
     mediaType: 'image',
     sellerId: 'user_2',
+    seller: getListingSeller('user_2'),
     status: 'active',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
     college: 'Christ University, Bangalore',
@@ -103,6 +117,7 @@ export const dummyListings: Listing[] = [
     mediaUrl: findImage('listing-engg-books') || "https://picsum.photos/seed/listing3/600/400",
     mediaType: 'image',
     sellerId: 'user_1',
+    seller: getListingSeller('user_1'),
     status: 'active',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1).toISOString(),
     college: 'IIT Bombay',
@@ -116,6 +131,7 @@ export const dummyListings: Listing[] = [
     mediaUrl: findImage('listing-hackathon') || "https://picsum.photos/seed/listing4/600/400",
     mediaType: 'image',
     sellerId: 'user_1',
+    seller: getListingSeller('user_1'),
     status: 'active',
     createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
     college: 'IIT Bombay',
@@ -129,6 +145,7 @@ export const dummyListings: Listing[] = [
     mediaUrl: findImage('listing-tiffin') || "https://picsum.photos/seed/listing5/600/400",
     mediaType: 'image',
     sellerId: 'user_3',
+    seller: getListingSeller('user_3'),
     status: 'active',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10).toISOString(),
     college: 'Delhi University',
@@ -142,6 +159,7 @@ export const dummyListings: Listing[] = [
     mediaUrl: findImage('listing-bicycle') || "https://picsum.photos/seed/listing8/600/400",
     mediaType: 'image',
     sellerId: 'user_3',
+    seller: getListingSeller('user_3'),
     status: 'active',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString(),
     college: 'Delhi University',
@@ -155,6 +173,7 @@ export const dummyListings: Listing[] = [
     mediaUrl: findImage('listing-novels') || "https://picsum.photos/seed/listing7/600/400",
     mediaType: 'image',
     sellerId: 'user_3',
+    seller: getListingSeller('user_3'),
     status: 'active',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 6).toISOString(),
     college: 'Delhi University',
@@ -168,6 +187,7 @@ export const dummyListings: Listing[] = [
     mediaUrl: findImage('listing-event-photography') || "https://picsum.photos/seed/listing9/600/400",
     mediaType: 'image',
     sellerId: 'user_2',
+    seller: getListingSeller('user_2'),
     status: 'active',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(),
     college: 'Christ University, Bangalore',
@@ -181,6 +201,7 @@ export const dummyListings: Listing[] = [
     mediaUrl: findImage('listing-guitar-lessons') || "https://picsum.photos/seed/listing10/600/400",
     mediaType: 'image',
     sellerId: 'user_3',
+    seller: getListingSeller('user_3'),
     status: 'active',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 8).toISOString(),
     college: 'Delhi University',
@@ -194,6 +215,7 @@ export const dummyListings: Listing[] = [
     mediaUrl: findImage('listing-calc-ra') || "https://picsum.photos/seed/listing11/600/400",
     mediaType: 'image',
     sellerId: 'user_1',
+    seller: getListingSeller('user_1'),
     status: 'active',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
     college: 'IIT Bombay',
@@ -207,6 +229,7 @@ export const dummyListings: Listing[] = [
     mediaUrl: 'https://picsum.photos/seed/listing12/600/400',
     mediaType: 'image',
     sellerId: 'user_2',
+    seller: getListingSeller('user_2'),
     status: 'active',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString(),
     college: 'Christ University, Bangalore',
@@ -220,6 +243,7 @@ export const dummyListings: Listing[] = [
     mediaUrl: 'https://picsum.photos/seed/listing13/600/400',
     mediaType: 'image',
     sellerId: 'user_1',
+    seller: getListingSeller('user_1'),
     status: 'active',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 9).toISOString(),
     college: 'IIT Bombay',
@@ -233,6 +257,7 @@ export const dummyListings: Listing[] = [
     mediaUrl: 'https://picsum.photos/seed/listing14/600/400',
     mediaType: 'image',
     sellerId: 'user_3',
+    seller: getListingSeller('user_3'),
     status: 'active',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1).toISOString(),
     college: 'Delhi University',
@@ -246,6 +271,7 @@ export const dummyListings: Listing[] = [
     mediaUrl: findImage('listing-table-lamp') || 'https://picsum.photos/seed/listing15/600/400',
     mediaType: 'image',
     sellerId: 'user_2',
+    seller: getListingSeller('user_2'),
     status: 'active',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(),
     college: 'Christ University, Bangalore',
@@ -259,6 +285,7 @@ export const dummyListings: Listing[] = [
     mediaUrl: findImage('listing-drawing-tutoring') || 'https://picsum.photos/seed/listing16/600/400',
     mediaType: 'image',
     sellerId: 'user_3',
+    seller: getListingSeller('user_3'),
     status: 'active',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
     college: 'Delhi University',
@@ -272,6 +299,7 @@ export const dummyListings: Listing[] = [
     mediaUrl: findImage('listing-classic-books') || 'https://picsum.photos/seed/listing17/600/400',
     mediaType: 'image',
     sellerId: 'user_3',
+    seller: getListingSeller('user_3'),
     status: 'active',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 6).toISOString(),
     college: 'Delhi University',

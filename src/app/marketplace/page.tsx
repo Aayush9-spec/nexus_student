@@ -3,37 +3,14 @@
 
 import { useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { collection, query, where, Query, doc } from 'firebase/firestore';
-import { useFirestore, useCollection, useDoc, useMemoFirebase } from '@/firebase';
-import type { Listing, User } from '@/lib/types';
+import { collection, query, where, Query } from 'firebase/firestore';
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import type { Listing } from '@/lib/types';
 import { ListingGrid } from './components/ListingGrid';
 import { FilterSidebar } from './components/FilterSidebar';
 import { Suspense } from 'react';
 import { ListingCard } from './components/ListingCard';
 import { Skeleton } from '@/components/ui/skeleton';
-
-function ListingWithSeller({ listing }: { listing: Listing }) {
-    const firestore = useFirestore();
-
-    const sellerRef = useMemoFirebase(() => {
-        if (!firestore || !listing.sellerId) return null;
-        return doc(firestore, 'users', listing.sellerId);
-    }, [firestore, listing.sellerId]);
-
-    const { data: seller, isLoading } = useDoc<User>(sellerRef);
-
-    if (isLoading) {
-        return <Skeleton className="h-96 rounded-lg" />;
-    }
-
-    const listingWithSeller = {
-        ...listing,
-        seller: seller || undefined,
-    };
-
-    return <ListingCard listing={listingWithSeller} />;
-}
-
 
 export default function MarketplacePage() {
   const firestore = useFirestore();
@@ -88,15 +65,7 @@ export default function MarketplacePage() {
           </aside>
           <main className="lg:col-span-3">
             <h1 className="text-3xl font-bold font-headline mb-6">Explore the Marketplace</h1>
-            {isLoadingListings ? (
-                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[...Array(9)].map((_, i) => <Skeleton key={i} className="h-96 rounded-lg" />)}
-                </div>
-            ) : (
-                <ListingGrid listings={filteredListings.map(l => ({ ...l, seller: undefined }))} isLoading={false}>
-                    {filteredListings.map(listing => <ListingWithSeller key={listing.id} listing={listing} />)}
-                </ListingGrid>
-            )}
+            <ListingGrid listings={filteredListings} isLoading={isLoadingListings} />
           </main>
         </div>
       </div>

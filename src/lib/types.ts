@@ -23,10 +23,13 @@ export type ListingCategory = 'Physical Products' | 'Digital Products' | 'Servic
 
 export const listingCategories: ListingCategory[] = ['Physical Products', 'Digital Products', 'Services', 'Community/Collaboration'];
 
+// Seller info is now denormalized onto the listing
+export type ListingSeller = Pick<User, 'id' | 'name' | 'profilePictureUrl'>;
+
 export type Listing = {
   id: string; // This is the documentId from Firestore
   sellerId: string;
-  seller?: User;
+  seller: ListingSeller; // Denormalized seller info for efficient querying
   title: string;
   description: string;
   category: ListingCategory;

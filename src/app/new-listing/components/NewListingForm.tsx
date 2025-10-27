@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { categorizeListing } from "@/ai/flows/categorize-listing";
-import { listingCategories } from "@/lib/types";
+import { listingCategories, ListingSeller } from "@/lib/types";
 import { useFirestore } from "@/firebase";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -109,8 +109,15 @@ export function NewListingForm() {
       const storageRef = ref(storage, `listings/${user.id}/${Date.now()}_${mediaFile.name}`);
       const uploadResult = await uploadBytes(storageRef, mediaFile);
       const mediaUrl = await getDownloadURL(uploadResult.ref);
+      
+      // 2. Prepare denormalized seller data
+      const sellerData: ListingSeller = {
+        id: user.id,
+        name: user.name,
+        profilePictureUrl: user.profilePictureUrl
+      }
 
-      // 2. Create new listing document in Firestore
+      // 3. Create new listing document in Firestore
       await addDoc(collection(firestore, "listings"), {
         title: values.title,
         description: values.description,
@@ -119,7 +126,8 @@ export function NewListingForm() {
         mediaUrl: mediaUrl,
         mediaType: mediaType,
         sellerId: user.id,
-        college: user.college, // Assuming user object has college info
+        seller: sellerData, // Add the denormalized seller data
+        college: user.college, 
         createdAt: serverTimestamp(),
         status: 'active',
       });
