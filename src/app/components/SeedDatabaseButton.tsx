@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -5,8 +6,7 @@ import { useFirestore } from '@/firebase';
 import { collection, writeBatch, doc, getDocs } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { dummyUsers } from '@/lib/dummy-data';
-import { dummyListings } from '@/lib/dummy-data';
+import { dummyUsers, dummyListings, dummyTransactions, dummyReviews } from '@/lib/dummy-data';
 import { Loader2, Database } from 'lucide-react';
 
 export function SeedDatabaseButton() {
@@ -19,10 +19,9 @@ export function SeedDatabaseButton() {
     setIsLoading(true);
 
     try {
-      // Check if collections are already populated
+      // Check if collections are already populated to avoid re-seeding
       const usersSnapshot = await getDocs(collection(firestore, 'users'));
-      const listingsSnapshot = await getDocs(collection(firestore, 'listings'));
-      if (!usersSnapshot.empty || !listingsSnapshot.empty) {
+      if (!usersSnapshot.empty) {
         toast({
           title: 'Database Already Seeded',
           description: 'Your Firestore collections already contain data.',
@@ -45,11 +44,23 @@ export function SeedDatabaseButton() {
         batch.set(listingRef, listing);
       });
 
+      // Add transactions
+      dummyTransactions.forEach(transaction => {
+        const transactionRef = doc(collection(firestore, 'transactions'));
+        batch.set(transactionRef, transaction);
+      });
+
+      // Add reviews
+      dummyReviews.forEach(review => {
+        const reviewRef = doc(collection(firestore, 'reviews'));
+        batch.set(reviewRef, review);
+      });
+
       await batch.commit();
 
       toast({
         title: 'Database Seeded!',
-        description: 'Dummy users and listings have been added to Firestore.',
+        description: 'Dummy data has been added to Firestore.',
       });
 
     } catch (error) {
@@ -75,3 +86,5 @@ export function SeedDatabaseButton() {
     </Button>
   );
 }
+
+    

@@ -1,5 +1,5 @@
 
-import type { User, Listing, ListingSeller } from '@/lib/types';
+import type { User, Listing, ListingSeller, Review, Transaction } from '@/lib/types';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const findImage = (id: string) => PlaceHolderImages.find(img => img.id === id)?.imageUrl || '';
@@ -16,14 +16,14 @@ export const dummyUsers: User[] = [
     bio: 'Budding software engineer and ML enthusiast. Selling my old engineering books and notes. Let\'s connect!',
     skills: ['Python', 'C++', 'Machine Learning', 'Data Structures'],
     following: ['user_2'],
-    followers: ['user_3'],
+    followers: ['user_3', 'user_2'],
     createdAt: new Date().toISOString(),
     rating: 4.8,
-    totalSales: 15,
+    totalSales: 16,
     sellerLevel: 'Gold',
-    xpPoints: 1250,
+    xpPoints: 1350,
     badges: ['Top Seller', 'Quick Responder'],
-    nexusCredits: 50,
+    nexusCredits: 150,
   },
   {
     id: 'user_2',
@@ -35,15 +35,15 @@ export const dummyUsers: User[] = [
     profilePictureUrl: findImage('user-2') || "https://picsum.photos/seed/user2/200",
     bio: 'BBA student with a passion for marketing and graphic design. Offering freelance design services for college fests and events.',
     skills: ['Graphic Design', 'Canva', 'Social Media Marketing'],
-    following: [],
+    following: ['user_1'],
     followers: ['user_1', 'user_3'],
     createdAt: new Date().toISOString(),
     rating: 4.9,
-    totalSales: 25,
+    totalSales: 26,
     sellerLevel: 'Platinum',
-    xpPoints: 2100,
+    xpPoints: 2200,
     badges: ['Creative Pro', 'Community Helper'],
-    nexusCredits: 120,
+    nexusCredits: 220,
   },
   {
     id: 'user_3',
@@ -59,11 +59,11 @@ export const dummyUsers: User[] = [
     followers: [],
     createdAt: new Date().toISOString(),
     rating: 4.7,
-    totalSales: 30,
+    totalSales: 32,
     sellerLevel: 'Gold',
-    xpPoints: 1800,
+    xpPoints: 1950,
     badges: ['Bookworm', 'Top Reviewer'],
-    nexusCredits: 75,
+    nexusCredits: 175,
   },
 ];
 
@@ -118,8 +118,8 @@ export const dummyListings: Listing[] = [
     mediaType: 'image',
     sellerId: 'user_1',
     seller: getListingSeller('user_1'),
-    status: 'active',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1).toISOString(),
+    status: 'sold',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString(),
     college: 'IIT Bombay',
   },
   {
@@ -174,8 +174,8 @@ export const dummyListings: Listing[] = [
     mediaType: 'image',
     sellerId: 'user_3',
     seller: getListingSeller('user_3'),
-    status: 'active',
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 6).toISOString(),
+    status: 'sold',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 45).toISOString(),
     college: 'Delhi University',
   },
   {
@@ -305,3 +305,49 @@ export const dummyListings: Listing[] = [
     college: 'Delhi University',
   }
 ];
+
+export const dummyTransactions: Omit<Transaction, 'id'>[] = [
+    {
+        transactionId: 'txn_1',
+        buyerId: 'user_2',
+        sellerId: 'user_1',
+        listingId: 'listing_3',
+        amount: 1500,
+        status: 'completed',
+        paymentMethod: 'NexusCredits',
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 29).toISOString(),
+    },
+    {
+        transactionId: 'txn_2',
+        buyerId: 'user_1',
+        sellerId: 'user_3',
+        listingId: 'listing_7',
+        amount: 750,
+        status: 'completed',
+        paymentMethod: 'NexusCredits',
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 44).toISOString(),
+    }
+];
+
+export const dummyReviews: Omit<Review, 'id' | 'reviewId'>[] = [
+    {
+        listingId: 'listing_3',
+        sellerId: 'user_1',
+        buyerId: 'user_2',
+        reviewerId: 'user_2',
+        rating: 5,
+        comment: 'Books were in perfect condition, just as described. Priya was super quick to respond and arrange the pickup. Highly recommend!',
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 28).toISOString(),
+    },
+    {
+        listingId: 'listing_7',
+        sellerId: 'user_3',
+        buyerId: 'user_1',
+        reviewerId: 'user_1',
+        rating: 4,
+        comment: 'Great collection of books! Ananya was very helpful. One of the book covers was a little worn, but otherwise a great deal.',
+        createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 43).toISOString(),
+    }
+];
+
+    
