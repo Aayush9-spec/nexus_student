@@ -79,8 +79,9 @@ const getListingSeller = (userId: string): ListingSeller => {
 };
 
 
-export const dummyListings: Omit<Listing, 'id'>[] = [
+export const dummyListings: Listing[] = [
   {
+    id: 'listing_1',
     title: 'GATE CSE Digital Preparation Notes',
     description: 'Comprehensive and well-organized digital notes for all Computer Science subjects for the GATE exam. Includes solved previous year papers.',
     category: 'Digital Products',
@@ -94,6 +95,7 @@ export const dummyListings: Omit<Listing, 'id'>[] = [
     college: 'IIT Bombay',
   },
   {
+    id: 'listing_2',
     title: 'Graphic Design for College Fests',
     description: 'Need posters, social media posts, or logos for your college event? I provide professional design services at student-friendly prices. Contact for a quote.',
     category: 'Services',
@@ -107,6 +109,7 @@ export const dummyListings: Omit<Listing, 'id'>[] = [
     college: 'Christ University, Bangalore',
   },
   {
+    id: 'listing_3',
     title: 'Gently Used Engineering Textbooks (1st Year)',
     description: 'Complete set of first-year engineering textbooks for CSE. Includes books for Physics, Chemistry, Maths, and C++. All in excellent condition.',
     category: 'Physical Products',
@@ -120,6 +123,7 @@ export const dummyListings: Omit<Listing, 'id'>[] = [
     college: 'IIT Bombay',
   },
   {
+    id: 'listing_4',
     title: 'Need Teammate for Smart India Hackathon',
     description: 'Looking for a backend developer (Node.js/Django) for our team for the Smart India Hackathon. We have a great idea for a healthcare solution.',
     category: 'Community/Collaboration',
@@ -133,6 +137,7 @@ export const dummyListings: Omit<Listing, 'id'>[] = [
     college: 'IIT Bombay',
   },
   {
+    id: 'listing_5',
     title: 'Homemade North Indian Tiffin Service',
     description: 'Delicious and healthy home-cooked North Indian meals delivered to your hostel or PG. Weekly and monthly plans available. (Only for IITB campus)',
     category: 'Services',
@@ -146,6 +151,7 @@ export const dummyListings: Omit<Listing, 'id'>[] = [
     college: 'Delhi University',
   },
   {
+    id: 'listing_8',
     title: 'Used Bicycle for Campus Commute',
     description: 'A Hero cycle in good working condition. Perfect for getting around the large DU campus. Minor scratches but runs smoothly. Price is negotiable.',
     category: 'Physical Products',
@@ -159,6 +165,7 @@ export const dummyListings: Omit<Listing, 'id'>[] = [
     college: 'Delhi University',
   },
   {
+    id: 'listing_7',
     title: 'Fiction Novel Bundles (Set of 3)',
     description: 'Choose any three fiction novels from my collection for a discounted price. Authors include Murakami, Adichie, and more. DM for the list.',
     category: 'Physical Products',
@@ -172,6 +179,7 @@ export const dummyListings: Omit<Listing, 'id'>[] = [
     college: 'Delhi University',
   },
   {
+    id: 'listing_9',
     title: 'Event Photography & Videography',
     description: 'Covering college events, birthdays, and workshops. I have a Sony A7III and can deliver edited photos within 48 hours.',
     category: 'Services',
@@ -185,6 +193,7 @@ export const dummyListings: Omit<Listing, 'id'>[] = [
     college: 'Christ University, Bangalore',
   },
   {
+    id: 'listing_10',
     title: 'Beginner Acoustic Guitar Lessons',
     description: 'One-on-one guitar lessons for beginners. Learn chords, strumming patterns, and your favorite songs. I have been playing for 5 years.',
     category: 'Services',
@@ -198,6 +207,7 @@ export const dummyListings: Omit<Listing, 'id'>[] = [
     college: 'Delhi University',
   },
   {
+    id: 'listing_11',
     title: 'Scientific Calculator (CASIO fx-991ES PLUS)',
     description: 'Barely used scientific calculator, essential for engineering and science students. In perfect working condition with cover.',
     category: 'Physical Products',
@@ -211,6 +221,7 @@ export const dummyListings: Omit<Listing, 'id'>[] = [
     college: 'IIT Bombay',
   },
   {
+    id: 'listing_12',
     title: 'Wacom Drawing Tablet (One by Wacom)',
     description: 'Excellent condition drawing tablet, perfect for digital art beginners. Comes with the original pen and cable. Used for one semester.',
     category: 'Physical Products',
@@ -224,6 +235,7 @@ export const dummyListings: Omit<Listing, 'id'>[] = [
     college: 'Christ University, Bangalore',
   },
   {
+    id: 'listing_13',
     title: 'Resume & Cover Letter Review',
     description: 'Get your resume and cover letter reviewed before internship season. I have experience with placements and can help you stand out.',
     category: 'Services',
@@ -237,6 +249,7 @@ export const dummyListings: Omit<Listing, 'id'>[] = [
     college: 'IIT Bombay',
   },
   {
+    id: 'listing_14',
     title: 'Looking for a Drummer and Bassist to form a Band',
     description: 'Vocalist and guitarist here, looking for a drummer and a bassist to form a rock/pop band. We practice on weekends. Let\'s jam!',
     category: 'Community/Collaboration',
@@ -250,6 +263,7 @@ export const dummyListings: Omit<Listing, 'id'>[] = [
     college: 'Delhi University',
   },
   {
+    id: 'listing_15',
     title: 'Stylish Study Table Lamp',
     description: 'A modern, minimalist LED table lamp. Perfect for late-night study sessions. It has adjustable brightness and a USB charging port.',
     category: 'Physical Products',
@@ -263,6 +277,7 @@ export const dummyListings: Omit<Listing, 'id'>[] = [
     college: 'Christ University, Bangalore',
   },
   {
+    id: 'listing_16',
     title: 'Introduction to Sketching & Drawing',
     description: 'A 4-week beginner-friendly workshop on the fundamentals of sketching and drawing. No prior experience needed! All materials will be provided.',
     category: 'Services',
@@ -276,6 +291,7 @@ export const dummyListings: Omit<Listing, 'id'>[] = [
     college: 'Delhi University',
   },
   {
+    id: 'listing_17',
     title: 'Set of 5 Classic Literature Books',
     description: 'Collection includes "Pride and Prejudice", "1984", "To Kill a Mockingbird", "The Great Gatsby", and "Moby Dick". All are paperback and in good condition.',
     category: 'Physical Products',
@@ -292,6 +308,7 @@ export const dummyListings: Omit<Listing, 'id'>[] = [
 
 export const dummyTransactions: Omit<Transaction, 'id'>[] = [
     {
+        transactionId: 'txn_1',
         buyerId: 'user_2',
         sellerId: 'user_1',
         listingId: 'listing_3',
@@ -301,6 +318,7 @@ export const dummyTransactions: Omit<Transaction, 'id'>[] = [
         createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 29).toISOString(),
     },
     {
+        transactionId: 'txn_2',
         buyerId: 'user_1',
         sellerId: 'user_3',
         listingId: 'listing_7',
@@ -311,7 +329,7 @@ export const dummyTransactions: Omit<Transaction, 'id'>[] = [
     }
 ];
 
-export const dummyReviews: Omit<Review, 'id'>[] = [
+export const dummyReviews: Omit<Review, 'id' | 'reviewId'>[] = [
     {
         listingId: 'listing_3',
         sellerId: 'user_1',

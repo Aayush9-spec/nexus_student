@@ -121,5 +121,3 @@ export function AddReviewForm({ listingId }: { listingId: string }) {
     </Card>
   );
 }
-
-    

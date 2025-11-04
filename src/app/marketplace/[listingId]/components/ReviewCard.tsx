@@ -67,5 +67,3 @@ export function ReviewCard({ review }: { review: ReviewType }) {
     </Card>
   );
 }
-
-    
