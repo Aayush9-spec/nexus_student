@@ -14,13 +14,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
 import { Star, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { Listing } from '@/lib/types';
 
 const formSchema = z.object({
   rating: z.number().min(1, 'Rating is required').max(5),
   comment: z.string().min(10, 'Comment must be at least 10 characters.'),
 });
 
-export function AddReviewForm({ listingId }: { listingId: string }) {
+export function AddReviewForm({ listing }: { listing: Listing }) {
   const { user } = useAuth();
   const firestore = useFirestore();
   const { toast } = useToast();
@@ -44,8 +45,10 @@ export function AddReviewForm({ listingId }: { listingId: string }) {
     try {
       await addDoc(collection(firestore, 'reviews'), {
         ...values,
-        listingId,
-        reviewerId: user.uid, // Use uid to match other refs
+        listingId: listing.id,
+        sellerId: listing.sellerId,
+        buyerId: user.uid,
+        reviewerId: user.uid,
         createdAt: serverTimestamp(),
       });
       toast({ title: 'Review submitted!', description: 'Thank you for your feedback.' });

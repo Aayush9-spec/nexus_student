@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Star } from 'lucide-react';
 import { doc } from 'firebase/firestore';
 import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
+import { formatDistanceToNow } from 'date-fns';
 
 function getInitials(name?: string) {
   if (!name) return '';
@@ -26,14 +27,18 @@ export function ReviewCard({ review }: { review: ReviewType }) {
 
   const { data: reviewer, isLoading } = useDoc<User>(reviewerRef);
 
+  const timeAgo = review.createdAt ? formatDistanceToNow(new Date(review.createdAt), { addSuffix: true }) : '';
+
+
   if (isLoading || !reviewer) {
     return (
         <Card>
             <CardContent className="p-4 flex gap-4 animate-pulse">
                 <div className="h-10 w-10 rounded-full bg-muted"></div>
-                <div className="space-y-2">
+                <div className="flex-grow space-y-2">
                     <div className="h-4 bg-muted w-32 rounded"></div>
                     <div className="h-4 bg-muted w-48 rounded"></div>
+                    <div className="h-4 bg-muted w-full rounded"></div>
                 </div>
             </CardContent>
         </Card>
@@ -47,10 +52,12 @@ export function ReviewCard({ review }: { review: ReviewType }) {
           <AvatarImage src={reviewer.profilePictureUrl} />
           <AvatarFallback>{getInitials(reviewer.name)}</AvatarFallback>
         </Avatar>
-        <div>
-          <div className="flex items-center gap-2 mb-1">
+        <div className="flex-grow">
+          <div className="flex items-center justify-between mb-1">
             <p className="font-semibold">{reviewer.name}</p>
-            <div className="flex items-center">
+            <span className="text-xs text-muted-foreground">{timeAgo}</span>
+          </div>
+          <div className="flex items-center mb-2">
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
@@ -60,8 +67,7 @@ export function ReviewCard({ review }: { review: ReviewType }) {
                 />
               ))}
             </div>
-          </div>
-          <p className="text-muted-foreground">{review.comment}</p>
+          <p className="text-sm text-foreground/80">{review.comment}</p>
         </div>
       </CardContent>
     </Card>

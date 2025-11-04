@@ -111,6 +111,7 @@ export type Report = {
 
 export type Transaction = {
     id: string; // Firestore document ID
+    transactionId: string;
     buyerId: string;
     sellerId: string;
     listingId: string;
@@ -119,3 +120,4 @@ export type Transaction = {
     paymentMethod: string;
     createdAt: string; // ISO string
 };
+

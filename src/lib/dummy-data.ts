@@ -329,7 +329,7 @@ export const dummyTransactions: Omit<Transaction, 'id'>[] = [
     }
 ];
 
-export const dummyReviews: Omit<Review, 'id' | 'reviewId'>[] = [
+export const dummyReviews: Omit<Review, 'id' >[] = [
     {
         listingId: 'listing_3',
         sellerId: 'user_1',

@@ -211,8 +211,8 @@ function ListingDetailContent({ listingId }: { listingId: string }) {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Button size="lg" className="w-full">
-                {listing.price > 0 ? 'Buy Now' : 'Get Item'}
+              <Button size="lg" className="w-full" disabled={listing.status === 'sold'}>
+                {listing.status === 'sold' ? 'Sold Out' : (listing.price > 0 ? 'Buy Now' : 'Get Item')}
               </Button>
               {seller && (
                 <>
@@ -255,14 +255,14 @@ function ListingDetailContent({ listingId }: { listingId: string }) {
             </div>
             <div>
               {canAddReview ? (
-                  <AddReviewForm listingId={listing.id} />
+                  <AddReviewForm listing={listing} />
               ) : (
                 <Card className="bg-muted p-4 text-center">
                   <p className="text-sm text-muted-foreground">
                     { !currentUser ? "You must be logged in to leave a review." 
                       : currentUser.id === listing.sellerId ? "You cannot review your own listing."
                       : hasUserReviewed ? "You have already reviewed this listing."
-                      : "Login to leave a review."
+                      : "You are not eligible to review this item."
                     }
                   </p>
                 </Card>
