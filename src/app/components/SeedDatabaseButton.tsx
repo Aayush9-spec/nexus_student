@@ -40,7 +40,8 @@ export function SeedDatabaseButton() {
 
       // Add listings
       dummyListings.forEach(listing => {
-        const listingRef = doc(firestore, 'listings', listing.id);
+        // We let Firestore generate the ID by creating a new doc reference
+        const listingRef = doc(collection(firestore, 'listings'));
         batch.set(listingRef, listing);
       });
 
@@ -86,5 +87,3 @@ export function SeedDatabaseButton() {
     </Button>
   );
 }
-
-    

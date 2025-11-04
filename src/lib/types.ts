@@ -1,3 +1,4 @@
+
 export type User = {
   id: string; // This is the uid from Firebase Auth
   uid: string;
@@ -62,13 +63,11 @@ export type Message = {
 };
 
 export type Review = {
-    id: string;
-    reviewId: string;
+    id: string; // Firestore document ID
     listingId: string;
     sellerId: string;
     buyerId: string;
-    reviewerId: string;
-    reviewer?: User;
+    reviewerId: string; // Should be the same as buyerId
     rating: number; // 1-5
     comment: string;
     createdAt: string; // ISO string
@@ -111,8 +110,7 @@ export type Report = {
 };
 
 export type Transaction = {
-    id: string;
-    transactionId: string;
+    id: string; // Firestore document ID
     buyerId: string;
     sellerId: string;
     listingId: string;
