@@ -48,18 +48,13 @@ export function FilterSidebar() {
     router.push(pathname + '?' + createQueryString([{ name: 'maxPrice', value: String(values[0]) }]));
   };
   
-  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newLocation = e.target.value;
-    setLocationInput(newLocation);
-  };
-  
-  // Effect to update URL when debounced location changes
+  // Update URL when debounced location changes
   useEffect(() => {
-    // We don't want to trigger a route change on the initial render.
-    if (debouncedLocation !== initialLocation) {
-        router.push(pathname + '?' + createQueryString([{ name: 'location', value: debouncedLocation }]));
+    // Only trigger a route change if the debounced value is different from what's in the URL
+    if (debouncedLocation !== (searchParams.get('location') || '')) {
+      router.push(pathname + '?' + createQueryString([{ name: 'location', value: debouncedLocation }]));
     }
-  }, [debouncedLocation, initialLocation, pathname, createQueryString, router]);
+  }, [debouncedLocation, searchParams, pathname, createQueryString, router]);
 
 
   const clearFilters = () => {
@@ -84,7 +79,7 @@ export function FilterSidebar() {
                     placeholder="Search by college..." 
                     className="pl-8" 
                     value={locationInput}
-                    onChange={handleLocationChange}
+                    onChange={(e) => setLocationInput(e.target.value)}
                 />
             </div>
         </div>
@@ -115,7 +110,7 @@ export function FilterSidebar() {
               id="price-range"
               max={5000}
               step={100}
-              defaultValue={[maxPrice]}
+              value={[maxPrice]}
               onValueChange={handlePriceChange}
             />
             <div className="relative">

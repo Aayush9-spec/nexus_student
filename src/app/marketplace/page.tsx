@@ -12,7 +12,7 @@ import { Suspense } from 'react';
 import { ListingCard } from './components/ListingCard';
 import { Skeleton } from '@/components/ui/skeleton';
 
-export default function MarketplacePage() {
+function MarketplaceContent() {
   const firestore = useFirestore();
   const searchParams = useSearchParams();
 
@@ -32,9 +32,9 @@ export default function MarketplacePage() {
         constraints.push(where('price', '<=', Number(maxPrice)));
     }
      if (location) {
-        // Note: Firestore can't do partial string matches with inequalities.
-        // For a real app, a search service like Algolia is better.
-        // Here we will filter client-side.
+        // Note: Firestore can't do partial string matches with inequalities on different fields.
+        // For a real app, a search service like Algolia is better for this.
+        // We will filter the location client-side after the initial query.
     }
     
     let q: Query<Listing> = query(collection(firestore, 'listings') as Query<Listing>, ...constraints);
@@ -55,20 +55,27 @@ export default function MarketplacePage() {
 
 
   return (
-    <Suspense fallback={<div className="container mx-auto py-8">Loading...</div>}>
-      <div className="container mx-auto py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <aside className="lg:col-span-1">
-            <div className="sticky top-20">
-              <FilterSidebar />
-            </div>
-          </aside>
-          <main className="lg:col-span-3">
-            <h1 className="text-3xl font-bold font-headline mb-6">Explore the Marketplace</h1>
-            <ListingGrid listings={filteredListings} isLoading={isLoadingListings} />
-          </main>
-        </div>
+    <div className="container mx-auto py-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <aside className="lg:col-span-1">
+          <div className="sticky top-20">
+            <FilterSidebar />
+          </div>
+        </aside>
+        <main className="lg:col-span-3">
+          <h1 className="text-3xl font-bold font-headline mb-6">Explore the Marketplace</h1>
+          <ListingGrid listings={filteredListings} isLoading={isLoadingListings} />
+        </main>
       </div>
+    </div>
+  );
+}
+
+
+export default function MarketplacePage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto py-8">Loading filters...</div>}>
+      <MarketplaceContent />
     </Suspense>
   );
 }
