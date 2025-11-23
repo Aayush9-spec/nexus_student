@@ -274,20 +274,6 @@ function ListingDetailContent({ listingId }: { listingId: string }) {
   );
 }
 
-function ClientOnly({ children }: { children: React.ReactNode }) {
-    const [hasMounted, setHasMounted] = useState(false);
-    useEffect(() => {
-        setHasMounted(true);
-    }, []);
-
-    if (!hasMounted) {
-        return null;
-    }
-
-    return <>{children}</>;
-}
-
-
 export default function ListingDetailPage({ params }: { params: { listingId: string } }) {
   const { listingId } = params;
 
@@ -295,9 +281,9 @@ export default function ListingDetailPage({ params }: { params: { listingId: str
     notFound();
   }
 
+  // The ClientOnly wrapper is no longer strictly necessary with this setup but can remain
+  // as a safeguard against hydration mismatches if more client-specific logic is added.
   return (
-    <ClientOnly>
       <ListingDetailContent listingId={listingId} />
-    </ClientOnly>
   );
 }

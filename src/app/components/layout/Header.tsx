@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CircleUser, GraduationCap, Menu, Package2, Search, ShoppingCart } from "lucide-react";
+import { CircleUser, GraduationCap, Menu, Package2, Search, ShoppingCart, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -70,6 +70,9 @@ export function Header() {
             <Link href="/marketplace" className="text-muted-foreground hover:text-foreground">
               Marketplace
             </Link>
+            <Link href="/new-listing" className="text-muted-foreground hover:text-foreground">
+                Create Listing
+            </Link>
           </nav>
         </SheetContent>
       </Sheet>
@@ -86,6 +89,14 @@ export function Header() {
             />
           </div>
         </form>
+        {user && (
+            <Link href="/new-listing">
+                <Button variant="outline">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    New Listing
+                </Button>
+            </Link>
+        )}
         <SeedDatabaseButton />
         <ThemeToggle />
         {loading ? (

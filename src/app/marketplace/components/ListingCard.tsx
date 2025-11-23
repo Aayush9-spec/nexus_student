@@ -14,6 +14,7 @@ interface ListingCardProps {
 
 export function ListingCard({ listing, className }: ListingCardProps) {
   const getInitials = (name: string) => {
+    if (!name) return '';
     const names = name.split(' ');
     if (names.length > 1) {
       return `${names[0][0]}${names[names.length - 1][0]}`;
@@ -36,6 +37,11 @@ export function ListingCard({ listing, className }: ListingCardProps) {
             {listing.mediaType === 'video' && (
                 <div className="absolute bottom-2 right-2 bg-black/50 text-white p-1 rounded-md">
                     <Video className="h-5 w-5" />
+                </div>
+            )}
+            {listing.status === 'sold' && (
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <span className="text-white text-lg font-bold bg-destructive px-3 py-1 rounded-md">SOLD</span>
                 </div>
             )}
           </div>
