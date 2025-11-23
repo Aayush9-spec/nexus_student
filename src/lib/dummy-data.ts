@@ -413,7 +413,7 @@ export const dummyListings: Listing[] = [
     title: 'iPhone 11 (White, 64GB)',
     description: 'Well-maintained iPhone 11 with 85% battery health. No scratches on the screen. Selling because I upgraded.',
     category: 'Physical Products',
-    price: 3000,
+    price: 21000,
     mediaUrl: findImage('listing-iphone-11') || "https://picsum.photos/seed/listing17/600/400",
     mediaType: 'image',
     sellerId: 'user_2',
@@ -490,3 +490,6 @@ export const dummyReviews: Omit<Review, 'id' >[] = [
     
 
 
+
+
+    
