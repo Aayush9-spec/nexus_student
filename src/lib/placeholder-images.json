@@ -33,13 +33,13 @@
     {
       "id": "listing-gate-notes",
       "description": "Digital notes for exam preparation",
-      "imageUrl": "https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzdHVkeSUyMG5vdGVzfGVufDB8fHx8MTc1OTg2OTEzNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzdHVkeSUyMG5vdGVzfGVufDB8fHx8MTc1OTg2OTEzNXww&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "study notes"
     },
     {
       "id": "listing-fest-design",
       "description": "Colorful graphic design poster for a college festival",
-      "imageUrl": "https://images.unsplash.com/photo-1719650932791-ba89aac31011?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxjb2xsZWdlJTIwZmVzdGl2YWx8ZW58MHx8fHwxNzYwOTUzMjQyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1719650932791-ba89aac31011?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxjb2xsZWdlJTIwZmVzdGl2YWx8ZW58MHx8fHwxNzYwOTUzMjQyfDA&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "college festival"
     },
     {
@@ -113,6 +113,30 @@
       "description": "A digital drawing tablet with a pen",
       "imageUrl": "https://images.unsplash.com/photo-1585435465945-b9a391604c27?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxkcmF3aW5nJTIwdGFibGV0fGVufDB8fHx8MTc2MTEyNzQ0N3ww&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "drawing tablet"
+    },
+    {
+      "id": "listing-pixel-7",
+      "description": "A Google Pixel 7 phone on a dark background",
+      "imageUrl": "https://images.unsplash.com/photo-1665553198399-6fe35c2b5358?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxnb29nbGUlMjBwaXhlbCUyMDd8ZW58MHx8fHwxNzYxMTMxNjUxfDA&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageHint": "google pixel"
+    },
+    {
+      "id": "listing-splendor",
+      "description": "A Hero Splendor motorcycle parked outdoors",
+      "imageUrl": "https://images.unsplash.com/photo-1620888219576-ab6454a938be?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxoZXJvJTIwc3BsZW5kb3J8ZW58MHx8fHwxNzYxMTMxNjUxfDA&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageHint": "hero splendor"
+    },
+    {
+      "id": "listing-iphone-11",
+      "description": "A white iPhone 11 held in a hand",
+      "imageUrl": "https://images.unsplash.com/photo-1591342593455-0ac1311559f9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxpcGhvbmUlMjAxMXxlbnwwfHx8fDE3NjExMzE2NTF8MA&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageHint": "iphone 11"
+    },
+    {
+      "id": "listing-leather-jacket",
+      "description": "A black leather jacket hanging on a rack",
+      "imageUrl": "https://images.unsplash.com/photo-1549443211-53692e6e3d6e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxsZWF0aGVyJTIwamFja2V0fGVufDB8fHx8MTc2MTEzMTY1MXww&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageHint": "leather jacket"
     }
   ]
 }

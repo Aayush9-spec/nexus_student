@@ -375,7 +375,69 @@ export const dummyListings: Listing[] = [
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 14).toISOString(),
     college: 'NIFT Delhi',
     location: duLocation,
-  }
+  },
+  {
+    id: 'listing_15',
+    title: 'Google Pixel 7 (128GB)',
+    description: 'Obsidian Black Google Pixel 7. One year old, in perfect condition with no scratches. Includes original box and cable.',
+    category: 'Physical Products',
+    price: 28999,
+    mediaUrl: findImage('listing-pixel-7') || "https://picsum.photos/seed/listing15/600/400",
+    mediaType: 'image',
+    sellerId: 'user_1',
+    seller: getListingSeller('user_1'),
+    status: 'active',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 9).toISOString(),
+    college: 'IIT Bombay',
+    location: iitBombayLocation,
+    isFeatured: true,
+  },
+  {
+    id: 'listing_16',
+    title: 'Brand New Hero Splendor Plus',
+    description: '2025 model Hero Splendor Plus, zero kilometers. Unwanted prize from a competition. All documents available. Save on showroom price.',
+    category: 'Physical Products',
+    price: 88426,
+    mediaUrl: findImage('listing-splendor') || "https://picsum.photos/seed/listing16/600/400",
+    mediaType: 'image',
+    sellerId: 'user_4',
+    seller: getListingSeller('user_4'),
+    status: 'active',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1).toISOString(),
+    college: 'IIT Madras',
+    location: iitMadrasLocation,
+    isFeatured: true,
+  },
+  {
+    id: 'listing_17',
+    title: 'iPhone 11 (White, 64GB)',
+    description: 'Well-maintained iPhone 11 with 85% battery health. No scratches on the screen. Selling because I upgraded.',
+    category: 'Physical Products',
+    price: 3000,
+    mediaUrl: findImage('listing-iphone-11') || "https://picsum.photos/seed/listing17/600/400",
+    mediaType: 'image',
+    sellerId: 'user_2',
+    seller: getListingSeller('user_2'),
+    status: 'active',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 23).toISOString(),
+    college: 'Christ University, Bangalore',
+    location: christUniLocation,
+  },
+  {
+    id: 'listing_18',
+    title: 'Premium Leather Jacket',
+    description: 'A stylish black leather jacket, perfect for Bangalore weather. Worn only a few times. Size M.',
+    category: 'Physical Products',
+    price: 3500,
+    mediaUrl: findImage('listing-leather-jacket') || "https://picsum.photos/seed/listing18/600/400",
+    mediaType: 'image',
+    sellerId: 'user_5',
+    seller: getListingSeller('user_5'),
+    status: 'active',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 20).toISOString(),
+    college: 'NIFT Delhi',
+    location: duLocation,
+  },
 ];
 
 export const dummyTransactions: Omit<Transaction, 'id'>[] = [
@@ -426,4 +488,5 @@ export const dummyReviews: Omit<Review, 'id' >[] = [
     
 
     
+
 
