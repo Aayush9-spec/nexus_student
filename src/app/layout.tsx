@@ -8,14 +8,12 @@ import { Header } from '@/app/components/layout/Header';
 import { Footer } from '@/app/components/layout/Footer';
 import { FirebaseClientProvider } from '@/firebase';
 import { ThemeProvider } from './components/ThemeProvider';
-import { LoadScript } from '@react-google-maps/api';
+import { GoogleMapsProvider } from './components/GoogleMapsProvider';
 
 export const metadata: Metadata = {
   title: 'Nexus Student Marketplace',
   description: 'A marketplace for students, by students.',
 };
-
-const libraries: "places"[] = ["places"];
 
 export default function RootLayout({
   children,
@@ -36,10 +34,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
         >
-          <LoadScript
-            googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}
-            libraries={libraries}
-            >
+          <GoogleMapsProvider>
             <FirebaseClientProvider>
               <AuthProvider>
                 <div className="relative flex min-h-screen flex-col">
@@ -50,7 +45,7 @@ export default function RootLayout({
                 <Toaster />
               </AuthProvider>
             </FirebaseClientProvider>
-          </LoadScript>
+          </GoogleMapsProvider>
         </ThemeProvider>
       </body>
     </html>
