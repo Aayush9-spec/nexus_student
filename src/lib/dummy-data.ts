@@ -153,6 +153,21 @@ const duLocation: LocationDetails = {
     "lng": 77.208151
 };
 
+const iitMadrasLocation: LocationDetails = {
+    "formatted_address": "Indian Institute of Technology Madras, Opposite to C.L.R.I, Sardar Patel Rd, Adyar, Chennai, Tamil Nadu 600036, India",
+    "address_components": [
+        { "long_name": "Indian Institute of Technology Madras", "short_name": "IIT Madras", "types": ["establishment", "point_of_interest", "university"] },
+        { "long_name": "Adyar", "short_name": "Adyar", "types": ["political", "sublocality", "sublocality_level_1"] },
+        { "long_name": "Chennai", "short_name": "Chennai", "types": ["locality", "political"] },
+        { "long_name": "Chennai", "short_name": "Chennai", "types": ["administrative_area_level_2", "political"] },
+        { "long_name": "Tamil Nadu", "short_name": "TN", "types": ["administrative_area_level_1", "political"] },
+        { "long_name": "India", "short_name": "IN", "types": ["country", "political"] },
+        { "long_name": "600036", "short_name": "600036", "types": ["postal_code"] }
+    ],
+    "lat": 13.006439,
+    "lng": 80.242316
+};
+
 // Helper to create denormalized seller objects
 const getListingSeller = (userId: string): ListingSeller => {
     const user = dummyUsers.find(u => u.id === userId);
@@ -315,6 +330,51 @@ export const dummyListings: Listing[] = [
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
     college: 'IIT Bombay',
     location: iitBombayLocation,
+  },
+  {
+    id: 'listing_12',
+    title: 'Used Mini-Fridge (90L)',
+    description: 'A 90-litre mini-fridge, perfect for a hostel room. One year old, in great working condition. Can hold drinks, snacks, and more.',
+    category: 'Physical Products',
+    price: 4500,
+    mediaUrl: findImage('listing-mini-fridge') || "https://picsum.photos/seed/listing12/600/400",
+    mediaType: 'image',
+    sellerId: 'user_4',
+    seller: getListingSeller('user_4'),
+    status: 'active',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 6).toISOString(),
+    college: 'IIT Madras',
+    location: iitMadrasLocation,
+  },
+  {
+    id: 'listing_13',
+    title: 'Professional Resume/CV Review Service',
+    description: 'Get your resume ready for placements! As a BBA student with internship experience, I will review your resume for content, formatting, and impact.',
+    category: 'Services',
+    price: 250,
+    mediaUrl: findImage('listing-resume-review') || "https://picsum.photos/seed/listing13/600/400",
+    mediaType: 'image',
+    sellerId: 'user_2',
+    seller: getListingSeller('user_2'),
+    status: 'active',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1).toISOString(),
+    college: 'Christ University, Bangalore',
+    location: christUniLocation,
+  },
+  {
+    id: 'listing_14',
+    title: 'Wacom One Drawing Tablet',
+    description: 'Wacom One (small) drawing tablet. Ideal for digital art beginners. Lightly used for one semester. Comes with the original pen and cable.',
+    category: 'Physical Products',
+    price: 2800,
+    mediaUrl: findImage('listing-drawing-tablet') || "https://picsum.photos/seed/listing14/600/400",
+    mediaType: 'image',
+    sellerId: 'user_5',
+    seller: getListingSeller('user_5'),
+    status: 'active',
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 14).toISOString(),
+    college: 'NIFT Delhi',
+    location: duLocation,
   }
 ];
 
@@ -366,3 +426,4 @@ export const dummyReviews: Omit<Review, 'id' >[] = [
     
 
     
+

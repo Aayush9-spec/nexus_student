@@ -21,7 +21,7 @@
     {
       "id": "user-4",
       "description": "Portrait of a thoughtful Indian male student",
-      "imageUrl": "https://images.unsplash.com/photo-1618355152367-d24c88514115?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxJbmRpYW4lMjBtYWxlJTIwc3R1ZGVudHxlbnwwfHx8fDE3NjEwNDE1MDR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1618355152367-d24c88514115?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxJbmRpYW4lMjBtYWxlJTIwc3R1ZGVudHxlbnwwfHx8fDE3NjEwNDE1MDR8MA&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "male student"
     },
     {
@@ -39,7 +39,7 @@
     {
       "id": "listing-fest-design",
       "description": "Colorful graphic design poster for a college festival",
-      "imageUrl": "https://images.unsplash.com/photo-1719650932791-ba89aac31011?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxjb2xsZWdlJTIwZmVzdGl2YWx8ZW58MHx8fHwxNzYwOTUzMjQyfDA&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageUrl": "https://images.unsplash.com/photo-1719650932791-ba89aac31011?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxjb2xsZWdlJTIwZmVzdGl2YWx8ZW58MHx8fHwxNzYwOTUzMjQyfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "college festival"
     },
     {
@@ -95,6 +95,24 @@
       "description": "A group of diverse Indian students collaborating",
       "imageUrl": "https://images.unsplash.com/photo-1663576139896-f1e9b9537634?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxJbmRpYW4lMjBzdHVkZW50c3xlbnwwfHx8fDE3NjA5NTMwMjh8MA&ixlib-rb-4.1.0&q=80&w=1080",
       "imageHint": "Indian students"
+    },
+    {
+      "id": "listing-mini-fridge",
+      "description": "A small mini-fridge in a dorm room",
+      "imageUrl": "https://images.unsplash.com/photo-1616428669528-5289d0de644c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtaW5pJTIwZnJpZGdlfGVufDB8fHx8MTc2MTEyNzQ0N3ww&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageHint": "mini fridge"
+    },
+    {
+      "id": "listing-resume-review",
+      "description": "A person reviewing a resume on a laptop",
+      "imageUrl": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxyZXN1bWUlMjByZXZpZXd8ZW58MHx8fHwxNzYxMTI3NDQ3fDA&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageHint": "resume review"
+    },
+    {
+      "id": "listing-drawing-tablet",
+      "description": "A digital drawing tablet with a pen",
+      "imageUrl": "https://images.unsplash.com/photo-1585435465945-b9a391604c27?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxkcmF3aW5nJTIwdGFibGV0fGVufDB8fHx8MTc2MTEyNzQ0N3ww&ixlib-rb-4.1.0&q=80&w=1080",
+      "imageHint": "drawing tablet"
     }
   ]
 }
