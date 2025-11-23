@@ -1,4 +1,5 @@
 
+
 export type User = {
   id: string; // This is the uid from Firebase Auth
   uid: string;
@@ -27,6 +28,19 @@ export const listingCategories: ListingCategory[] = ['Physical Products', 'Digit
 // Seller info is now denormalized onto the listing
 export type ListingSeller = Pick<User, 'id' | 'name' | 'profilePictureUrl'>;
 
+export type AddressComponent = {
+  long_name: string;
+  short_name: string;
+  types: string[];
+};
+
+export type LocationDetails = {
+    formatted_address: string;
+    address_components: AddressComponent[];
+    lat: number;
+    lng: number;
+};
+
 export type Listing = {
   id: string; // This is the documentId from Firestore
   sellerId: string;
@@ -43,6 +57,7 @@ export type Listing = {
   likes?: number;
   college: string;
   createdAt: string; // ISO string
+  location?: LocationDetails;
 };
 
 export type Chat = {

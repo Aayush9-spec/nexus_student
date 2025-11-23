@@ -1,16 +1,31 @@
 
 "use client";
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { collection, query, where, Query } from 'firebase/firestore';
+import { collection, query, where, Query as FirestoreQuery, getDocs } from 'firebase/firestore';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import type { Listing } from '@/lib/types';
+import type { Listing, LocationDetails } from '@/lib/types';
 import { ListingGrid } from './components/ListingGrid';
 import { FilterSidebar } from './components/FilterSidebar';
 import { Suspense } from 'react';
 import { ListingCard } from './components/ListingCard';
 import { Skeleton } from '@/components/ui/skeleton';
+
+// Haversine distance formula
+const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const R = 6371; // Radius of the earth in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const d = R * c; // Distance in km
+  return d;
+};
+
 
 function MarketplaceContent() {
   const firestore = useFirestore();
@@ -19,7 +34,9 @@ function MarketplaceContent() {
   const q = searchParams.get('q');
   const category = searchParams.get('category');
   const maxPrice = searchParams.get('maxPrice');
-  const location = searchParams.get('location');
+  const locationLat = searchParams.get('lat');
+  const locationLng = searchParams.get('lng');
+  const locationSearchTerm = searchParams.get('location');
 
   const listingsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -31,13 +48,10 @@ function MarketplaceContent() {
     if (maxPrice) {
         constraints.push(where('price', '<=', Number(maxPrice)));
     }
-     if (location) {
-        // Note: Firestore can't do partial string matches with inequalities on different fields.
-        // For a real app, a search service like Algolia is better for this.
-        // We will filter the location client-side after the initial query.
-    }
     
-    let q: Query<Listing> = query(collection(firestore, 'listings') as Query<Listing>, ...constraints);
+    // We can't query by location directly with Firestore's basic queries.
+    // So we fetch based on other filters and then filter by location client-side.
+    let q: FirestoreQuery<Listing> = query(collection(firestore, 'listings') as FirestoreQuery<Listing>, ...constraints);
     return q;
   }, [firestore, category, maxPrice]);
 
@@ -48,10 +62,22 @@ function MarketplaceContent() {
     
     return listingsData.filter(listing => {
         const queryMatch = q ? listing.title.toLowerCase().includes(q.toLowerCase()) || listing.description.toLowerCase().includes(q.toLowerCase()) : true;
-        const locationMatch = location ? (listing.college || '').toLowerCase().includes(location.toLowerCase()) : true;
-        return queryMatch && locationMatch;
+        
+        const locationMatch = () => {
+            if (locationLat && locationLng) {
+                if (!listing.location) return false;
+                const distance = getDistance(Number(locationLat), Number(locationLng), listing.location.lat, listing.location.lng);
+                return distance <= 50; // 50km radius
+            }
+            if(locationSearchTerm) {
+                return (listing.college || '').toLowerCase().includes(locationSearchTerm.toLowerCase()) || (listing.location?.formatted_address || '').toLowerCase().includes(locationSearchTerm.toLowerCase());
+            }
+            return true;
+        };
+
+        return queryMatch && locationMatch();
     });
-  }, [listingsData, q, location]);
+  }, [listingsData, q, locationLat, locationLng, locationSearchTerm]);
 
 
   return (

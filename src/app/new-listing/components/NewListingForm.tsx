@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import React from "react";
@@ -8,11 +9,10 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { categorizeListing } from "@/ai/flows/categorize-listing";
-import { listingCategories, ListingSeller } from "@/lib/types";
+import { listingCategories, ListingSeller, LocationDetails } from "@/lib/types";
 import { useFirestore } from "@/firebase";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,6 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Sparkles, Upload } from "lucide-react";
 import Image from "next/image";
+import { LocationSearchInput } from "@/app/marketplace/components/LocationSearchInput";
 
 const formSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters."),
@@ -29,6 +30,7 @@ const formSchema = z.object({
   category: z.enum(listingCategories, { required_error: "Please select a category." }),
   price: z.coerce.number().min(0, "Price must be a positive number."),
   media: z.instanceof(File).refine(file => file.size > 0, "Image or video is required."),
+  location: z.custom<LocationDetails | null>(data => data !== undefined, "Location is required."),
 });
 
 export function NewListingForm() {
@@ -46,6 +48,7 @@ export function NewListingForm() {
       title: "",
       description: "",
       price: 0,
+      location: null,
     },
   });
   
@@ -96,8 +99,8 @@ export function NewListingForm() {
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!user || !firestore) {
-      toast({ title: "Error", description: "You must be logged in to create a listing.", variant: "destructive" });
+    if (!user || !firestore || !values.location) {
+      toast({ title: "Error", description: "You must be logged in and provide a location to create a listing.", variant: "destructive" });
       return;
     }
     setIsSubmitting(true);
@@ -130,6 +133,7 @@ export function NewListingForm() {
         college: user.college, 
         createdAt: serverTimestamp(),
         status: 'active',
+        location: values.location,
       });
 
       toast({
@@ -162,6 +166,20 @@ export function NewListingForm() {
             <FormField control={form.control} name="description" render={({ field }) => (
               <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea placeholder="Describe your product or service in detail..." rows={5} {...field} /></FormControl><FormMessage /></FormItem>
             )} />
+
+             <Controller
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Location</FormLabel>
+                        <FormControl>
+                            <LocationSearchInput onLocationSelect={(loc) => field.onChange(loc)} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
 
             <div className="space-y-2">
                 <div className="flex items-center justify-between">

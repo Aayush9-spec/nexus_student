@@ -1,5 +1,5 @@
 
-import type { User, Listing, ListingSeller, Review, Transaction } from '@/lib/types';
+import type { User, Listing, ListingSeller, Review, Transaction, LocationDetails } from '@/lib/types';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const findImage = (id: string) => PlaceHolderImages.find(img => img.id === id)?.imageUrl || '';
@@ -107,6 +107,52 @@ export const dummyUsers: User[] = [
   }
 ];
 
+const iitBombayLocation: LocationDetails = {
+    "formatted_address": "IIT Bombay, Main Gate Road, IIT Area, Powai, Mumbai, Maharashtra 400076, India",
+    "address_components": [
+        { "long_name": "Indian Institute of Technology Bombay", "short_name": "IIT Bombay", "types": ["establishment", "point_of_interest", "university"] },
+        { "long_name": "Powai", "short_name": "Powai", "types": ["political", "sublocality", "sublocality_level_1"] },
+        { "long_name": "Mumbai", "short_name": "Mumbai", "types": ["locality", "political"] },
+        { "long_name": "Mumbai Suburban", "short_name": "Mumbai Suburban", "types": ["administrative_area_level_2", "political"] },
+        { "long_name": "Maharashtra", "short_name": "MH", "types": ["administrative_area_level_1", "political"] },
+        { "long_name": "India", "short_name": "IN", "types": ["country", "political"] },
+        { "long_name": "400076", "short_name": "400076", "types": ["postal_code"] }
+    ],
+    "lat": 19.1332353,
+    "lng": 72.9134939
+};
+
+const christUniLocation: LocationDetails = {
+    "formatted_address": "Christ University, Hosur Road, Bhavani Nagar, S.G. Palya, Bengaluru, Karnataka 560029, India",
+    "address_components": [
+      { "long_name": "Christ University", "short_name": "Christ University", "types": ["establishment", "point_of_interest", "university"] },
+      { "long_name": "Bhavani Nagar", "short_name": "Bhavani Nagar", "types": ["political", "sublocality", "sublocality_level_2"] },
+      { "long_name": "S.G. Palya", "short_name": "S.G. Palya", "types": ["political", "sublocality", "sublocality_level_1"] },
+      { "long_name": "Bengaluru", "short_name": "Bengaluru", "types": ["locality", "political"] },
+      { "long_name": "Bangalore Urban", "short_name": "Bangalore Urban", "types": ["administrative_area_level_2", "political"] },
+      { "long_name": "Karnataka", "short_name": "KA", "types": ["administrative_area_level_1", "political"] },
+      { "long_name": "India", "short_name": "IN", "types": ["country", "political"] },
+      { "long_name": "560029", "short_name": "560029", "types": ["postal_code"] }
+    ],
+    "lat": 12.9343698,
+    "lng": 77.6045959
+};
+
+const duLocation: LocationDetails = {
+    "formatted_address": "University of Delhi, Sudhir Bose Marg, University Area, New Delhi, Delhi 110007, India",
+    "address_components": [
+        { "long_name": "University of Delhi", "short_name": "University of Delhi", "types": ["establishment", "point_of_interest", "university"] },
+        { "long_name": "University Area", "short_name": "University Area", "types": ["political", "sublocality", "sublocality_level_1"] },
+        { "long_name": "New Delhi", "short_name": "New Delhi", "types": ["locality", "political"] },
+        { "long_name": "New Delhi", "short_name": "New Delhi", "types": ["administrative_area_level_2", "political"] },
+        { "long_name": "Delhi", "short_name": "DL", "types": ["administrative_area_level_1", "political"] },
+        { "long_name": "India", "short_name": "IN", "types": ["country", "political"] },
+        { "long_name": "110007", "short_name": "110007", "types": ["postal_code"] }
+    ],
+    "lat": 28.6872147,
+    "lng": 77.208151
+};
+
 // Helper to create denormalized seller objects
 const getListingSeller = (userId: string): ListingSeller => {
     const user = dummyUsers.find(u => u.id === userId);
@@ -133,6 +179,7 @@ export const dummyListings: Listing[] = [
     status: 'active',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
     college: 'IIT Bombay',
+    location: iitBombayLocation,
   },
   {
     id: 'listing_2',
@@ -147,6 +194,7 @@ export const dummyListings: Listing[] = [
     status: 'active',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
     college: 'Christ University, Bangalore',
+    location: christUniLocation,
   },
   {
     id: 'listing_3',
@@ -161,6 +209,7 @@ export const dummyListings: Listing[] = [
     status: 'sold',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30).toISOString(),
     college: 'IIT Bombay',
+    location: iitBombayLocation,
   },
   {
     id: 'listing_4',
@@ -175,11 +224,12 @@ export const dummyListings: Listing[] = [
     status: 'active',
     createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
     college: 'IIT Bombay',
+    location: iitBombayLocation,
   },
   {
     id: 'listing_5',
     title: 'Homemade North Indian Tiffin Service',
-    description: 'Delicious and healthy home-cooked North Indian meals delivered to your hostel or PG. Weekly and monthly plans available. (Only for IITB campus)',
+    description: 'Delicious and healthy home-cooked North Indian meals delivered to your hostel or PG. Weekly and monthly plans available. (Only for DU campus)',
     category: 'Services',
     price: 120.00,
     mediaUrl: findImage('listing-tiffin') || "https://picsum.photos/seed/listing5/600/400",
@@ -189,6 +239,7 @@ export const dummyListings: Listing[] = [
     status: 'active',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10).toISOString(),
     college: 'Delhi University',
+    location: duLocation,
   },
   {
     id: 'listing_8',
@@ -203,6 +254,7 @@ export const dummyListings: Listing[] = [
     status: 'active',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString(),
     college: 'Delhi University',
+    location: duLocation,
   },
   {
     id: 'listing_7',
@@ -217,6 +269,7 @@ export const dummyListings: Listing[] = [
     status: 'sold',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 45).toISOString(),
     college: 'Delhi University',
+    location: duLocation,
   },
   {
     id: 'listing_9',
@@ -231,6 +284,7 @@ export const dummyListings: Listing[] = [
     status: 'active',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(),
     college: 'Christ University, Bangalore',
+    location: christUniLocation,
   },
   {
     id: 'listing_10',
@@ -245,6 +299,7 @@ export const dummyListings: Listing[] = [
     status: 'active',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 8).toISOString(),
     college: 'Delhi University',
+    location: duLocation,
   },
   {
     id: 'listing_11',
@@ -259,6 +314,7 @@ export const dummyListings: Listing[] = [
     status: 'active',
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
     college: 'IIT Bombay',
+    location: iitBombayLocation,
   }
 ];
 

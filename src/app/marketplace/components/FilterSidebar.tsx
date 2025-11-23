@@ -9,9 +9,9 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { listingCategories } from '@/lib/types';
-import { X, MapPin } from 'lucide-react';
-import { useDebounce } from 'use-debounce';
+import { listingCategories, LocationDetails } from '@/lib/types';
+import { X } from 'lucide-react';
+import { LocationSearchInput } from './LocationSearchInput';
 
 export function FilterSidebar() {
   const router = useRouter();
@@ -19,7 +19,7 @@ export function FilterSidebar() {
   const searchParams = useSearchParams();
 
   const createQueryString = useCallback(
-    (paramsToUpdate: { name: string; value: string }[]) => {
+    (paramsToUpdate: { name: string; value: string | null }[]) => {
       const params = new URLSearchParams(searchParams.toString());
       paramsToUpdate.forEach(({ name, value }) => {
         if (value) {
@@ -37,29 +37,34 @@ export function FilterSidebar() {
   const maxPrice = Number(searchParams.get('maxPrice')) || 5000;
   const initialLocation = searchParams.get('location') || '';
 
-  const [locationInput, setLocationInput] = useState(initialLocation);
-  const [debouncedLocation] = useDebounce(locationInput, 500);
 
   const handleCategoryChange = (category: string) => {
-    router.push(pathname + '?' + createQueryString([{ name: 'category', value: category === 'All' ? '' : category }]));
+    router.push(pathname + '?' + createQueryString([{ name: 'category', value: category === 'All' ? null : category }]));
   };
   
   const handlePriceChange = (values: number[]) => {
     router.push(pathname + '?' + createQueryString([{ name: 'maxPrice', value: String(values[0]) }]));
   };
-  
-  // Update URL when debounced location changes
-  useEffect(() => {
-    // Only trigger a route change if the debounced value is different from what's in the URL
-    if (debouncedLocation !== (searchParams.get('location') || '')) {
-      router.push(pathname + '?' + createQueryString([{ name: 'location', value: debouncedLocation }]));
+
+  const handleLocationSelect = (location: LocationDetails | null) => {
+    if (location) {
+        router.push(pathname + '?' + createQueryString([
+            { name: 'location', value: location.formatted_address },
+            { name: 'lat', value: String(location.lat) },
+            { name: 'lng', value: String(location.lng) }
+        ]));
+    } else {
+        router.push(pathname + '?' + createQueryString([
+            { name: 'location', value: null },
+            { name: 'lat', value: null },
+            { name: 'lng', value: null }
+        ]));
     }
-  }, [debouncedLocation, searchParams, pathname, createQueryString, router]);
+  }
 
 
   const clearFilters = () => {
     router.push(pathname);
-    setLocationInput('');
   };
 
   return (
@@ -73,15 +78,10 @@ export function FilterSidebar() {
       <CardContent className="space-y-6">
         <div>
             <Label className="font-semibold">Location</Label>
-            <div className="relative mt-2">
-                <MapPin className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input 
-                    placeholder="Search by college..." 
-                    className="pl-8" 
-                    value={locationInput}
-                    onChange={(e) => setLocationInput(e.target.value)}
-                />
-            </div>
+             <LocationSearchInput 
+                onLocationSelect={handleLocationSelect} 
+                initialValue={initialLocation}
+             />
         </div>
         <div>
           <Label className="font-semibold">Category</Label>
