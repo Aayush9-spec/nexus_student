@@ -70,9 +70,6 @@ export function Header() {
             <Link href="/marketplace" className="text-muted-foreground hover:text-foreground">
               Marketplace
             </Link>
-            <Link href="/new-listing" className="text-muted-foreground hover:text-foreground">
-              New Listing
-            </Link>
           </nav>
         </SheetContent>
       </Sheet>
@@ -89,9 +86,6 @@ export function Header() {
             />
           </div>
         </form>
-         <Link href="/new-listing" className="hidden md:inline-flex">
-          <Button>New Listing</Button>
-        </Link>
         <SeedDatabaseButton />
         <ThemeToggle />
         {loading ? (

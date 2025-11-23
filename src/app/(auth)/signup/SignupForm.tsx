@@ -84,7 +84,6 @@ export function SignupForm() {
     try {
         let finalProfilePicUrl = values.profilePictureUrl;
         if (!finalProfilePicUrl) {
-            // Fallback to a default placeholder if no image is uploaded or generated.
             toast({ title: "Setting a default profile picture..." });
             finalProfilePicUrl = "https://picsum.photos/seed/defaultuser/200";
         }

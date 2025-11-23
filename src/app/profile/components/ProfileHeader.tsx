@@ -27,7 +27,7 @@ export function ProfileHeader({ user, isOwnProfile }: ProfileHeaderProps) {
                 <AvatarFallback className="text-4xl">{getInitials(user.name)}</AvatarFallback>
             </Avatar>
             <div className="flex-grow text-center md:text-left">
-                <h1 className="text-3xl font-bold font-headline">{user.name}</h1>
+                <h1 className="text-3xl font-bold">{user.name}</h1>
                 <p className="text-lg text-muted-foreground">{user.college}</p>
                 <div className="flex gap-4 mt-4 justify-center md:justify-start">
                     <div>

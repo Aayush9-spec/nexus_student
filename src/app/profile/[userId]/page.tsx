@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { notFound } from 'next/navigation';
-import { ProfileHeader } from "../components/ProfileHeader";
-import { UserListings } from "../components/UserListings";
+import { ProfileHeader } from "./components/ProfileHeader";
+import { UserListings } from "./components/UserListings";
 import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import type { User } from '@/lib/types';
@@ -70,7 +70,6 @@ function ClientOnly({ children }: { children: React.ReactNode }) {
     }, []);
 
     if (!hasMounted) {
-        // You can return a loading skeleton here if you want.
         return null;
     }
 

@@ -31,7 +31,6 @@ function ClientOnly({ children, fallback }: { children: React.ReactNode, fallbac
 function AuthenticatedHomepageContent() {
     const firestore = useFirestore();
 
-    // Trending Listings
     const trendingQuery = useMemoFirebase(() => {
         if (!firestore) return null;
         return query(collection(firestore, 'listings'), limit(4)) as Query<Listing>;
@@ -42,7 +41,7 @@ function AuthenticatedHomepageContent() {
         <>
             <section className="container mx-auto py-12 md:py-16">
                 <div className="flex justify-between items-center mb-8">
-                    <h2 className="text-2xl md:text-3xl font-headline font-bold">Trending Listings</h2>
+                    <h2 className="text-2xl md:text-3xl font-bold">Trending Listings</h2>
                     <Link href="/marketplace">
                         <Button variant="outline">View All <ArrowRight className="ml-2 h-4 w-4" /></Button>
                     </Link>
@@ -66,7 +65,7 @@ function UnauthenticatedHomepageContent() {
         <section className="container mx-auto py-12 md:py-16">
             <Card className="text-center p-8 md:p-12">
                 <CardHeader>
-                    <CardTitle className="text-2xl md:text-3xl font-headline">Welcome to Nexus!</CardTitle>
+                    <CardTitle className="text-2xl md:text-3xl">Welcome to Nexus!</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <p className="text-lg text-muted-foreground mb-6">Log in to see trending listings and featured students from your community.</p>
@@ -101,7 +100,7 @@ export default function Home() {
         )}
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative h-full flex flex-col items-center justify-center text-center p-4">
-          <h1 className="text-4xl md:text-6xl font-headline font-bold mb-4 drop-shadow-lg">
+          <h1 className="text-4xl md:text-6xl font-bold mb-4 drop-shadow-lg">
             The Student-Powered Marketplace
           </h1>
           <p className="text-lg md:text-2xl mb-8 max-w-3xl drop-shadow-md">

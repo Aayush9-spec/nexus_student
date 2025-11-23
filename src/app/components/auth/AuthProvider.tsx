@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { createContext, useState, ReactNode, useEffect } from 'react';
@@ -34,8 +33,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (userDoc.exists()) {
           setUser({ id: userDoc.id, ...userDoc.data() } as User);
         } else {
-          // If doc doesn't exist, create it. This happens with Google Sign-In or if a user was created before the profile page existed.
-          const newUser: User = {
+          // This case can happen for users created via the Firebase console before a profile is made in the app
+           const newUser: User = {
             id: firebaseUser.uid,
             uid: firebaseUser.uid,
             name: firebaseUser.displayName || 'Nexus User',
@@ -44,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             verified: firebaseUser.emailVerified,
             profilePictureUrl: firebaseUser.photoURL || '',
             createdAt: new Date().toISOString(),
-            bio: 'Welcome to Nexus 2.0!',
+            bio: 'Welcome to Nexus!',
             rating: 0,
             totalSales: 0,
             sellerLevel: 'Newbie',
@@ -83,18 +82,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
     const firebaseUser = userCredential.user;
 
-    // Upload the profile picture to Firebase Storage
-    const storage = getStorage();
-    const storageRef = ref(storage, `profilePictures/${firebaseUser.uid}`);
-    const uploadResult = await uploadString(storageRef, profilePictureDataUri, 'data_url');
-    const profilePictureUrl = await getDownloadURL(uploadResult.ref);
-
+    let profilePictureUrl = profilePictureDataUri;
+    if (profilePictureDataUri.startsWith('data:')) {
+      const storage = getStorage();
+      const storageRef = ref(storage, `profilePictures/${firebaseUser.uid}`);
+      const uploadResult = await uploadString(storageRef, profilePictureDataUri, 'data_url');
+      profilePictureUrl = await getDownloadURL(uploadResult.ref);
+    }
+    
     const newUser: Omit<User, 'id'> = {
       uid: firebaseUser.uid,
       name,
       email,
       college,
-      verified: false, // Email not verified on signup
+      verified: false, 
       profilePictureUrl,
       createdAt: new Date().toISOString(),
       bio: 'A new member of the Nexus community!',
