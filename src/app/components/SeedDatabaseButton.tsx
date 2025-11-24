@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { useFirestore } from '@/firebase';
-import { collection, writeBatch, doc, getDocs } from 'firebase/firestore';
+import { collection, writeBatch, doc, getDocs, deleteDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { dummyUsers, dummyListings, dummyTransactions, dummyReviews } from '@/lib/dummy-data';
@@ -17,50 +17,37 @@ export function SeedDatabaseButton() {
   const seedDatabase = async () => {
     if (!firestore) return;
     setIsLoading(true);
+    toast({ title: 'Clearing and seeding database...', description: 'Please wait.' });
 
     try {
-      // Check if collections are already populated to avoid re-seeding
-      const usersSnapshot = await getDocs(collection(firestore, 'users'));
-      if (!usersSnapshot.empty) {
-        toast({
-          title: 'Database Already Seeded',
-          description: 'Your Firestore collections already contain data.',
-        });
-        setIsLoading(false);
-        return;
-      }
-      
       const batch = writeBatch(firestore);
 
-      // Add users
+      // Clear existing listings
+      const listingsSnapshot = await getDocs(collection(firestore, 'listings'));
+      listingsSnapshot.forEach(doc => batch.delete(doc.ref));
+      
+      // Clear existing users
+      const usersSnapshot = await getDocs(collection(firestore, 'users'));
+      usersSnapshot.forEach(doc => batch.delete(doc.ref));
+
+      // Add new users
       dummyUsers.forEach(user => {
         const userRef = doc(firestore, 'users', user.id);
         batch.set(userRef, user);
       });
 
-      // Add listings
+      // Add new listings
       dummyListings.forEach(listing => {
+        // Use the listing 'id' field for the document ID
         const listingRef = doc(firestore, 'listings', listing.id);
         batch.set(listingRef, listing);
-      });
-
-      // Add transactions
-      dummyTransactions.forEach(transaction => {
-        const transactionRef = doc(collection(firestore, 'transactions'));
-        batch.set(transactionRef, transaction);
-      });
-
-      // Add reviews
-      dummyReviews.forEach(review => {
-        const reviewRef = doc(collection(firestore, 'reviews'));
-        batch.set(reviewRef, review);
       });
 
       await batch.commit();
 
       toast({
         title: 'Database Seeded!',
-        description: 'Dummy data has been added to Firestore.',
+        description: 'Dummy data has been successfully loaded into Firestore.',
       });
 
     } catch (error) {
