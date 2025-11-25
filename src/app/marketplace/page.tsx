@@ -83,13 +83,13 @@ function MarketplaceContent() {
 
   return (
     <div className="container mx-auto py-8">
-       <div className="flex flex-col lg:flex-row lg:gap-8">
-        <aside className="w-full lg:w-1/4 mb-8 lg:mb-0">
+       <div className="grid grid-cols-1 lg:grid-cols-4 lg:gap-8">
+        <aside className="lg:col-span-1 mb-8 lg:mb-0">
           <div className="sticky top-20">
             <FilterSidebar />
           </div>
         </aside>
-        <main className="flex-1">
+        <main className="lg:col-span-3">
           <h1 className="text-3xl font-bold font-headline mb-6">Explore the Marketplace</h1>
           <ListingGrid listings={filteredListings} isLoading={isLoadingListings} />
         </main>
@@ -106,4 +106,3 @@ export default function MarketplacePage() {
     </Suspense>
   );
 }
-
