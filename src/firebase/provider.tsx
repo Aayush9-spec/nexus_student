@@ -64,7 +64,12 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       return;
     }
 
-    setUserAuthState({ user: null, isUserLoading: true, userError: null });
+    // Set initial loading state. Auth might already have a cached user.
+    if (auth.currentUser) {
+       setUserAuthState({ user: auth.currentUser, isUserLoading: false, userError: null });
+    } else {
+       setUserAuthState({ user: null, isUserLoading: true, userError: null });
+    }
 
     const unsubscribe = onAuthStateChanged(
       auth,
@@ -122,32 +127,49 @@ export const useFirebase = (): FirebaseServicesAndUser => {
 };
 
 export const useAuth = (): Auth => {
-  const { auth } = useFirebase();
-  return auth;
+  const context = useContext(FirebaseContext);
+  if (context === undefined) throw new Error('useAuth must be used within a FirebaseProvider.');
+  if (!context.auth) throw new Error('Auth service not available.');
+  return context.auth;
 };
 
 export const useFirestore = (): Firestore => {
-  const { firestore } = useFirebase();
-  return firestore;
+  const context = useContext(FirebaseContext);
+  if (context === undefined) throw new Error('useFirestore must be used within a FirebaseProvider.');
+  if (!context.firestore) throw new Error('Firestore service not available.');
+  return context.firestore;
 };
 
 export const useFirebaseApp = (): FirebaseApp => {
-  const { firebaseApp } = useFirebase();
-  return firebaseApp;
+  const context = useContext(FirebaseContext);
+  if (context === undefined) throw new Error('useFirebaseApp must be used within a FirebaseProvider.');
+  if (!context.firebaseApp) throw new Error('Firebase App not available.');
+  return context.firebaseApp;
 };
 
 type MemoFirebase <T> = T & {__memo?: boolean};
 
-export function useMemoFirebase<T>(factory: () => T, deps: DependencyList): T | (MemoFirebase<T>) {
+export function useMemoFirebase<T>(factory: () => T, deps: DependencyList): T {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const memoized = useMemo(factory, deps);
   
-  if(typeof memoized !== 'object' || memoized === null) return memoized;
-  (memoized as MemoFirebase<T>).__memo = true;
+  if(typeof memoized === 'object' && memoized !== null) {
+    Object.defineProperty(memoized, '__memo', {
+        value: true,
+        writable: false,
+        configurable: false,
+        enumerable: false,
+    });
+  }
   
   return memoized;
 }
 
 export const useUser = (): UserHookResult => {
-  const { user, isUserLoading, userError } = useFirebase();
+  const context = useContext(FirebaseContext);
+  if (context === undefined) {
+    throw new Error('useUser must be used within a FirebaseProvider.');
+  }
+  const { user, isUserLoading, userError } = context;
   return { user, isUserLoading, userError };
 };

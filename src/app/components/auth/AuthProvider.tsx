@@ -2,7 +2,7 @@
 
 import React, { createContext, useState, ReactNode, useEffect } from 'react';
 import { Auth, User as FirebaseAuthUser, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth as useFirebaseAuthHook, useFirestore } from '@/firebase';
 import type { User } from '@/lib/types';
 import { getStorage, ref, uploadString, getDownloadURL } from 'firebase/storage';
@@ -24,7 +24,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!auth || !firestore) return;
+    if (!auth || !firestore) {
+      setLoading(false);
+      return;
+    };
 
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser: FirebaseAuthUser | null) => {
       if (firebaseUser) {
@@ -41,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             email: firebaseUser.email!,
             college: 'Unknown',
             verified: firebaseUser.emailVerified,
-            profilePictureUrl: firebaseUser.photoURL || '',
+            profilePictureUrl: firebaseUser.photoURL || `https://picsum.photos/seed/${firebaseUser.uid}/200`,
             createdAt: new Date().toISOString(),
             bio: 'Welcome to Nexus!',
             rating: 0,
@@ -54,7 +57,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             following: [],
             followers: [],
           };
-          await setDoc(userDocRef, newUser);
+          // Don't await this, let it happen in the background
+          setDoc(userDocRef, newUser, { merge: true });
           setUser(newUser);
         }
       } else {
@@ -86,8 +90,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (profilePictureDataUri.startsWith('data:')) {
       const storage = getStorage();
       const storageRef = ref(storage, `profilePictures/${firebaseUser.uid}`);
-      const uploadResult = await uploadString(storageRef, profilePictureDataUri, 'data_url');
-      profilePictureUrl = await getDownloadURL(uploadResult.ref);
+      try {
+        const uploadResult = await uploadString(storageRef, profilePictureDataUri, 'data_url');
+        profilePictureUrl = await getDownloadURL(uploadResult.ref);
+      } catch (e) {
+        console.error("Profile picture upload failed, falling back", e);
+        profilePictureUrl = `https://picsum.photos/seed/${firebaseUser.uid}/200`;
+      }
     }
     
     const newUser: Omit<User, 'id'> = {
@@ -110,6 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       following: [],
     };
     
+    // This will create the user document. The onAuthStateChanged listener will pick it up.
     await setDoc(doc(firestore, "users", firebaseUser.uid), newUser);
   };
 

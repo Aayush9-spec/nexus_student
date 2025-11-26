@@ -1,16 +1,12 @@
-
-
 "use client";
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { collection, query, where, Query as FirestoreQuery, getDocs } from 'firebase/firestore';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import type { Listing, LocationDetails } from '@/lib/types';
 import { ListingGrid } from './components/ListingGrid';
 import { FilterSidebar } from './components/FilterSidebar';
-import { Suspense } from 'react';
-import { ListingCard } from './components/ListingCard';
 import { Skeleton } from '@/components/ui/skeleton';
 
 // Haversine distance formula
@@ -52,8 +48,7 @@ function MarketplaceContent() {
     
     // We can't query by location directly with Firestore's basic queries.
     // So we fetch based on other filters and then filter by location client-side.
-    let q: FirestoreQuery<Listing> = query(collection(firestore, 'listings') as FirestoreQuery<Listing>, ...constraints);
-    return q;
+    return query(collection(firestore, 'listings'), ...constraints) as FirestoreQuery<Listing>;
   }, [firestore, category, maxPrice]);
 
   const { data: listingsData, isLoading: isLoadingListings } = useCollection<Listing>(listingsQuery);
@@ -65,12 +60,11 @@ function MarketplaceContent() {
         const queryMatch = q ? listing.title.toLowerCase().includes(q.toLowerCase()) || listing.description.toLowerCase().includes(q.toLowerCase()) : true;
         
         const locationMatch = () => {
-            if (locationLat && locationLng) {
-                if (!listing.location) return false;
+            if (locationLat && locationLng && listing.location?.lat && listing.location?.lng) {
                 const distance = getDistance(Number(locationLat), Number(locationLng), listing.location.lat, listing.location.lng);
                 return distance <= 50; // 50km radius
             }
-            if(locationSearchTerm) {
+            if(locationSearchTerm && !locationLat) { // Fallback to text search if no lat/lng
                 return (listing.college || '').toLowerCase().includes(locationSearchTerm.toLowerCase()) || (listing.location?.formatted_address || '').toLowerCase().includes(locationSearchTerm.toLowerCase());
             }
             return true;
@@ -82,14 +76,14 @@ function MarketplaceContent() {
 
 
   return (
-    <div className="container mx-auto py-8">
-       <div className="grid grid-cols-1 lg:grid-cols-4 lg:gap-8">
-        <aside className="lg:col-span-1 mb-8 lg:mb-0">
+     <div className="container mx-auto py-8">
+      <div className="flex flex-col lg:flex-row lg:gap-8">
+        <aside className="lg:w-1/4 mb-8 lg:mb-0">
           <div className="sticky top-20">
             <FilterSidebar />
           </div>
         </aside>
-        <main className="lg:col-span-3">
+        <main className="flex-1 lg:w-3/4">
           <h1 className="text-3xl font-bold font-headline mb-6">Explore the Marketplace</h1>
           <ListingGrid listings={filteredListings} isLoading={isLoadingListings} />
         </main>
@@ -101,8 +95,31 @@ function MarketplaceContent() {
 
 export default function MarketplacePage() {
   return (
-    <Suspense fallback={<div className="container mx-auto py-8">Loading filters...</div>}>
+    <Suspense fallback={<MarketplaceSkeleton />}>
       <MarketplaceContent />
     </Suspense>
   );
+}
+
+
+function MarketplaceSkeleton() {
+    return (
+        <div className="container mx-auto py-8">
+            <div className="flex flex-col lg:flex-row lg:gap-8">
+                <aside className="lg:w-1/4 mb-8 lg:mb-0">
+                    <div className="sticky top-20">
+                        <Skeleton className="h-[450px] w-full" />
+                    </div>
+                </aside>
+                <main className="flex-1 lg:w-3/4">
+                    <Skeleton className="h-9 w-72 mb-6" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {[...Array(6)].map((_, i) => (
+                        <Skeleton key={i} className="h-96 w-full" />
+                        ))}
+                    </div>
+                </main>
+            </div>
+        </div>
+    );
 }

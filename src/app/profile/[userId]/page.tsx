@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { ProfileHeader } from "../components/ProfileHeader";
 import { UserListings } from "../components/UserListings";
@@ -12,46 +12,24 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 function ProfileView({ userId }: { userId: string }) {
   const firestore = useFirestore();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, loading: isAuthLoading } = useAuth();
 
   const userRef = useMemoFirebase(() => {
     if (!firestore || !userId) return null;
     return doc(firestore, 'users', userId);
   }, [firestore, userId]);
 
-  const { data: user, isLoading } = useDoc<User>(userRef);
+  const { data: user, isLoading: isUserDocLoading } = useDoc<User>(userRef);
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto py-8">
-        <div className="space-y-8">
-          <div className="bg-card p-6 md:p-8 rounded-lg animate-pulse">
-             <div className="flex flex-col md:flex-row items-center gap-6">
-                <div className="w-32 h-32 rounded-full bg-muted"></div>
-                <div className="flex-grow text-center md:text-left space-y-3">
-                    <div className="h-8 bg-muted rounded w-48 mx-auto md:mx-0"></div>
-                    <div className="h-6 bg-muted rounded w-32 mx-auto md:mx-0"></div>
-                </div>
-            </div>
-          </div>
-          <div>
-            <div className="h-8 bg-muted rounded w-40 mb-6"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {[...Array(4)].map((_, i) => (
-                  <div key={i} className="animate-pulse bg-muted rounded-lg h-80"></div>
-                ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+  if (isAuthLoading || isUserDocLoading) {
+    return <ProfileSkeleton />;
   }
 
   if (!user) {
     notFound();
   }
   
-  const isOwnProfile = currentUser?.id === user.id;
+  const isOwnProfile = currentUser?.uid === user.id;
 
   return (
     <div className="container mx-auto py-8">
@@ -63,17 +41,44 @@ function ProfileView({ userId }: { userId: string }) {
   );
 }
 
-function ClientOnly({ children }: { children: React.ReactNode }) {
-    const [hasMounted, setHasMounted] = useState(false);
-    useEffect(() => {
-        setHasMounted(true);
-    }, []);
-
-    if (!hasMounted) {
-        return null;
-    }
-
-    return <>{children}</>;
+function ProfileSkeleton() {
+  return (
+    <div className="container mx-auto py-8">
+      <div className="space-y-8">
+        <div className="bg-card p-6 md:p-8 rounded-lg">
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <Skeleton className="w-32 h-32 rounded-full" />
+              <div className="flex-grow text-center md:text-left space-y-3">
+                  <Skeleton className="h-8 bg-muted rounded w-48 mx-auto md:mx-0" />
+                  <Skeleton className="h-6 bg-muted rounded w-32 mx-auto md:mx-0" />
+                  <div className="flex gap-4 mt-4 justify-center md:justify-start">
+                    <div className="space-y-2"><Skeleton className="h-5 w-12" /><Skeleton className="h-4 w-20" /></div>
+                    <div className="space-y-2"><Skeleton className="h-5 w-12" /><Skeleton className="h-4 w-20" /></div>
+                  </div>
+              </div>
+              <Skeleton className="h-10 w-32" />
+          </div>
+          <div className="mt-6 space-y-4">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-2/3" />
+              <div className="flex flex-wrap gap-2 pt-2">
+                <Skeleton className="h-6 w-20 rounded-full" />
+                <Skeleton className="h-6 w-24 rounded-full" />
+                <Skeleton className="h-6 w-16 rounded-full" />
+              </div>
+          </div>
+        </div>
+        <div>
+          <Skeleton className="h-8 w-40 mb-6" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[...Array(4)].map((_, i) => (
+                <Skeleton key={i} className="bg-muted rounded-lg h-80" />
+              ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 
@@ -85,8 +90,8 @@ export default function ProfilePage({ params }: { params: { userId: string } }) 
   }
 
   return (
-    <ClientOnly>
+    <Suspense fallback={<ProfileSkeleton />}>
       <ProfileView userId={userId} />
-    </ClientOnly>
+    </Suspense>
   );
 }
