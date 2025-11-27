@@ -33,7 +33,7 @@ export function Header() {
     }
     return names[0].substring(0, 2);
   };
-  
+
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -44,7 +44,7 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-card px-4 md:px-6 z-50">
+    <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-md px-4 md:px-6 z-50 transition-all duration-300 supports-[backdrop-filter]:bg-background/60">
       <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
         <Link href="/" className="flex items-center gap-2 text-lg font-semibold md:text-base">
           <Logo />
@@ -71,7 +71,7 @@ export function Header() {
               Marketplace
             </Link>
             <Link href="/new-listing" className="text-muted-foreground hover:text-foreground">
-                Create Listing
+              Create Listing
             </Link>
           </nav>
         </SheetContent>
@@ -90,12 +90,12 @@ export function Header() {
           </div>
         </form>
         {user && (
-            <Link href="/new-listing">
-                <Button variant="outline">
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    New Listing
-                </Button>
-            </Link>
+          <Link href="/new-listing">
+            <Button variant="outline">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              New Listing
+            </Button>
+          </Link>
         )}
         <SeedDatabaseButton />
         <ThemeToggle />
@@ -118,13 +118,16 @@ export function Header() {
               <DropdownMenuItem asChild>
                 <Link href={`/profile/${user.id}`}>Profile</Link>
               </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/chat">Messages</Link>
+              </DropdownMenuItem>
               <DropdownMenuItem disabled>Settings</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-           <Link href="/login">
+          <Link href="/login">
             <Button>Login</Button>
           </Link>
         )}

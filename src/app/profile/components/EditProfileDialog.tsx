@@ -27,8 +27,16 @@ import { X } from 'lucide-react';
 
 const formSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
+  college: z.string().optional(),
   bio: z.string().optional(),
   skills: z.array(z.string()).optional(),
+  socialLinks: z.object({
+    linkedin: z.string().optional(),
+    github: z.string().optional(),
+    twitter: z.string().optional(),
+    instagram: z.string().optional(),
+    website: z.string().optional(),
+  }).optional(),
 });
 
 export function EditProfileDialog({ user }: { user: User }) {
@@ -42,8 +50,16 @@ export function EditProfileDialog({ user }: { user: User }) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: user.name || '',
+      college: user.college || '',
       bio: user.bio || '',
       skills: user.skills || [],
+      socialLinks: {
+        linkedin: user.socialLinks?.linkedin || '',
+        github: user.socialLinks?.github || '',
+        twitter: user.socialLinks?.twitter || '',
+        instagram: user.socialLinks?.instagram || '',
+        website: user.socialLinks?.website || '',
+      },
     },
   });
 
@@ -108,6 +124,19 @@ export function EditProfileDialog({ user }: { user: User }) {
             />
             <FormField
               control={form.control}
+              name="college"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>College / University</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. Stanford University" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="bio"
               render={({ field }) => (
                 <FormItem>
@@ -119,14 +148,14 @@ export function EditProfileDialog({ user }: { user: User }) {
                 </FormItem>
               )}
             />
-             <FormField
+            <FormField
               control={form.control}
               name="skills"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Skills</FormLabel>
-                   <div className="flex gap-2">
-                    <Input 
+                  <div className="flex gap-2">
+                    <Input
                       value={skillInput}
                       onChange={(e) => setSkillInput(e.target.value)}
                       onKeyDown={(e) => {
@@ -144,7 +173,7 @@ export function EditProfileDialog({ user }: { user: User }) {
                       <Badge key={skill} variant="secondary" className="flex items-center gap-1">
                         {skill}
                         <button type="button" onClick={() => handleRemoveSkill(skill)} className="ml-1 rounded-full hover:bg-destructive/20 p-0.5">
-                            <X className="h-3 w-3" />
+                          <X className="h-3 w-3" />
                         </button>
                       </Badge>
                     ))}
@@ -153,6 +182,52 @@ export function EditProfileDialog({ user }: { user: User }) {
                 </FormItem>
               )}
             />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="socialLinks.linkedin"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>LinkedIn URL</FormLabel>
+                    <FormControl><Input placeholder="https://linkedin.com/in/..." {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="socialLinks.github"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>GitHub URL</FormLabel>
+                    <FormControl><Input placeholder="https://github.com/..." {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="socialLinks.instagram"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Instagram URL</FormLabel>
+                    <FormControl><Input placeholder="https://instagram.com/..." {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="socialLinks.website"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Website URL</FormLabel>
+                    <FormControl><Input placeholder="https://yourwebsite.com" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <DialogFooter>
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

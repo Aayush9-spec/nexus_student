@@ -1,11 +1,42 @@
-
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow read/write access to all documents for any authenticated user.
-    // This is permissive for development but should be locked down for production.
-    match /{document=**} {
-      allow read, write: if request.auth != null;
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Users: Public read (for profiles), Auth write (for seeding/editing)
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Listings: Public read, Auth write
+    match /listings/{listingId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+    
+    // Chats: Authenticated users can read/write
+    match /chats/{chatId} {
+      allow read, write: if isAuthenticated();
+      
+      match /messages/{messageId} {
+        allow read, write: if isAuthenticated();
+      }
+    }
+
+    // Reviews: Public read, Auth write
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+    
+    // Transactions: Auth only
+    match /transactions/{transactionId} {
+      allow read, write: if isAuthenticated();
     }
   }
 }

@@ -64,7 +64,7 @@ export function SignupForm() {
       setIsGenerating(false);
     }
   };
-  
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -82,20 +82,31 @@ export function SignupForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     try {
-        let finalProfilePicUrl = values.profilePictureUrl;
-        if (!finalProfilePicUrl) {
-            toast({ title: "Setting a default profile picture..." });
-            finalProfilePicUrl = "https://picsum.photos/seed/defaultuser/200";
-        }
+      let finalProfilePicUrl = values.profilePictureUrl;
+      if (!finalProfilePicUrl) {
+        toast({ title: "Setting a default profile picture..." });
+        finalProfilePicUrl = "https://picsum.photos/seed/defaultuser/200";
+      }
 
-        await signup(values.name, values.email, values.password, values.college, finalProfilePicUrl);
-        toast({ title: "Welcome!", description: "Your account has been created." });
-        router.push("/marketplace");
-    } catch (error) {
+      await signup(values.name, values.email, values.password, values.college, finalProfilePicUrl);
+      toast({ title: "Welcome!", description: "Your account has been created." });
+      router.push("/marketplace");
+    } catch (error: any) {
+      let errorMessage = "An unknown error occurred.";
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = "This email is already in use. Please log in instead.";
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = "Password should be at least 6 characters.";
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = "Please enter a valid email address.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
       toast({
         variant: "destructive",
         title: "Signup Failed",
-        description: error instanceof Error ? error.message : "An unknown error occurred.",
+        description: errorMessage,
       });
     } finally {
       setIsSubmitting(false);
@@ -122,29 +133,29 @@ export function SignupForm() {
               </Avatar>
               <div className="flex gap-2">
                 <Button type="button" variant="outline" size="sm" onClick={() => document.getElementById('file-upload')?.click()}>
-                  <Upload className="mr-2 h-4 w-4"/> Upload
+                  <Upload className="mr-2 h-4 w-4" /> Upload
                 </Button>
                 <input type="file" id="file-upload" className="hidden" accept="image/*" onChange={handleFileChange} />
                 <Button type="button" size="sm" onClick={handleGenerateImage} disabled={isGenerating}>
-                  {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4" />}
+                  {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                   Generate with AI
                 </Button>
               </div>
             </FormItem>
-            
+
             <FormField control={form.control} name="name" render={({ field }) => (
-                <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Priya Sharma" {...field} /></FormControl><FormMessage /></FormItem>
-            )}/>
+              <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Priya Sharma" {...field} /></FormControl><FormMessage /></FormItem>
+            )} />
             <FormField control={form.control} name="email" render={({ field }) => (
-                <FormItem><FormLabel>Email</FormLabel><FormControl><Input placeholder="priya.sharma@example.com" {...field} /></FormControl><FormMessage /></FormItem>
-            )}/>
+              <FormItem><FormLabel>Email</FormLabel><FormControl><Input placeholder="priya.sharma@example.com" {...field} /></FormControl><FormMessage /></FormItem>
+            )} />
             <FormField control={form.control} name="college" render={({ field }) => (
-                <FormItem><FormLabel>College/University</FormLabel><FormControl><Input placeholder="IIT Bombay" {...field} /></FormControl><FormMessage /></FormItem>
-            )}/>
+              <FormItem><FormLabel>College/University</FormLabel><FormControl><Input placeholder="IIT Bombay" {...field} /></FormControl><FormMessage /></FormItem>
+            )} />
             <FormField control={form.control} name="password" render={({ field }) => (
-                <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" {...field} /></FormControl><FormMessage /></FormItem>
-            )}/>
-            
+              <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" {...field} /></FormControl><FormMessage /></FormItem>
+            )} />
+
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Sign Up

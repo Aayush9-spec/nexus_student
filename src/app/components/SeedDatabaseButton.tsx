@@ -25,7 +25,7 @@ export function SeedDatabaseButton() {
       // Clear existing listings
       const listingsSnapshot = await getDocs(collection(firestore, 'listings'));
       listingsSnapshot.forEach(doc => batch.delete(doc.ref));
-      
+
       // Clear existing users
       const usersSnapshot = await getDocs(collection(firestore, 'users'));
       usersSnapshot.forEach(doc => batch.delete(doc.ref));
@@ -47,7 +47,7 @@ export function SeedDatabaseButton() {
 
       toast({
         title: 'Database Seeded!',
-        description: 'Dummy data has been successfully loaded into Firestore.',
+        description: 'Dummy data loaded. Note: This does NOT create login accounts. Please Sign Up to log in.',
       });
 
     } catch (error) {

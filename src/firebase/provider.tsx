@@ -20,10 +20,10 @@ interface UserAuthState {
 }
 
 export interface FirebaseContextState {
-  areServicesAvailable: boolean; 
+  areServicesAvailable: boolean;
   firebaseApp: FirebaseApp | null;
   firestore: Firestore | null;
-  auth: Auth | null; 
+  auth: Auth | null;
   user: User | null;
   isUserLoading: boolean;
   userError: Error | null;
@@ -54,26 +54,26 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 }) => {
   const [userAuthState, setUserAuthState] = useState<UserAuthState>({
     user: null,
-    isUserLoading: true, 
+    isUserLoading: true,
     userError: null,
   });
 
   useEffect(() => {
-    if (!auth) { 
+    if (!auth) {
       setUserAuthState({ user: null, isUserLoading: false, userError: new Error("Auth service not provided.") });
       return;
     }
 
     // Set initial loading state. Auth might already have a cached user.
     if (auth.currentUser) {
-       setUserAuthState({ user: auth.currentUser, isUserLoading: false, userError: null });
+      setUserAuthState({ user: auth.currentUser, isUserLoading: false, userError: null });
     } else {
-       setUserAuthState({ user: null, isUserLoading: true, userError: null });
+      setUserAuthState({ user: null, isUserLoading: true, userError: null });
     }
 
     const unsubscribe = onAuthStateChanged(
       auth,
-      (firebaseUser) => { 
+      (firebaseUser) => {
         setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null });
       },
       (error) => {
@@ -86,6 +86,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
   const contextValue = useMemo((): FirebaseContextState => {
     const servicesAvailable = !!(firebaseApp && firestore && auth);
+    if (!servicesAvailable) {
+      console.error("FirebaseProvider: Services not available", { firebaseApp: !!firebaseApp, firestore: !!firestore, auth: !!auth });
+    }
     return {
       areServicesAvailable: servicesAvailable,
       firebaseApp: servicesAvailable ? firebaseApp : null,
@@ -133,10 +136,13 @@ export const useAuth = (): Auth => {
   return context.auth;
 };
 
-export const useFirestore = (): Firestore => {
+export const useFirestore = (): Firestore | null => {
   const context = useContext(FirebaseContext);
   if (context === undefined) throw new Error('useFirestore must be used within a FirebaseProvider.');
-  if (!context.firestore) throw new Error('Firestore service not available.');
+  if (!context.firestore) {
+    console.warn('Firestore service not available.');
+    return null;
+  }
   return context.firestore;
 };
 
@@ -147,21 +153,21 @@ export const useFirebaseApp = (): FirebaseApp => {
   return context.firebaseApp;
 };
 
-type MemoFirebase <T> = T & {__memo?: boolean};
+type MemoFirebase<T> = T & { __memo?: boolean };
 
 export function useMemoFirebase<T>(factory: () => T, deps: DependencyList): T {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const memoized = useMemo(factory, deps);
-  
-  if(typeof memoized === 'object' && memoized !== null) {
+
+  if (typeof memoized === 'object' && memoized !== null) {
     Object.defineProperty(memoized, '__memo', {
-        value: true,
-        writable: false,
-        configurable: false,
-        enumerable: false,
+      value: true,
+      writable: false,
+      configurable: false,
+      enumerable: false,
     });
   }
-  
+
   return memoized;
 }
 

@@ -1,5 +1,6 @@
 
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from "@/components/ui/toaster";
@@ -8,7 +9,6 @@ import { Header } from '@/app/components/layout/Header';
 import { Footer } from '@/app/components/layout/Footer';
 import { FirebaseClientProvider } from '@/firebase';
 import { ThemeProvider } from './components/ThemeProvider';
-import { GoogleMapsProvider } from './components/GoogleMapsProvider';
 
 export const metadata: Metadata = {
   title: 'Nexus Student Marketplace',
@@ -27,25 +27,25 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
       </head>
-      <body className={cn('min-h-screen bg-background font-sans antialiased')}>
+      <body suppressHydrationWarning={true} className={cn('min-h-screen bg-background font-sans antialiased')}>
         <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
         >
-          <GoogleMapsProvider>
-            <FirebaseClientProvider>
-              <AuthProvider>
-                <div className="relative flex min-h-screen flex-col">
+          <FirebaseClientProvider>
+            <AuthProvider>
+              <div className="relative flex min-h-screen flex-col">
+                <Suspense fallback={<div className="h-16 border-b bg-background/80" />}>
                   <Header />
-                  <main className="flex-1">{children}</main>
-                  <Footer />
-                </div>
-                <Toaster />
-              </AuthProvider>
-            </FirebaseClientProvider>
-          </GoogleMapsProvider>
+                </Suspense>
+                <main className="flex-1">{children}</main>
+                <Footer />
+              </div>
+              <Toaster />
+            </AuthProvider>
+          </FirebaseClientProvider>
         </ThemeProvider>
       </body>
     </html>

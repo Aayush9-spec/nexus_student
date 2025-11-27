@@ -43,11 +43,20 @@ export function LoginForm() {
         description: "You've been logged in.",
       });
       router.push("/marketplace");
-    } catch (error) {
+    } catch (error: any) {
+      let errorMessage = "An unknown error occurred.";
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        errorMessage = "Invalid email or password. Please check your credentials.";
+      } else if (error.code === 'auth/too-many-requests') {
+        errorMessage = "Too many failed login attempts. Please try again later.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
       toast({
         variant: "destructive",
         title: "Login Failed",
-        description: error instanceof Error ? error.message : "An unknown error occurred.",
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);

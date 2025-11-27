@@ -3,7 +3,7 @@
 import React, { createContext, useState, ReactNode, useEffect } from 'react';
 import { Auth, User as FirebaseAuthUser, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
-import { useAuth as useFirebaseAuthHook, useFirestore } from '@/firebase';
+import { FirebaseContext } from '@/firebase/provider';
 import type { User } from '@/lib/types';
 import { getStorage, ref, uploadString, getDownloadURL } from 'firebase/storage';
 
@@ -18,13 +18,16 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const auth = useFirebaseAuthHook();
-  const firestore = useFirestore();
+  const firebaseContext = React.useContext(FirebaseContext);
+  const auth = firebaseContext?.auth;
+  const firestore = firebaseContext?.firestore;
+
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!auth || !firestore) {
+      console.warn("AuthProvider: Firebase services not available.");
       setLoading(false);
       return;
     };
@@ -37,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser({ id: userDoc.id, ...userDoc.data() } as User);
         } else {
           // This case can happen for users created via the Firebase console before a profile is made in the app
-           const newUser: User = {
+          const newUser: User = {
             id: firebaseUser.uid,
             uid: firebaseUser.uid,
             name: firebaseUser.displayName || 'Nexus User',
@@ -82,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signup = async (name: string, email: string, pass: string, college: string, profilePictureDataUri: string) => {
     if (!auth || !firestore) throw new Error("Firebase services are not available.");
-    
+
     const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
     const firebaseUser = userCredential.user;
 
@@ -98,13 +101,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         profilePictureUrl = `https://picsum.photos/seed/${firebaseUser.uid}/200`;
       }
     }
-    
+
     const newUser: Omit<User, 'id'> = {
       uid: firebaseUser.uid,
       name,
       email,
       college,
-      verified: false, 
+      verified: false,
       profilePictureUrl,
       createdAt: new Date().toISOString(),
       bio: 'A new member of the Nexus community!',
@@ -118,7 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       followers: [],
       following: [],
     };
-    
+
     // This will create the user document. The onAuthStateChanged listener will pick it up.
     await setDoc(doc(firestore, "users", firebaseUser.uid), newUser);
   };

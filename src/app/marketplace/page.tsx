@@ -1,13 +1,18 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useMemo, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { collection, query, where, Query as FirestoreQuery, getDocs } from 'firebase/firestore';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import type { Listing, LocationDetails } from '@/lib/types';
 import { ListingGrid } from './components/ListingGrid';
 import { FilterSidebar } from './components/FilterSidebar';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { PlusCircle } from 'lucide-react';
 
 // Haversine distance formula
 const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -37,56 +42,87 @@ function MarketplaceContent() {
 
   const listingsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
-    
+
     const constraints = [];
     if (category && category !== 'All') {
-        constraints.push(where('category', '==', category));
+      constraints.push(where('category', '==', category));
     }
     if (maxPrice) {
-        constraints.push(where('price', '<=', Number(maxPrice)));
+      constraints.push(where('price', '<=', Number(maxPrice)));
     }
-    
+
     // We can't query by location directly with Firestore's basic queries.
     // So we fetch based on other filters and then filter by location client-side.
     return query(collection(firestore, 'listings'), ...constraints) as FirestoreQuery<Listing>;
   }, [firestore, category, maxPrice]);
 
   const { data: listingsData, isLoading: isLoadingListings } = useCollection<Listing>(listingsQuery);
-  
+
   const filteredListings = useMemo(() => {
     if (!listingsData) return [];
-    
-    return listingsData.filter(listing => {
-        const queryMatch = q ? listing.title.toLowerCase().includes(q.toLowerCase()) || listing.description.toLowerCase().includes(q.toLowerCase()) : true;
-        
-        const locationMatch = () => {
-            if (locationLat && locationLng && listing.location?.lat && listing.location?.lng) {
-                const distance = getDistance(Number(locationLat), Number(locationLng), listing.location.lat, listing.location.lng);
-                return distance <= 50; // 50km radius
-            }
-            if(locationSearchTerm && !locationLat) { // Fallback to text search if no lat/lng
-                return (listing.college || '').toLowerCase().includes(locationSearchTerm.toLowerCase()) || (listing.location?.formatted_address || '').toLowerCase().includes(locationSearchTerm.toLowerCase());
-            }
-            return true;
-        };
 
-        return queryMatch && locationMatch();
+    return listingsData.filter(listing => {
+      const queryMatch = q ? listing.title.toLowerCase().includes(q.toLowerCase()) || listing.description.toLowerCase().includes(q.toLowerCase()) : true;
+
+      const locationMatch = () => {
+        if (locationLat && locationLng && listing.location?.lat && listing.location?.lng) {
+          const distance = getDistance(Number(locationLat), Number(locationLng), listing.location.lat, listing.location.lng);
+          return distance <= 50; // 50km radius
+        }
+        if (locationSearchTerm && !locationLat) { // Fallback to text search if no lat/lng
+          return (listing.college || '').toLowerCase().includes(locationSearchTerm.toLowerCase()) || (listing.location?.formatted_address || '').toLowerCase().includes(locationSearchTerm.toLowerCase());
+        }
+        return true;
+      };
+
+      return queryMatch && locationMatch();
     });
   }, [listingsData, q, locationLat, locationLng, locationSearchTerm]);
 
 
   return (
-     <div className="container mx-auto py-8">
-      <div className="flex flex-col lg:flex-row lg:gap-8">
-        <aside className="lg:w-1/4 mb-8 lg:mb-0">
-          <div className="sticky top-20">
-            <FilterSidebar />
+    <div className="min-h-screen bg-background/50">
+      {/* Hero Section */}
+      <div className="relative bg-gradient-to-r from-primary/10 via-primary/5 to-background border-b border-border/50">
+        <div className="container mx-auto py-12 px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="space-y-2">
+              <h1 className="text-4xl md:text-5xl font-bold font-headline bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
+                Student Marketplace
+              </h1>
+              <p className="text-lg text-muted-foreground max-w-xl">
+                Buy and sell textbooks, electronics, and dorm essentials within your campus community. Safe, verified, and student-friendly.
+              </p>
+            </div>
+            <Link href="/new-listing">
+              <Button size="lg" className="font-semibold shadow-lg hover:shadow-primary/25 transition-all hover:scale-105">
+                <PlusCircle className="mr-2 h-5 w-5" />
+                Sell an Item
+              </Button>
+            </Link>
           </div>
-        </aside>
-        <main className="flex-1 lg:w-3/4">
-          <h1 className="text-3xl font-bold font-headline mb-6">Explore the Marketplace</h1>
-          <ListingGrid listings={filteredListings} isLoading={isLoadingListings} />
-        </main>
+        </div>
+      </div>
+
+      <div className="container mx-auto py-8 px-4">
+        <div className="flex flex-col lg:flex-row lg:gap-8">
+          <aside className="lg:w-1/4 mb-8 lg:mb-0">
+            <div className="sticky top-24">
+              <FilterSidebar />
+            </div>
+          </aside>
+          <main className="flex-1 lg:w-3/4">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold">
+                {category && category !== 'All' ? `${category} Listings` : 'Trending Listings'}
+              </h2>
+              <span className="text-muted-foreground text-sm">
+                {filteredListings.length} {filteredListings.length === 1 ? 'result' : 'results'} found
+              </span>
+            </div>
+            <ListingGrid listings={filteredListings} isLoading={isLoadingListings} />
+          </main>
+        </div>
       </div>
     </div>
   );
@@ -103,23 +139,23 @@ export default function MarketplacePage() {
 
 
 function MarketplaceSkeleton() {
-    return (
-        <div className="container mx-auto py-8">
-            <div className="flex flex-col lg:flex-row lg:gap-8">
-                <aside className="lg:w-1/4 mb-8 lg:mb-0">
-                    <div className="sticky top-20">
-                        <Skeleton className="h-[450px] w-full" />
-                    </div>
-                </aside>
-                <main className="flex-1 lg:w-3/4">
-                    <Skeleton className="h-9 w-72 mb-6" />
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {[...Array(6)].map((_, i) => (
-                        <Skeleton key={i} className="h-96 w-full" />
-                        ))}
-                    </div>
-                </main>
-            </div>
-        </div>
-    );
+  return (
+    <div className="container mx-auto py-8">
+      <div className="flex flex-col lg:flex-row lg:gap-8">
+        <aside className="lg:w-1/4 mb-8 lg:mb-0">
+          <div className="sticky top-20">
+            <Skeleton className="h-[450px] w-full" />
+          </div>
+        </aside>
+        <main className="flex-1 lg:w-3/4">
+          <Skeleton className="h-9 w-72 mb-6" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <Skeleton key={i} className="h-96 w-full" />
+            ))}
+          </div>
+        </main>
+      </div>
+    </div>
+  );
 }
