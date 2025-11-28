@@ -23,7 +23,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Loader2, Pencil } from 'lucide-react';
 import type { User } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
-import { X } from 'lucide-react';
+import { X, Upload, Camera } from 'lucide-react';
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const formSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
@@ -45,6 +47,8 @@ export function EditProfileDialog({ user }: { user: User }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [skillInput, setSkillInput] = useState('');
+  const [newProfilePic, setNewProfilePic] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -77,14 +81,34 @@ export function EditProfileDialog({ user }: { user: User }) {
     const currentSkills = form.getValues('skills') || [];
     form.setValue('skills', currentSkills.filter(skill => skill !== skillToRemove));
   };
-
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setNewProfilePic(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!firestore) return;
     setIsSubmitting(true);
     try {
       const userRef = doc(firestore, 'users', user.id);
-      await updateDoc(userRef, values);
+      let updatedValues: any = { ...values };
+
+      if (newProfilePic) {
+        const storage = getStorage();
+        const storageRef = ref(storage, `users/${user.id}/profile_${Date.now()}`);
+        const uploadResult = await uploadBytes(storageRef, newProfilePic);
+        const downloadUrl = await getDownloadURL(uploadResult.ref);
+        updatedValues.profilePictureUrl = downloadUrl;
+      }
+
+      await updateDoc(userRef, updatedValues);
       toast({ title: 'Profile updated successfully!' });
       setIsOpen(false);
     } catch (error) {
@@ -109,6 +133,27 @@ export function EditProfileDialog({ user }: { user: User }) {
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="flex flex-col items-center gap-4 mb-6">
+              <div className="relative group cursor-pointer" onClick={() => document.getElementById('profile-pic-upload')?.click()}>
+                <Avatar className="w-24 h-24 border-2 border-border">
+                  <AvatarImage src={previewUrl || user.profilePictureUrl} className="object-cover" />
+                  <AvatarFallback>{user.name.substring(0, 2)}</AvatarFallback>
+                </Avatar>
+                <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Camera className="w-8 h-8 text-white" />
+                </div>
+              </div>
+              <input
+                type="file"
+                id="profile-pic-upload"
+                className="hidden"
+                accept="image/*"
+                onChange={handleFileChange}
+              />
+              <Button type="button" variant="outline" size="sm" onClick={() => document.getElementById('profile-pic-upload')?.click()}>
+                Change Photo
+              </Button>
+            </div>
             <FormField
               control={form.control}
               name="name"

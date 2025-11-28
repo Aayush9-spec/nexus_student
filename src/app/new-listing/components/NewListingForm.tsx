@@ -29,7 +29,7 @@ const formSchema = z.object({
   description: z.string().min(20, "Description must be at least 20 characters."),
   category: z.enum(listingCategories as [string, ...string[]], { required_error: "Please select a category." }),
   price: z.coerce.number().min(0, "Price must be a positive number."),
-  media: z.instanceof(File).refine(file => file.size > 0, "Image or video is required."),
+  media: z.array(z.instanceof(File)).min(1, "At least one image or video is required."),
   location: z.custom<LocationDetails | null>(data => data !== undefined, "Location is required."),
 });
 
@@ -40,7 +40,7 @@ export function NewListingForm() {
   const firestore = useFirestore();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isCategorizing, setIsCategorizing] = React.useState(false);
-  const [preview, setPreview] = React.useState<{ url: string; type: 'image' | 'video' } | null>(null);
+  const [previews, setPreviews] = React.useState<{ url: string; type: 'image' | 'video' }[]>([]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -85,17 +85,34 @@ export function NewListingForm() {
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const url = reader.result as string;
-        const type = file.type.startsWith('video') ? 'video' : 'image';
-        setPreview({ url, type });
-      };
-      reader.readAsDataURL(file);
-      form.setValue('media', file);
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      const newPreviews: { url: string; type: 'image' | 'video' }[] = [];
+      const fileArray = Array.from(files);
+
+      fileArray.forEach(file => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const url = reader.result as string;
+          const type = file.type.startsWith('video') ? 'video' : 'image';
+          newPreviews.push({ url, type });
+          if (newPreviews.length === fileArray.length) {
+            setPreviews(prev => [...prev, ...newPreviews]);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+
+      const currentMedia = form.getValues('media') || [];
+      form.setValue('media', [...currentMedia, ...fileArray]);
     }
+  };
+
+  const removeMedia = (index: number) => {
+    const currentMedia = form.getValues('media');
+    const newMedia = currentMedia.filter((_, i) => i !== index);
+    form.setValue('media', newMedia);
+    setPreviews(prev => prev.filter((_, i) => i !== index));
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -107,11 +124,16 @@ export function NewListingForm() {
     try {
       // 1. Upload media to Firebase Storage
       const storage = getStorage();
-      const mediaFile = values.media;
-      const mediaType = mediaFile.type.startsWith('video') ? 'video' : 'image';
-      const storageRef = ref(storage, `listings/${user.id}/${Date.now()}_${mediaFile.name}`);
-      const uploadResult = await uploadBytes(storageRef, mediaFile);
-      const mediaUrl = await getDownloadURL(uploadResult.ref);
+      const mediaFiles = values.media;
+      const uploadPromises = mediaFiles.map(async (file) => {
+        const storageRef = ref(storage, `listings/${user.id}/${Date.now()}_${file.name}`);
+        const uploadResult = await uploadBytes(storageRef, file);
+        return getDownloadURL(uploadResult.ref);
+      });
+
+      const mediaUrls = await Promise.all(uploadPromises);
+      const mediaUrl = mediaUrls[0]; // Main image
+      const mediaType = mediaFiles[0].type.startsWith('video') ? 'video' : 'image';
 
       // 2. Prepare denormalized seller data
       const sellerData: ListingSeller = {
@@ -127,6 +149,7 @@ export function NewListingForm() {
         category: values.category,
         price: values.price,
         mediaUrl: mediaUrl,
+        images: mediaUrls,
         mediaType: mediaType,
         sellerId: user.id,
         seller: sellerData, // Add the denormalized seller data
@@ -212,25 +235,33 @@ export function NewListingForm() {
 
             <FormField control={form.control} name="media" render={({ field }) => (
               <FormItem>
-                <FormLabel>Image or Video</FormLabel>
+                <FormLabel>Images or Video</FormLabel>
                 <FormControl>
                   <div>
                     <Button type="button" variant="outline" onClick={() => document.getElementById('media-upload')?.click()}>
                       <Upload className="mr-2 h-4 w-4" /> Upload Media
                     </Button>
-                    <input type="file" id="media-upload" className="hidden" accept="image/*,video/*" onChange={(e) => {
-                      handleFileChange(e);
-                      field.onChange(e.target.files?.[0]);
-                    }} />
+                    <input type="file" id="media-upload" className="hidden" multiple accept="image/*,video/*" onChange={handleFileChange} />
                   </div>
                 </FormControl>
-                {preview && (
-                  <div className="relative w-full aspect-video rounded-md overflow-hidden mt-2 bg-muted">
-                    {preview.type === 'image' ? (
-                      <Image src={preview.url} alt="Preview" fill className="object-cover" />
-                    ) : (
-                      <video src={preview.url} controls className="w-full h-full object-cover" />
-                    )}
+                {previews.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                    {previews.map((preview, index) => (
+                      <div key={index} className="relative aspect-video rounded-md overflow-hidden bg-muted group">
+                        {preview.type === 'image' ? (
+                          <Image src={preview.url} alt={`Preview ${index + 1}`} fill className="object-cover" />
+                        ) : (
+                          <video src={preview.url} className="w-full h-full object-cover" />
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => removeMedia(index)}
+                          className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 )}
                 <FormMessage />

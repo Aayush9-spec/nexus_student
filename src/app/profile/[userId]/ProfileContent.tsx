@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserReviews } from "../components/UserReviews";
+import { SavedListings } from "../components/SavedListings";
 
 export function ProfileContent({ userId }: { userId: string }) {
     const firestore = useFirestore();
@@ -39,9 +40,10 @@ export function ProfileContent({ userId }: { userId: string }) {
                 <ProfileHeader user={user} isOwnProfile={isOwnProfile} />
 
                 <Tabs defaultValue="listings" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
+                    <TabsList className={`grid w-full max-w-[400px] ${isOwnProfile ? 'grid-cols-3' : 'grid-cols-2'}`}>
                         <TabsTrigger value="listings">Listings</TabsTrigger>
                         <TabsTrigger value="reviews">Reviews</TabsTrigger>
+                        {isOwnProfile && <TabsTrigger value="saved">Saved</TabsTrigger>}
                     </TabsList>
                     <TabsContent value="listings" className="mt-6">
                         <UserListings userId={user.id} />
@@ -49,6 +51,11 @@ export function ProfileContent({ userId }: { userId: string }) {
                     <TabsContent value="reviews" className="mt-6">
                         <UserReviews userId={user.id} />
                     </TabsContent>
+                    {isOwnProfile && (
+                        <TabsContent value="saved" className="mt-6">
+                            <SavedListings savedListingIds={user.savedListingIds} />
+                        </TabsContent>
+                    )}
                 </Tabs>
             </div>
         </div>

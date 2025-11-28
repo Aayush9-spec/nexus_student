@@ -26,6 +26,7 @@ export type User = {
         instagram?: string;
         website?: string;
     };
+    savedListingIds?: string[];
 };
 
 export type ListingCategory = 'Physical Products' | 'Digital Products' | 'Services' | 'Community/Collaboration';
@@ -57,6 +58,7 @@ export type Listing = {
     category: ListingCategory;
     price: number;
     mediaUrl: string;
+    images?: string[]; // Multiple images support
     mediaType: 'image' | 'video';
     isFeatured?: boolean;
     status: 'active' | 'sold' | 'deleted';

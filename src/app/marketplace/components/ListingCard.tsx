@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { Video, CheckCircle2 } from 'lucide-react';
+import { SaveListingButton } from './SaveListingButton';
 
 interface ListingCardProps {
   listing: Listing;
@@ -31,7 +32,7 @@ export function ListingCard({ listing, className }: ListingCardProps) {
         <CardHeader className="p-0">
           <div className="relative aspect-video bg-muted overflow-hidden">
             <Image
-              src={listing.mediaUrl || `https://image.pollinations.ai/prompt/${encodeURIComponent(listing.title)}?width=600&height=400&nologo=true`}
+              src={listing.images?.[0] || listing.mediaUrl || `https://image.pollinations.ai/prompt/${encodeURIComponent(listing.title)}?width=600&height=400&nologo=true`}
               alt={listing.title}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -49,7 +50,10 @@ export function ListingCard({ listing, className }: ListingCardProps) {
                 <span className="text-white text-lg font-bold bg-destructive px-4 py-2 rounded-full shadow-lg transform -rotate-12 border-2 border-white">SOLD</span>
               </div>
             )}
-            <div className="absolute top-2 right-2">
+            <div className="absolute top-2 right-2 z-20">
+              <SaveListingButton listingId={listing.id} className="bg-background/50 backdrop-blur-md hover:bg-background/80 h-8 w-8" />
+            </div>
+            <div className="absolute top-2 left-2">
               <Badge variant="secondary" className="backdrop-blur-md bg-background/80 shadow-sm">{listing.category}</Badge>
             </div>
           </div>

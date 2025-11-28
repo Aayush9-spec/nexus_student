@@ -7,6 +7,7 @@ import { Star } from 'lucide-react';
 import { doc } from 'firebase/firestore';
 import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { formatDistanceToNow } from 'date-fns';
+import Link from 'next/link';
 
 function getInitials(name?: string) {
   if (!name) return '';
@@ -32,41 +33,44 @@ export function ReviewCard({ review }: { review: ReviewType }) {
 
   if (isLoading || !reviewer) {
     return (
-        <Card>
-            <CardContent className="p-4 flex gap-4 animate-pulse">
-                <div className="h-10 w-10 rounded-full bg-muted"></div>
-                <div className="flex-grow space-y-2">
-                    <div className="h-4 bg-muted w-32 rounded"></div>
-                    <div className="h-4 bg-muted w-48 rounded"></div>
-                    <div className="h-4 bg-muted w-full rounded"></div>
-                </div>
-            </CardContent>
-        </Card>
+      <Card>
+        <CardContent className="p-4 flex gap-4 animate-pulse">
+          <div className="h-10 w-10 rounded-full bg-muted"></div>
+          <div className="flex-grow space-y-2">
+            <div className="h-4 bg-muted w-32 rounded"></div>
+            <div className="h-4 bg-muted w-48 rounded"></div>
+            <div className="h-4 bg-muted w-full rounded"></div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
     <Card>
       <CardContent className="p-4 flex gap-4">
-        <Avatar>
-          <AvatarImage src={reviewer.profilePictureUrl} />
-          <AvatarFallback>{getInitials(reviewer.name)}</AvatarFallback>
-        </Avatar>
+        <Link href={`/profile/${reviewer.id}`}>
+          <Avatar className="hover:opacity-80 transition-opacity">
+            <AvatarImage src={reviewer.profilePictureUrl} />
+            <AvatarFallback>{getInitials(reviewer.name)}</AvatarFallback>
+          </Avatar>
+        </Link>
         <div className="flex-grow">
           <div className="flex items-center justify-between mb-1">
-            <p className="font-semibold">{reviewer.name}</p>
+            <Link href={`/profile/${reviewer.id}`} className="hover:underline">
+              <p className="font-semibold">{reviewer.name}</p>
+            </Link>
             <span className="text-xs text-muted-foreground">{timeAgo}</span>
           </div>
           <div className="flex items-center mb-2">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`h-4 w-4 ${
-                    i < review.rating ? 'fill-primary text-primary' : 'fill-muted stroke-muted-foreground'
+            {[...Array(5)].map((_, i) => (
+              <Star
+                key={i}
+                className={`h-4 w-4 ${i < review.rating ? 'fill-primary text-primary' : 'fill-muted stroke-muted-foreground'
                   }`}
-                />
-              ))}
-            </div>
+              />
+            ))}
+          </div>
           <p className="text-sm text-foreground/80">{review.comment}</p>
         </div>
       </CardContent>

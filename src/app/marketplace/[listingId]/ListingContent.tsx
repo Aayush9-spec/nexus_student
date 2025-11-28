@@ -8,13 +8,14 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { MapPin, Sparkles, AlertCircle } from 'lucide-react';
+import { MapPin, Sparkles, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useDoc, useFirestore, useMemoFirebase, useCollection } from '@/firebase';
 import { doc, collection, query, where, Query as FirestoreQuery, addDoc, getDocs, serverTimestamp } from 'firebase/firestore';
 import type { Listing, User, Review as ReviewType } from '@/lib/types';
 import { useMemo, useState, useEffect } from 'react';
 import { AddReviewForm } from './components/AddReviewForm';
 import { ReviewCard } from './components/ReviewCard';
+import { SaveListingButton } from '../components/SaveListingButton';
 import { useAuth } from '@/hooks/use-auth';
 import { analyzeListing, AnalyzeListingOutput } from '@/ai/flows/analyze-listing';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -207,12 +208,23 @@ export function ListingDetailContent({ listingId }: { listingId: string }) {
     }
 
     const canAddReview = currentUser && currentUser.id !== listing.sellerId && !hasUserReviewed;
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+    const images = listing.images && listing.images.length > 0 ? listing.images : [listing.mediaUrl];
+
+    const nextImage = () => {
+        setCurrentImageIndex((prev) => (prev + 1) % images.length);
+    };
+
+    const prevImage = () => {
+        setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+    };
 
     return (
         <div className="container mx-auto py-8">
             <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
                 <div className="md:col-span-2">
-                    <div className="relative aspect-video w-full overflow-hidden rounded-lg mb-4 bg-muted">
+                    <div className="relative aspect-video w-full overflow-hidden rounded-lg mb-4 bg-muted group">
                         {listing.mediaType === 'video' ? (
                             <video
                                 src={listing.mediaUrl}
@@ -222,16 +234,49 @@ export function ListingDetailContent({ listingId }: { listingId: string }) {
                                 Your browser does not support the video tag.
                             </video>
                         ) : (
-                            <Image
-                                src={listing.mediaUrl || "https://picsum.photos/seed/placeholder/800/600"}
-                                alt={listing.title}
-                                fill
-                                className="object-cover"
-                                data-ai-hint="product image"
-                            />
+                            <>
+                                <Image
+                                    src={images[currentImageIndex] || "https://picsum.photos/seed/placeholder/800/600"}
+                                    alt={listing.title}
+                                    fill
+                                    className="object-cover"
+                                    data-ai-hint="product image"
+                                />
+                                {images.length > 1 && (
+                                    <>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                            onClick={prevImage}
+                                        >
+                                            <ChevronLeft className="h-6 w-6" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                            onClick={nextImage}
+                                        >
+                                            <ChevronRight className="h-6 w-6" />
+                                        </Button>
+                                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                                            {images.map((_, index) => (
+                                                <div
+                                                    key={index}
+                                                    className={`h-2 w-2 rounded-full transition-colors ${index === currentImageIndex ? 'bg-white' : 'bg-white/50'}`}
+                                                />
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
+                            </>
                         )}
                     </div>
-                    <h1 className="text-3xl md:text-4xl font-bold font-headline mb-2">{listing.title}</h1>
+                    <div className="flex justify-between items-start gap-4">
+                        <h1 className="text-3xl md:text-4xl font-bold font-headline mb-2">{listing.title}</h1>
+                        <SaveListingButton listingId={listing.id} variant="outline" />
+                    </div>
                     <div className="flex items-center gap-2 flex-wrap">
                         <Badge variant="secondary">{listing.category}</Badge>
                         {listing.college && (
