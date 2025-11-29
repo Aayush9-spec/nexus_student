@@ -56,7 +56,7 @@ export function ListingCard({ listing, className }: ListingCardProps) {
     )}>
       <CardHeader className="p-0">
         <div className="relative aspect-video bg-muted overflow-hidden">
-          <Link href={`/marketplace/${listing.id}`} className="block w-full h-full">
+          <Link href={`/marketplace/${listing.id}`} className="block w-full h-full relative z-10">
             <Image
               src={listing.images?.[0] || listing.mediaUrl || `https://image.pollinations.ai/prompt/${encodeURIComponent(listing.title)}?width=600&height=400&nologo=true`}
               alt={listing.title}
@@ -91,7 +91,7 @@ export function ListingCard({ listing, className }: ListingCardProps) {
         </Link>
         <div className="flex items-baseline gap-1">
           <p className="text-xl font-headline font-bold text-primary">
-            {listing.price > 0 ? `₹${listing.price.toFixed(2)}` : 'Free'}
+            {listing.price > 0 ? <><span className="font-sans">₹</span>{listing.price.toFixed(2)}</> : 'Free'}
           </p>
           {listing.price > 0 && <span className="text-xs text-muted-foreground">INR</span>}
         </div>
@@ -114,7 +114,7 @@ export function ListingCard({ listing, className }: ListingCardProps) {
         )}
         <div className="flex gap-2 w-full">
           <Link href={`/marketplace/${listing.id}`} className="flex-1">
-            <Button variant="outline" className="w-full h-9 text-xs sm:text-sm">
+            <Button variant="secondary" className="w-full h-9 text-xs sm:text-sm hover:bg-secondary/80">
               <Eye className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
               Details
             </Button>

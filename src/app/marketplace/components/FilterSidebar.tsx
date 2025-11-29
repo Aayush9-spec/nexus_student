@@ -32,7 +32,7 @@ export function FilterSidebar() {
     },
     [searchParams]
   );
-  
+
   const selectedCategory = searchParams.get('category') || 'All';
   const maxPrice = Number(searchParams.get('maxPrice')) || 5000;
   const initialLocation = searchParams.get('location') || '';
@@ -41,24 +41,24 @@ export function FilterSidebar() {
   const handleCategoryChange = (category: string) => {
     router.push(pathname + '?' + createQueryString([{ name: 'category', value: category === 'All' ? null : category }]));
   };
-  
+
   const handlePriceChange = (values: number[]) => {
     router.push(pathname + '?' + createQueryString([{ name: 'maxPrice', value: String(values[0]) }]));
   };
 
   const handleLocationSelect = (location: LocationDetails | null) => {
     if (location) {
-        router.push(pathname + '?' + createQueryString([
-            { name: 'location', value: location.formatted_address },
-            { name: 'lat', value: String(location.lat) },
-            { name: 'lng', value: String(location.lng) }
-        ]));
+      router.push(pathname + '?' + createQueryString([
+        { name: 'location', value: location.formatted_address },
+        { name: 'lat', value: String(location.lat) },
+        { name: 'lng', value: String(location.lng) }
+      ]));
     } else {
-        router.push(pathname + '?' + createQueryString([
-            { name: 'location', value: null },
-            { name: 'lat', value: null },
-            { name: 'lng', value: null }
-        ]));
+      router.push(pathname + '?' + createQueryString([
+        { name: 'location', value: null },
+        { name: 'lat', value: null },
+        { name: 'lng', value: null }
+      ]));
     }
   }
 
@@ -72,22 +72,22 @@ export function FilterSidebar() {
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Filters</CardTitle>
         <Button variant="ghost" size="sm" onClick={clearFilters}>
-            <X className="mr-2 h-4 w-4" /> Clear
+          <X className="mr-2 h-4 w-4" /> Clear
         </Button>
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
-            <Label className="font-semibold">Location</Label>
-             <LocationSearchInput 
-                onLocationSelect={handleLocationSelect} 
-                initialValue={initialLocation}
-             />
+          <Label className="font-semibold">Location</Label>
+          <LocationSearchInput
+            onLocationSelect={handleLocationSelect}
+            initialValue={initialLocation}
+          />
         </div>
         <div>
           <Label className="font-semibold">Category</Label>
-          <RadioGroup 
+          <RadioGroup
             value={selectedCategory}
-            onValueChange={handleCategoryChange} 
+            onValueChange={handleCategoryChange}
             className="mt-2 space-y-1"
           >
             <div className="flex items-center space-x-2">
@@ -114,8 +114,8 @@ export function FilterSidebar() {
               onValueChange={handlePriceChange}
             />
             <div className="relative">
-                <span className="absolute inset-y-0 left-3 flex items-center text-muted-foreground">₹</span>
-                <Input value={maxPrice} readOnly className="w-24 pl-6" />
+              <span className="absolute inset-y-0 left-3 flex items-center text-muted-foreground font-sans">₹</span>
+              <Input value={maxPrice} readOnly className="w-24 pl-6" />
             </div>
           </div>
         </div>
@@ -123,4 +123,4 @@ export function FilterSidebar() {
     </Card>
   );
 }
-    
+

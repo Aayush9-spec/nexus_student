@@ -73,7 +73,7 @@ export function TransactionCard({ transaction, role }: { transaction: Transactio
                             </p>
                         </div>
                         <div className="text-right">
-                            <p className="font-bold text-lg">${listing.price}</p>
+                            <p className="font-bold text-lg">₹{listing.price}</p>
                         </div>
                     </div>
                     <div className="flex justify-between items-center">

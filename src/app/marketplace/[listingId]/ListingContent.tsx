@@ -312,7 +312,7 @@ export function ListingDetailContent({ listingId }: { listingId: string }) {
                     <Card className="sticky top-24">
                         <CardHeader>
                             <CardTitle className="text-4xl font-headline text-primary">
-                                {listing.price > 0 ? `₹${listing.price.toFixed(2)}` : 'Free'}
+                                {listing.price > 0 ? <><span className="font-sans">₹</span>{listing.price.toFixed(2)}</> : 'Free'}
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">

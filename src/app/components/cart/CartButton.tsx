@@ -60,7 +60,7 @@ export function CartButton() {
                                         <div className="flex flex-1 flex-col justify-between">
                                             <div className="flex justify-between gap-2">
                                                 <h3 className="font-medium leading-none">{item.title}</h3>
-                                                <p className="font-medium">${item.price}</p>
+                                                <p className="font-medium">₹{item.price}</p>
                                             </div>
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-2">
@@ -100,7 +100,7 @@ export function CartButton() {
                             <Separator />
                             <div className="flex justify-between font-medium">
                                 <span>Total</span>
-                                <span>${total.toFixed(2)}</span>
+                                <span>₹{total.toFixed(2)}</span>
                             </div>
                             <SheetClose asChild>
                                 <Link href="/checkout">

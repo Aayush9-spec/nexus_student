@@ -230,7 +230,7 @@ export function NewListingForm() {
             </div>
 
             <FormField control={form.control} name="price" render={({ field }) => (
-              <FormItem><FormLabel>Price</FormLabel><FormControl><div className="relative"><span className="absolute inset-y-0 left-3 flex items-center text-muted-foreground">₹</span><Input type="number" step="10" placeholder="500" className="pl-6" {...field} /></div></FormControl><FormMessage /></FormItem>
+              <FormItem><FormLabel>Price</FormLabel><FormControl><div className="relative"><span className="absolute inset-y-0 left-3 flex items-center text-muted-foreground font-sans">₹</span><Input type="number" step="10" placeholder="500" className="pl-6" {...field} /></div></FormControl><FormMessage /></FormItem>
             )} />
 
             <FormField control={form.control} name="media" render={({ field }) => (
