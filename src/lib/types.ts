@@ -27,6 +27,9 @@ export type User = {
         website?: string;
     };
     savedListingIds?: string[];
+    phoneNumber?: string;
+    major?: string;
+    studentId?: string;
 };
 
 export type ListingCategory = 'Physical Products' | 'Digital Products' | 'Services' | 'Community/Collaboration';

@@ -30,6 +30,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 const formSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters.'),
   college: z.string().optional(),
+  major: z.string().optional(),
+  studentId: z.string().optional(),
+  phoneNumber: z.string().optional(),
   bio: z.string().optional(),
   skills: z.array(z.string()).optional(),
   socialLinks: z.object({
@@ -55,6 +58,9 @@ export function EditProfileDialog({ user }: { user: User }) {
     defaultValues: {
       name: user.name || '',
       college: user.college || '',
+      major: user.major || '',
+      studentId: user.studentId || '',
+      phoneNumber: user.phoneNumber || '',
       bio: user.bio || '',
       skills: user.skills || [],
       socialLinks: {
@@ -175,6 +181,47 @@ export function EditProfileDialog({ user }: { user: User }) {
                   <FormLabel>College / University</FormLabel>
                   <FormControl>
                     <Input placeholder="e.g. Stanford University" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="major"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Major / Course</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. Computer Science" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="studentId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Student ID / Roll No</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. 12345678" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <FormField
+              control={form.control}
+              name="phoneNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Phone Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. +1 234 567 8900" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

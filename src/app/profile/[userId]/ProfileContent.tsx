@@ -12,6 +12,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserReviews } from "../components/UserReviews";
 import { SavedListings } from "../components/SavedListings";
+import { UserOrders } from "../components/UserOrders";
+import { UserSales } from "../components/UserSales";
 
 export function ProfileContent({ userId }: { userId: string }) {
     const firestore = useFirestore();
@@ -40,10 +42,16 @@ export function ProfileContent({ userId }: { userId: string }) {
                 <ProfileHeader user={user} isOwnProfile={isOwnProfile} />
 
                 <Tabs defaultValue="listings" className="w-full">
-                    <TabsList className={`grid w-full max-w-[400px] ${isOwnProfile ? 'grid-cols-3' : 'grid-cols-2'}`}>
-                        <TabsTrigger value="listings">Listings</TabsTrigger>
-                        <TabsTrigger value="reviews">Reviews</TabsTrigger>
-                        {isOwnProfile && <TabsTrigger value="saved">Saved</TabsTrigger>}
+                    <TabsList className="w-full justify-start overflow-x-auto flex h-auto p-1 gap-1 bg-muted/50 rounded-lg">
+                        <TabsTrigger value="listings" className="flex-1 min-w-[80px]">Listings</TabsTrigger>
+                        <TabsTrigger value="reviews" className="flex-1 min-w-[80px]">Reviews</TabsTrigger>
+                        {isOwnProfile && (
+                            <>
+                                <TabsTrigger value="saved" className="flex-1 min-w-[80px]">Saved</TabsTrigger>
+                                <TabsTrigger value="orders" className="flex-1 min-w-[80px]">Orders</TabsTrigger>
+                                <TabsTrigger value="sales" className="flex-1 min-w-[80px]">Sales</TabsTrigger>
+                            </>
+                        )}
                     </TabsList>
                     <TabsContent value="listings" className="mt-6">
                         <UserListings userId={user.id} />
@@ -52,9 +60,17 @@ export function ProfileContent({ userId }: { userId: string }) {
                         <UserReviews userId={user.id} />
                     </TabsContent>
                     {isOwnProfile && (
-                        <TabsContent value="saved" className="mt-6">
-                            <SavedListings savedListingIds={user.savedListingIds} />
-                        </TabsContent>
+                        <>
+                            <TabsContent value="saved" className="mt-6">
+                                <SavedListings savedListingIds={user.savedListingIds} />
+                            </TabsContent>
+                            <TabsContent value="orders" className="mt-6">
+                                <UserOrders userId={user.id} />
+                            </TabsContent>
+                            <TabsContent value="sales" className="mt-6">
+                                <UserSales userId={user.id} />
+                            </TabsContent>
+                        </>
                     )}
                 </Tabs>
             </div>

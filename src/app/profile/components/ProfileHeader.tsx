@@ -120,6 +120,7 @@ export function ProfileHeader({ user, isOwnProfile }: ProfileHeaderProps) {
                                 <div className="flex items-center gap-2 text-muted-foreground mt-1">
                                     <GraduationCap className="w-4 h-4" />
                                     <span>{user.college || "University Student"}</span>
+                                    {user.major && <span className="text-muted-foreground">• {user.major}</span>}
                                 </div>
                             </div>
                             <div className="flex gap-3">
@@ -158,10 +159,24 @@ export function ProfileHeader({ user, isOwnProfile }: ProfileHeaderProps) {
                                 <span>Joined {user.createdAt ? format(new Date(user.createdAt), 'MMMM yyyy') : 'Recently'}</span>
                             </div>
                             {isOwnProfile && (
-                                <div className="flex items-center gap-1">
-                                    <Mail className="w-4 h-4" />
-                                    <span>{user.email}</span>
-                                </div>
+                                <>
+                                    <div className="flex items-center gap-1">
+                                        <Mail className="w-4 h-4" />
+                                        <span>{user.email}</span>
+                                    </div>
+                                    {user.phoneNumber && (
+                                        <div className="flex items-center gap-1">
+                                            <span className="text-muted-foreground font-semibold">Phone:</span>
+                                            <span>{user.phoneNumber}</span>
+                                        </div>
+                                    )}
+                                    {user.studentId && (
+                                        <div className="flex items-center gap-1">
+                                            <span className="text-muted-foreground font-semibold">ID:</span>
+                                            <span>{user.studentId}</span>
+                                        </div>
+                                    )}
+                                </>
                             )}
                             {user.sellerLevel && (
                                 <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
