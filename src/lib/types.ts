@@ -148,3 +148,29 @@ export type Transaction = {
     createdAt: string; // ISO string
 };
 
+export type OrderItem = {
+    listingId: string;
+    sellerId: string;
+    title: string;
+    price: number;
+    quantity: number;
+    image: string;
+};
+
+export type Order = {
+    id: string;
+    buyerId: string;
+    items: OrderItem[];
+    totalAmount: number;
+    paymentMethod: 'credit_card' | 'upi' | 'cod';
+    status: 'pending' | 'processing' | 'completed' | 'cancelled';
+    shippingAddress: {
+        name: string;
+        email: string;
+        address: string;
+        city: string;
+        zip: string;
+    };
+    createdAt: string;
+};
+

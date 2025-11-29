@@ -1,6 +1,7 @@
 "use client";
 
 import { ShoppingCart, Trash2, Plus, Minus } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Sheet,
@@ -18,13 +19,18 @@ import Image from "next/image";
 
 export function CartButton() {
     const { items, removeItem, addItem, decreaseItem, total, itemCount } = useCart();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     return (
         <Sheet>
             <SheetTrigger asChild>
                 <Button variant="outline" size="icon" className="relative">
                     <ShoppingCart className="h-5 w-5" />
-                    {itemCount > 0 && (
+                    {mounted && itemCount > 0 && (
                         <span className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
                             {itemCount}
                         </span>
