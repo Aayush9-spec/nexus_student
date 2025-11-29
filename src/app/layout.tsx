@@ -9,6 +9,7 @@ import { Header } from '@/app/components/layout/Header';
 import { Footer } from '@/app/components/layout/Footer';
 import { FirebaseClientProvider } from '@/firebase';
 import { ThemeProvider } from './components/ThemeProvider';
+import { CartProvider } from '@/context/CartContext';
 
 export const metadata: Metadata = {
   title: 'Nexus Student Marketplace',
@@ -36,14 +37,16 @@ export default function RootLayout({
         >
           <FirebaseClientProvider>
             <AuthProvider>
-              <div className="relative flex min-h-screen flex-col">
-                <Suspense fallback={<div className="h-16 border-b bg-background/80" />}>
-                  <Header />
-                </Suspense>
-                <main className="flex-1">{children}</main>
-                <Footer />
-              </div>
-              <Toaster />
+              <CartProvider>
+                <div className="relative flex min-h-screen flex-col">
+                  <Suspense fallback={<div className="h-16 border-b bg-background/80" />}>
+                    <Header />
+                  </Suspense>
+                  <main className="flex-1">{children}</main>
+                  <Footer />
+                </div>
+                <Toaster />
+              </CartProvider>
             </AuthProvider>
           </FirebaseClientProvider>
         </ThemeProvider>

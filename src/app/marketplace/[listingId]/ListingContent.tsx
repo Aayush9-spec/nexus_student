@@ -8,7 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { MapPin, Sparkles, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MapPin, Sparkles, AlertCircle, ChevronLeft, ChevronRight, ShoppingCart } from 'lucide-react';
+import { useCart } from '@/context/CartContext';
+import { useToast } from '@/hooks/use-toast';
 import { useDoc, useFirestore, useMemoFirebase, useCollection } from '@/firebase';
 import { doc, collection, query, where, Query as FirestoreQuery, addDoc, getDocs, serverTimestamp } from 'firebase/firestore';
 import type { Listing, User, Review as ReviewType } from '@/lib/types';
@@ -220,6 +222,25 @@ export function ListingDetailContent({ listingId }: { listingId: string }) {
         setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
     };
 
+    const { addItem } = useCart();
+    const { toast } = useToast();
+
+    const handleAddToCart = () => {
+        if (!listing) return;
+        addItem({
+            id: listing.id,
+            title: listing.title,
+            price: listing.price,
+            image: listing.images && listing.images.length > 0 ? listing.images[0] : listing.mediaUrl,
+            quantity: 1,
+            sellerId: listing.sellerId
+        });
+        toast({
+            title: "Added to cart",
+            description: `${listing.title} has been added to your cart.`,
+        });
+    };
+
     return (
         <div className="container mx-auto py-8">
             <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
@@ -302,6 +323,16 @@ export function ListingDetailContent({ listingId }: { listingId: string }) {
                                 onClick={handleContactSeller}
                             >
                                 {listing.status === 'sold' ? 'Sold Out' : (currentUser?.id === listing.sellerId ? 'Your Listing' : 'Contact Seller')}
+                            </Button>
+                            <Button
+                                size="lg"
+                                className="w-full"
+                                variant="secondary"
+                                disabled={listing.status === 'sold' || !currentUser || currentUser.id === listing.sellerId}
+                                onClick={handleAddToCart}
+                            >
+                                <ShoppingCart className="mr-2 h-4 w-4" />
+                                Add to Cart
                             </Button>
                             {seller && (
                                 <>

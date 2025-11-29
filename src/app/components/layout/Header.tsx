@@ -19,6 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/app/components/ThemeToggle";
 import { SeedDatabaseButton } from "../SeedDatabaseButton";
+import { CartButton } from "../cart/CartButton";
 
 export function Header() {
   const { user, logout, loading } = useAuth();
@@ -97,6 +98,7 @@ export function Header() {
             </Button>
           </Link>
         )}
+        <CartButton />
         <SeedDatabaseButton />
         <ThemeToggle />
         {loading ? (
