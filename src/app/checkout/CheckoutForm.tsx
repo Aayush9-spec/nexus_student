@@ -25,7 +25,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/use-auth";
 import { useFirestore } from "@/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { Order } from "@/lib/types";
+import { Order, Transaction } from "@/lib/types";
 
 const baseSchema = z.object({
     name: z.string().min(2, {
@@ -162,10 +162,26 @@ export function CheckoutForm() {
                 createdAt: new Date().toISOString(),
             };
 
-            await addDoc(collection(firestore, "orders"), {
+            const orderRef = await addDoc(collection(firestore, "orders"), {
                 ...orderData,
                 timestamp: serverTimestamp()
             });
+
+            // Create Transaction records for each item (for User Orders/Sales history)
+            const transactionPromises = items.map(item => {
+                const transactionData: Omit<Transaction, "id"> = {
+                    transactionId: `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                    buyerId: user.id,
+                    sellerId: item.sellerId,
+                    listingId: item.id,
+                    amount: item.price * item.quantity,
+                    status: 'completed', // Assuming immediate success for now
+                    paymentMethod: values.paymentMethod,
+                    createdAt: new Date().toISOString(),
+                };
+                return addDoc(collection(firestore, "transactions"), transactionData);
+            });
+            await Promise.all(transactionPromises);
 
             // Update reputation for sellers
             try {

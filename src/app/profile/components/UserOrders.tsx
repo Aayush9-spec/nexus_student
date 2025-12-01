@@ -20,7 +20,23 @@ export function UserOrders({ userId }: { userId: string }) {
         );
     }, [firestore, userId]);
 
-    const { data: orders, isLoading } = useCollection<Transaction>(ordersQuery);
+    const { data: orders, isLoading, error } = useCollection<Transaction>(ordersQuery);
+
+    if (error) {
+        return (
+            <div className="space-y-4">
+                <h2 className="text-2xl font-bold font-headline flex items-center gap-2">
+                    <ShoppingBag className="h-6 w-6 text-blue-500" /> Order History
+                </h2>
+                <Card className="bg-destructive/10 border-destructive/20">
+                    <CardContent className="p-8 text-center text-destructive">
+                        <p>Unable to load order history.</p>
+                        <p className="text-sm opacity-80 mt-1">{error.message}</p>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
 
     if (isLoading) {
         return (
