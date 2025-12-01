@@ -167,6 +167,22 @@ export function CheckoutForm() {
                 timestamp: serverTimestamp()
             });
 
+            // Update reputation for sellers
+            try {
+                const { updateReputation } = await import('@/ai/flows/reputation-flow');
+                const uniqueSellerIds = Array.from(new Set(items.map(item => item.sellerId)));
+
+                await Promise.all(uniqueSellerIds.map(sellerId =>
+                    updateReputation({
+                        sellerId,
+                        triggerEvent: 'sale_completed',
+                        eventData: { amount: total }
+                    })
+                ));
+            } catch (repError) {
+                console.error("Failed to update reputation:", repError);
+            }
+
             clearCart();
             toast({
                 title: "Order placed successfully!",

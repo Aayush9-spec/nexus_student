@@ -51,6 +51,20 @@ export function AddReviewForm({ listing }: { listing: Listing }) {
         reviewerId: user.uid,
         createdAt: serverTimestamp(),
       });
+
+      // Update seller reputation
+      try {
+        const { updateReputation } = await import('@/ai/flows/reputation-flow');
+        await updateReputation({
+          sellerId: listing.sellerId,
+          triggerEvent: 'new_review',
+          eventData: { rating: values.rating },
+        });
+      } catch (repError) {
+        console.error("Failed to update reputation:", repError);
+        // Don't block the UI for this
+      }
+
       toast({ title: 'Review submitted!', description: 'Thank you for your feedback.' });
       form.reset();
     } catch (error) {
