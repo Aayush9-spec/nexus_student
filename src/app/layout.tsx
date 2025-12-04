@@ -16,6 +16,8 @@ export const metadata: Metadata = {
   description: 'A marketplace for students, by students.',
 };
 
+import { Background3D } from '@/components/ui/Background3D';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,13 +30,14 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
       </head>
-      <body suppressHydrationWarning={true} className={cn('min-h-screen bg-background font-sans antialiased')}>
+      <body suppressHydrationWarning={true} className={cn('min-h-screen bg-transparent font-sans antialiased')}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
+          <Background3D />
           <FirebaseClientProvider>
             <AuthProvider>
               <CartProvider>
