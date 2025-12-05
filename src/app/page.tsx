@@ -69,7 +69,7 @@ function UnauthenticatedHomepageContent() {
     return (
         <section className="container mx-auto py-16 md:py-24 flex justify-center">
             <Card className="text-center p-10 md:p-16 max-w-3xl w-full backdrop-blur-md bg-card/40 border-primary/10 shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary via-purple-500 to-primary animate-gradient bg-200%" />
+                <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary via-purple-500 to-primary animate-gradient bg-200-percent" />
                 <CardHeader className="pb-4">
                     <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit mb-6">
                         <LogIn className="h-10 w-10 text-primary" />
@@ -111,7 +111,7 @@ export default function Home() {
 
                 <div className="relative z-10 flex flex-col items-center justify-center text-center p-6 max-w-5xl mx-auto animate-slide-up">
                     <div className="backdrop-blur-sm bg-black/20 p-8 md:p-12 rounded-3xl border border-white/10 shadow-2xl">
-                        <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-200 to-white bg-300% animate-gradient drop-shadow-sm">
+                        <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-indigo-200 to-white bg-300-percent animate-gradient drop-shadow-sm">
                             The Student-Powered Marketplace
                         </h1>
                         <p className="text-xl md:text-3xl mb-10 text-gray-100 font-light leading-relaxed drop-shadow-md max-w-3xl mx-auto">
