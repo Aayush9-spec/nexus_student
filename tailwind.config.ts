@@ -108,6 +108,15 @@ export default {
           '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
           '50%': { transform: 'translateY(20px) rotate(-5deg)' },
         },
+        gradient: {
+          '0%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+          '100%': { backgroundPosition: '0% 50%' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -117,6 +126,8 @@ export default {
         'pulse-slow': 'pulse-slow 3s infinite ease-in-out',
         'float-slow': 'float 20s ease-in-out infinite',
         'float-slower': 'float-reverse 25s ease-in-out infinite',
+        gradient: 'gradient 8s ease infinite',
+        shimmer: 'shimmer 2s linear infinite',
       },
     },
   },
