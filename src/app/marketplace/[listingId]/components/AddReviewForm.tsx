@@ -87,7 +87,7 @@ export function AddReviewForm({ listing }: { listing: Listing }) {
             <FormField
               control={form.control}
               name="rating"
-              render={({ field }) => (
+              render={({ field }: { field: any }) => (
                 <FormItem>
                   <FormLabel>Rating</FormLabel>
                   <FormControl>
@@ -118,7 +118,7 @@ export function AddReviewForm({ listing }: { listing: Listing }) {
             <FormField
               control={form.control}
               name="comment"
-              render={({ field }) => (
+              render={({ field }: { field: any }) => (
                 <FormItem>
                   <FormLabel>Comment</FormLabel>
                   <FormControl>

@@ -16,13 +16,13 @@ export async function POST() {
 
         // Clear existing listings
         const listingsSnapshot = await db.collection('listings').get();
-        listingsSnapshot.forEach((doc) => {
+        listingsSnapshot.forEach((doc: any) => {
             batch.delete(doc.ref);
         });
 
         // Clear existing users
         const usersSnapshot = await db.collection('users').get();
-        usersSnapshot.forEach((doc) => {
+        usersSnapshot.forEach((doc: any) => {
             batch.delete(doc.ref);
         });
 

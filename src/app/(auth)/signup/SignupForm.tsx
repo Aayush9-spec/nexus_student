@@ -143,7 +143,7 @@ export function SignupForm() {
               </div>
             </FormItem>
 
-            <FormField control={form.control} name="name" render={({ field }) => (
+            <FormField control={form.control} name="name" render={({ field }: { field: any }) => (
               <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Priya Sharma" {...field} /></FormControl><FormMessage /></FormItem>
             )} />
             <FormField control={form.control} name="email" render={({ field }) => (

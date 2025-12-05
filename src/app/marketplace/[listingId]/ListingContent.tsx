@@ -49,7 +49,7 @@ function AiAnalysisCard({ listing }: { listing: Listing }) {
         getAnalysis();
     }, [listing]);
 
-    const valueScoreColor = {
+    const valueScoreColor: Record<string, string> = {
         'Great Deal': 'text-green-600 bg-green-100 dark:text-green-300 dark:bg-green-900/50',
         'Good Deal': 'text-emerald-600 bg-emerald-100 dark:text-emerald-300 dark:bg-emerald-900/50',
         'Fair Price': 'text-blue-600 bg-blue-100 dark:text-blue-300 dark:bg-blue-900/50',
@@ -207,6 +207,7 @@ export function ListingDetailContent({ listingId }: { listingId: string }) {
 
     if (!listing) {
         notFound();
+        return null;
     }
 
     const canAddReview = currentUser && currentUser.id !== listing.sellerId && !hasUserReviewed;
@@ -353,7 +354,7 @@ export function ListingDetailContent({ listingId }: { listingId: string }) {
                             )}
                         </CardContent>
                     </Card>
-                    <AiAnalysisCard listing={listing} />
+                    <AiAnalysisCard listing={listing!} />
                 </div>
             </div>
 

@@ -44,7 +44,7 @@ const generateDefaultProfilePictureFlow = ai.defineFlow(
     inputSchema: GenerateDefaultProfilePictureInputSchema,
     outputSchema: GenerateDefaultProfilePictureOutputSchema,
   },
-  async input => {
+  async (input: GenerateDefaultProfilePictureInput) => {
     const { media } = await ai.generate({
       prompt: `Generate a professional-looking profile picture for an Indian student named ${input.studentName}. The image should be suitable for use on a student marketplace platform, conveying a sense of trustworthiness and competence. The image MUST be returned as a data URI, in PNG format with Base64 encoding, and MUST be less than 1MB in size.`,
       model: 'googleai/imagen-4.0-fast-generate-001',

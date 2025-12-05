@@ -98,7 +98,7 @@ const reputationFlow = ai.defineFlow(
     inputSchema: ReputationUpdateInputSchema,
     outputSchema: ReputationUpdateOutputSchema,
   },
-  async (input) => {
+  async (input: ReputationUpdateInput) => {
     return updateReputation(input);
   }
 );

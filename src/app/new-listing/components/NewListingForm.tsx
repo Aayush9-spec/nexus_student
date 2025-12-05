@@ -110,7 +110,7 @@ export function NewListingForm() {
 
   const removeMedia = (index: number) => {
     const currentMedia = form.getValues('media');
-    const newMedia = currentMedia.filter((_, i) => i !== index);
+    const newMedia = currentMedia.filter((_: any, i: number) => i !== index);
     form.setValue('media', newMedia);
     setPreviews(prev => prev.filter((_, i) => i !== index));
   };
@@ -193,7 +193,7 @@ export function NewListingForm() {
             <Controller
               control={form.control}
               name="location"
-              render={({ field }) => (
+              render={({ field }: { field: any }) => (
                 <FormItem>
                   <FormLabel>Location</FormLabel>
                   <FormControl>

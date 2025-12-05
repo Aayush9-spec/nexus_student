@@ -241,7 +241,7 @@ export function CheckoutForm() {
                                     <FormField
                                         control={form.control}
                                         name="name"
-                                        render={({ field }) => (
+                                        render={({ field }: { field: any }) => (
                                             <FormItem>
                                                 <FormLabel>Full Name</FormLabel>
                                                 <FormControl>
@@ -254,7 +254,7 @@ export function CheckoutForm() {
                                     <FormField
                                         control={form.control}
                                         name="email"
-                                        render={({ field }) => (
+                                        render={({ field }: { field: any }) => (
                                             <FormItem>
                                                 <FormLabel>Email</FormLabel>
                                                 <FormControl>
@@ -284,7 +284,7 @@ export function CheckoutForm() {
                                     <FormField
                                         control={form.control}
                                         name="city"
-                                        render={({ field }) => (
+                                        render={({ field }: { field: any }) => (
                                             <FormItem>
                                                 <FormLabel>City</FormLabel>
                                                 <FormControl>
@@ -297,7 +297,7 @@ export function CheckoutForm() {
                                     <FormField
                                         control={form.control}
                                         name="zip"
-                                        render={({ field }) => (
+                                        render={({ field }: { field: any }) => (
                                             <FormItem>
                                                 <FormLabel>Zip Code</FormLabel>
                                                 <FormControl>
@@ -371,7 +371,7 @@ export function CheckoutForm() {
                                         <FormField
                                             control={form.control}
                                             name="cardNumber"
-                                            render={({ field }) => (
+                                            render={({ field }: { field: any }) => (
                                                 <FormItem>
                                                     <FormLabel>Card Number</FormLabel>
                                                     <FormControl>
@@ -386,7 +386,7 @@ export function CheckoutForm() {
                                             <FormField
                                                 control={form.control}
                                                 name="expiry"
-                                                render={({ field }) => (
+                                                render={({ field }: { field: any }) => (
                                                     <FormItem>
                                                         <FormLabel>Expiry (MM/YY)</FormLabel>
                                                         <FormControl>
@@ -399,7 +399,7 @@ export function CheckoutForm() {
                                             <FormField
                                                 control={form.control}
                                                 name="cvc"
-                                                render={({ field }) => (
+                                                render={({ field }: { field: any }) => (
                                                     <FormItem>
                                                         <FormLabel>CVC</FormLabel>
                                                         <FormControl>
@@ -418,7 +418,7 @@ export function CheckoutForm() {
                                         <FormField
                                             control={form.control}
                                             name="upiId"
-                                            render={({ field }) => (
+                                            render={({ field }: { field: any }) => (
                                                 <FormItem>
                                                     <FormLabel>UPI ID</FormLabel>
                                                     <FormControl>

@@ -76,7 +76,7 @@ export function LoginForm() {
             <FormField
               control={form.control}
               name="email"
-              render={({ field }) => (
+              render={({ field }: { field: any }) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>

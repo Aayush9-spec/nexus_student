@@ -73,10 +73,10 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
     const unsubscribe = onAuthStateChanged(
       auth,
-      (firebaseUser) => {
+      (firebaseUser: User | null) => {
         setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null });
       },
-      (error) => {
+      (error: Error) => {
         console.error("FirebaseProvider: onAuthStateChanged error:", error);
         setUserAuthState({ user: null, isUserLoading: false, userError: error });
       }
