@@ -5,36 +5,40 @@
 @layer base {
   :root {
     /* Premium Deep Indigo/Purple Theme - Light Mode */
-    --background: 240 20% 98%; /* Very light cool gray/blue */
+    --background: 240 20% 98%;
+    /* Very light cool gray/blue */
     --foreground: 240 10% 3.9%;
-    
+
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
-    
+
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
-    
+
     /* Vibrant Primary - Deep Indigo */
-    --primary: 255 85% 55%; /* Richer purple */
+    --primary: 255 85% 55%;
+    /* Richer purple */
     --primary-foreground: 0 0% 100%;
-    
+
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
-    
+
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
-    
-    --accent: 255 85% 96%; /* Very light purple tint */
+
+    --accent: 255 85% 96%;
+    /* Very light purple tint */
     --accent-foreground: 255 85% 55%;
-    
+
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
     --ring: 255 85% 55%;
-    
-    --radius: 0.75rem; /* Slightly more rounded */
+
+    --radius: 0.75rem;
+    /* Slightly more rounded */
 
     /* Chart Colors */
     --chart-1: 255 85% 55%;
@@ -56,34 +60,37 @@
 
   .dark {
     /* Premium Deep Indigo/Purple Theme - Dark Mode */
-    --background: 240 10% 3.9%; /* Deep dark blue/gray */
+    --background: 240 10% 3.9%;
+    /* Deep dark blue/gray */
     --foreground: 0 0% 98%;
-    
-    --card: 240 10% 6%; /* Slightly lighter than background */
+
+    --card: 240 10% 6%;
+    /* Slightly lighter than background */
     --card-foreground: 0 0% 98%;
-    
+
     --popover: 240 10% 6%;
     --popover-foreground: 0 0% 98%;
-    
-    --primary: 255 85% 65%; /* Lighter purple for dark mode */
+
+    --primary: 255 85% 65%;
+    /* Lighter purple for dark mode */
     --primary-foreground: 0 0% 100%;
-    
+
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
-    
+
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
-    
+
     --accent: 240 3.7% 15.9%;
     --accent-foreground: 0 0% 98%;
-    
+
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    
+
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 255 85% 65%;
-    
+
     /* Chart Colors */
     --chart-1: 255 85% 65%;
     --chart-2: 280 75% 65%;
@@ -107,7 +114,14 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .bg-300% {
+    background-size: 300% 300%;
   }
 }

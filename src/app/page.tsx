@@ -4,7 +4,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { ArrowRight, LogIn } from 'lucide-react';
 import { ListingCard } from './marketplace/components/ListingCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -94,7 +93,6 @@ function UnauthenticatedHomepageContent() {
 
 
 export default function Home() {
-    const heroImage = PlaceHolderImages.find(img => img.id === 'hero-image');
     const { user, isUserLoading } = useUser();
     // const user = null;
     // const isUserLoading = false;
