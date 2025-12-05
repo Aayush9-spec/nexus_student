@@ -12,6 +12,11 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    // TEMPORARY: Allow all access for seeding
+    match /{document=**} {
+      allow read, write: if true;
+    }
+
     // Users:
     // - Anyone can read public profiles
     // - Only the user can update their own profile
