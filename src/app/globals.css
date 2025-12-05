@@ -121,7 +121,11 @@
 }
 
 @layer utilities {
-  .bg-300% {
+  .bg-300-percent {
     background-size: 300% 300%;
+  }
+
+  .bg-200-percent {
+    background-size: 200% 200%;
   }
 }
